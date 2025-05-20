@@ -1,0 +1,163 @@
+-- Tạo database
+CREATE DATABASE swimming_pool_management;
+USE swimming_pool_management;
+
+-- Roles
+CREATE TABLE Roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL
+);
+
+-- Users
+CREATE TABLE Users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    password_hash TEXT,
+    phone_number VARCHAR(20),
+    address TEXT,
+    dob DATE,
+    gender ENUM('Male', 'Female', 'Other'),
+    role_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES Roles(id)
+);
+
+-- Courses
+CREATE TABLE Courses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    description TEXT,
+    price DECIMAL(10, 2),
+    duration INT,
+    coach_id INT,
+    status ENUM('Active', 'Inactive'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (coach_id) REFERENCES Users(id)
+);
+
+-- Course Registrations
+CREATE TABLE Course_Registrations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    course_id INT,
+    registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'Approved', 'Cancelled'),
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
+
+-- Services
+CREATE TABLE Services (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    description TEXT,
+    price DECIMAL(10, 2),
+    status ENUM('Available', 'Unavailable'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Service Registrations
+CREATE TABLE Service_Registrations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    service_id INT,
+    registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'Approved', 'Cancelled'),
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (service_id) REFERENCES Services(id)
+);
+
+-- Feedbacks
+CREATE TABLE Feedbacks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    coach_id INT,
+    content TEXT,
+    rating INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (coach_id) REFERENCES Users(id)
+);
+
+-- Complaints
+CREATE TABLE Complaints (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    staff_id INT,
+    content TEXT,
+    status ENUM('New', 'In Progress', 'Resolved'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (staff_id) REFERENCES Users(id)
+);
+
+-- Schedules
+CREATE TABLE Schedules (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    course_id INT,
+    coach_id INT,
+    start_time DATETIME,
+    end_time DATETIME,
+    location VARCHAR(100),
+    FOREIGN KEY (course_id) REFERENCES Courses(id),
+    FOREIGN KEY (coach_id) REFERENCES Users(id)
+);
+
+-- Maintenance Requests
+CREATE TABLE Maintenance_Requests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    description TEXT,
+    status ENUM('Open', 'In Progress', 'Closed'),
+    created_by INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES Users(id)
+);
+
+-- Payments
+CREATE TABLE Payments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    amount DECIMAL(10, 2),
+    method VARCHAR(50),
+    payment_for ENUM('Course', 'Service'),
+    reference_id INT,
+    status ENUM('Pending', 'Completed', 'Failed'),
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+
+-- Tracking (theo dõi học tập)
+CREATE TABLE Tracking (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    course_id INT,
+    progress TEXT,
+    coach_feedback TEXT,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES Users(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
+
+-- Blogs
+CREATE TABLE Blogs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200),
+    content TEXT,
+    author_id INT,
+    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES Users(id)
+);
+
+-- Study Roadmaps
+CREATE TABLE Study_Roadmaps (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200),
+    content TEXT,
+    created_by INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES Users(id)
+);
+blogs
