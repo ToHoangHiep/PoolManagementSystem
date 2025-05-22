@@ -55,24 +55,35 @@ CREATE TABLE Course_Registrations (
 );
 
 -- Services
-CREATE TABLE Services (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100),
-    description TEXT,
-    price DECIMAL(10, 2),
-    status ENUM('Available', 'Unavailable'),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+-- CREATE TABLE Services (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     name VARCHAR(100),
+--     description TEXT,
+--     price DECIMAL(10, 2),
+--     status ENUM('Available', 'Unavailable'),
+--     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+-- );
 
 -- Service Registrations
-CREATE TABLE Service_Registrations (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    service_id INT,
-    registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Pending', 'Approved', 'Cancelled'),
-    FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (service_id) REFERENCES Services(id)
+-- CREATE TABLE Service_Registrations (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     user_id INT,
+--     service_id INT,
+--     registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+--     status ENUM('Pending', 'Approved', 'Cancelled'),
+--     FOREIGN KEY (user_id) REFERENCES Users(id),
+--     FOREIGN KEY (service_id) REFERENCES Services(id)
+-- );
+
+-- Iventory
+CREATE TABLE Inventory (
+	inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+    item_name varchar(100),
+    category varchar(100),
+    quantity int,
+    unit varchar(100),
+    status enum('Available', 'In Use', 'Maintenance', 'Broken'),
+    last_updated datetime
 );
 
 -- Feedbacks
