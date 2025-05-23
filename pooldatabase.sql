@@ -4,6 +4,12 @@ DROP database swimming_pool_management;
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
+INSERT INTO Roles(id, name) VALUES
+  (1, 'Admin'),
+  (2, 'Manager'),
+  (3, 'Coach'),
+  (4, 'Customer'),
+  (5, 'Staff');
 
 -- Roles
 CREATE TABLE Roles (
