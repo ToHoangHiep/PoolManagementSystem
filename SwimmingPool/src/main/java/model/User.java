@@ -15,7 +15,8 @@ public class User {
     private Date createdAt;
     private Date updatedAt;
 
-    public User() {}
+    public User() {
+    }
 
     // Getter
     public int getId() {
@@ -31,6 +32,8 @@ public class User {
     }
 
     public String getPasswordHash() {
+        // TODO - Unhash the password
+
         return passwordHash;
     }
 
@@ -76,6 +79,8 @@ public class User {
     }
 
     public void setPasswordHash(String passwordHash) {
+        // TODO - Hash the password before setting it
+
         this.passwordHash = passwordHash;
     }
 
