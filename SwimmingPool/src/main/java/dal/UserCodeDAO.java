@@ -7,6 +7,25 @@ import java.security.SecureRandom;
 import java.sql.*;
 
 public class UserCodeDAO {
+    public static String getCode(User user) {
+        String sql = "SELECT code FROM user_codes WHERE user_id = ?";
+        String code = null;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, user.getId());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                code = rs.getString("code");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return code; // Trả về mã nếu tìm thấy, hoặc null nếu không có
+    }
+
+
     public static boolean createCode(User user) {
         String sql = "INSERT INTO user_codes (user_id, code, created_time) VALUES (?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE code = ?, created_time = ?";

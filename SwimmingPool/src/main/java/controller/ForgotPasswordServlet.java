@@ -29,6 +29,14 @@ public class ForgotPasswordServlet extends HttpServlet {
                 return;
             }
 
+            // Validate email format
+            String emailRegex = "^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$";
+            if (!email.matches(emailRegex)) {
+                request.setAttribute("error_p1", "Email không hợp lệ. Vui lòng nhập email hợp lệ.");
+                request.getRequestDispatcher("forgot_password.jsp").forward(request, response);
+                return;
+            }
+
             // Kiểm tra email có tồn tại không
             if (!UserDAO.checkEmailExists(email)) {
                 request.setAttribute("error_p1", "Email không tồn tại.");
@@ -44,10 +52,20 @@ public class ForgotPasswordServlet extends HttpServlet {
                 return;
             }
 
-            UserCodeDAO.createCode(user);
-            // Sau khi tạo mã, bạn có thể gửi email chứa mã xác nhận
             boolean codeCreated = UserCodeDAO.createCode(user);
             if (codeCreated) {
+                String code = UserCodeDAO.getCode(user);
+                // Sau khi tạo mã, bạn có thể gửi email chứa mã xác nhận
+                Utils.SendEmail("Pool Management System Reset Password <pms@testmailgun.org>",
+                        email,
+                        "Xác nhận đặt lại mật khẩu",
+                        "Mã xác nhận của bạn là: " + code +
+                                "\nVui lòng không chia sẻ mã này với bất kỳ ai." +
+                                "\nNếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này." +
+                                "\nMã này sẽ hết hạn sau 15 phút." +
+                                "\n\nTrân trọng,\nPMS Team");
+
+
                 // Chuyển hướng đến trang xác nhận mã
                 response.sendRedirect("forgot_password.jsp?step=verify&email=" +
                         URLEncoder.encode(email, StandardCharsets.UTF_8));
@@ -62,6 +80,12 @@ public class ForgotPasswordServlet extends HttpServlet {
             // Kiểm tra mã xác nhận
 
             User user = UserDAO.findUserFromEmail(email);
+            if (user == null) {
+                request.setAttribute("error_p2", "Không tìm thấy người dùng với email này.");
+                request.getRequestDispatcher("forgot_password.jsp").forward(request, response);
+                return;
+            }
+
             boolean isValid = UserCodeDAO.checkCode(user, code);
             if (isValid) { // Giả sử mã hợp lệ
                 response.sendRedirect("reset_password.jsp?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8));

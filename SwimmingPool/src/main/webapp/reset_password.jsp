@@ -12,5 +12,26 @@
 </head>
 <body>
 
+<%
+    if (request.getParameter("email") == null) {
+        response.sendRedirect("forgot_password.jsp");
+        return;
+    }
+%>
+
+<form method="post">
+    <label for="newPass">New Password: </label>
+    <input type="password" name="newPass" id="newPass" required placeholder="Enter New Password"/>
+
+    <label for="confirmPass">Confirm Password: </label>
+    <input type="password" name="confirmPass" id="confirmPass" required placeholder="Confirm New Password"/>
+
+    <div class="error">
+        <%= request.getAttribute("error") != null ? request.getAttribute("error") : "" %>
+    </div>
+
+    <button type="submit">Reset Password</button>
+</form>
+
 </body>
 </html>

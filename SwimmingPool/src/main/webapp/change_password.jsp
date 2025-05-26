@@ -22,5 +22,28 @@
 </head>
 <body>
 
+<h2>
+    Change Password for <%= user.getFullName() %> (Email: <%= user.getEmail() %>)
+</h2>
+
+<form method="post">
+    <label for="oldPass">Old Password: </label>
+    <input type="password" name="oldPass" id="oldPass" required placeholder="Enter Old Password"/>
+    <br><br>
+
+    <label for="newPass">New Password: </label>
+    <input type="password" name="newPass" id="newPass" required placeholder="Enter New Password"/>
+    <label for="confirmPass">Confirm Password: </label>
+    <input type="password" name="confirmPass" id="confirmPass" required placeholder="Confirm New Password"/>
+    <br><br>
+
+    <div class="error">
+        <%= request.getAttribute("error") != null ? request.getAttribute("error") : "" %>
+    </div>
+
+    <button type="submit">Change Password</button>
+    <button type="button" onclick="window.location.href='home.jsp'">Cancel</button>
+</form>
+
 </body>
 </html>
