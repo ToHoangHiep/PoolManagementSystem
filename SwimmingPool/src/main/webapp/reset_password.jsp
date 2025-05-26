@@ -33,5 +33,7 @@
     <button type="submit">Reset Password</button>
 </form>
 
+<a href="login.jsp">Remembered Your Password ?</a>
+
 </body>
 </html>
