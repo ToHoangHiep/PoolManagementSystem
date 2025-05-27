@@ -123,6 +123,7 @@ public class InventoryDAO {
             return false;
         }
     }
+
     public List<Inventory> searchInventory(String keyword) {
         List<Inventory> list = new ArrayList<>();
         String sql = "SELECT * FROM Inventory WHERE item_name LIKE ?";
