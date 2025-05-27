@@ -11,6 +11,7 @@ public class User {
     private String address;
     private Date dob;
     private String gender; // Male, Female, Other
+    private String userStatus; // Active, Deactive, Banned
     private Role role;
     private Date createdAt;
     private Date updatedAt;
@@ -32,8 +33,6 @@ public class User {
     }
 
     public String getPasswordHash() {
-        // TODO - Unhash the password
-
         return passwordHash;
     }
 
@@ -51,6 +50,10 @@ public class User {
 
     public String getGender() {
         return gender;
+    }
+
+    public String getUserStatus() {
+        return userStatus;
     }
 
     public Role getRole() {
@@ -79,8 +82,6 @@ public class User {
     }
 
     public void setPasswordHash(String passwordHash) {
-        // TODO - Hash the password before setting it
-
         this.passwordHash = passwordHash;
     }
 
@@ -98,6 +99,10 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public void setUserStatus(String userStatus) {
+        this.userStatus = userStatus;
     }
 
     public void setRole(Role role) {

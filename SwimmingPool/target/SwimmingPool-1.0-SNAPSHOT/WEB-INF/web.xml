@@ -53,5 +53,13 @@
         <url-pattern>/change-password</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>VerifyServlet</servlet-name>
+        <servlet-class>controller.VerifyServlet</servlet-class>
+    </servlet>
 
+    <servlet-mapping>
+        <servlet-name>VerifyServlet</servlet-name>
+        <url-pattern>/verify</url-pattern>
+    </servlet-mapping>
 </web-app>

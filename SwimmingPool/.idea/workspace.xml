@@ -10,39 +10,309 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="57a0edb1-45bf-4a04-a1f0-1fb1b34f6fc2" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/active-tab-highlighter.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/betterCommentsSettings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controller/ChangePasswordServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controller/ForgotPasswordServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/controller/ResetPasswordServlet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dal/UserCodeDAO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/model/UserCode.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/utils/Utils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/change_password.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/forgot_password.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/reset_password.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/controller/VerifyServlet.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/utils/EmailUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/verify.jsp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/webapp/verify.jsp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5bdc0641-ddec-425d-adfd-b0bab31bef0a.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5bdc0641-ddec-425d-adfd-b0bab31bef0a/storage_v2/_src_/schema/information_schema.FNRwLQ.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5bdc0641-ddec-425d-adfd-b0bab31bef0a/storage_v2/_src_/schema/mysql.osA4Bg.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5bdc0641-ddec-425d-adfd-b0bab31bef0a/storage_v2/_src_/schema/performance_schema.kIw0nw.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5bdc0641-ddec-425d-adfd-b0bab31bef0a/storage_v2/_src_/schema/swimming_pool_management.5PotlQ.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/5bdc0641-ddec-425d-adfd-b0bab31bef0a/storage_v2/_src_/schema/sys.zb4BAA.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sqldialects.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controller/LoginServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controller/LoginServlet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/controller/RegisterServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controller/RegisterServlet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dal/UserDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dal/UserDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/User.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/login.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/login.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/register.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/register.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/META-INF/MANIFEST.MF" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/controller/LoginServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/controller/LoginServlet.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/controller/RegisterServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/controller/RegisterServlet.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/dal/UserDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/dal/UserDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/model/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/model/User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/utils/DBConnect.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/utils/DBConnect.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/login.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/login.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/register.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/register.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/controller/LoginServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/controller/LoginServlet.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/controller/RegisterServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/controller/RegisterServlet.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/dal/UserDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/dal/UserDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/model/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/model/User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/utils/DBConnect.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/utils/DBConnect.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Jsp File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="LogFilters">
+    <option name="FILTER_ERRORS" value="false" />
+    <option name="FILTER_WARNINGS" value="false" />
+    <option name="FILTER_INFO" value="true" />
+    <option name="FILTER_DEBUG" value="true" />
+    <option name="CUSTOM_FILTER" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2xepudvOecPJuXY6d58ujKBCiWl" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "TomEE Server.Unnamed.executor": "Run",
+    "Tomcat Server.Tomcat 10.1.18.executor": "Run",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager" selected="Tomcat Server.Tomcat 10.1.18">
+    <configuration name="Unnamed" type="TomeeConfiguration" factoryName="Local" APPLICATION_SERVER_NAME="TomEE 10.1.18" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
+      <option name="UPDATING_POLICY" value="restart-server" />
+      <deployment>
+        <artifact name="SwimmingPool:war exploded">
+          <settings>
+            <option name="CONTEXT_PATH" value="/SwimmingPool" />
+          </settings>
+        </artifact>
+      </deployment>
+      <server-settings>
+        <option name="BASE_DIRECTORY_NAME" value="3194d8a1-3d74-4fa5-ae59-181998e2bc5c" />
+      </server-settings>
+      <predefined_log_file enabled="true" id="Tomcat" />
+      <predefined_log_file enabled="true" id="Tomcat Catalina" />
+      <predefined_log_file id="Tomcat Manager" />
+      <predefined_log_file id="Tomcat Host Manager" />
+      <predefined_log_file id="Tomcat Localhost Access" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="50596" />
+      </RunnerSettings>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Cover">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Debug">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Profile">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Run">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <method v="2">
+        <option name="Make" enabled="true" />
+        <option name="BuildArtifacts" enabled="true">
+          <artifact name="SwimmingPool:war exploded" />
+        </option>
+      </method>
+    </configuration>
+    <configuration name="Tomcat 10.1.18" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 10.1.18" ALTERNATIVE_JRE_ENABLED="false" nameIsGenerated="true">
+      <option name="UPDATING_POLICY" value="restart-server" />
+      <deployment>
+        <artifact name="SwimmingPool:war exploded">
+          <settings>
+            <option name="CONTEXT_PATH" value="/SwimmingPool" />
+          </settings>
+        </artifact>
+      </deployment>
+      <server-settings>
+        <option name="BASE_DIRECTORY_NAME" value="df198365-5339-4c2f-8966-5e5373f05704" />
+      </server-settings>
+      <predefined_log_file enabled="true" id="Tomcat" />
+      <predefined_log_file enabled="true" id="Tomcat Catalina" />
+      <predefined_log_file id="Tomcat Manager" />
+      <predefined_log_file id="Tomcat Host Manager" />
+      <predefined_log_file id="Tomcat Localhost Access" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="50659" />
+      </RunnerSettings>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Cover">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Debug">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Profile">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Run">
+        <option name="USE_ENV_VARIABLES" value="true" />
+        <STARTUP>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </STARTUP>
+        <SHUTDOWN>
+          <option name="USE_DEFAULT" value="true" />
+          <option name="SCRIPT" value="" />
+          <option name="VM_PARAMETERS" value="" />
+          <option name="PROGRAM_PARAMETERS" value="" />
+        </SHUTDOWN>
+      </ConfigurationWrapper>
+      <method v="2">
+        <option name="Make" enabled="true" />
+        <option name="BuildArtifacts" enabled="true">
+          <artifact name="SwimmingPool:war exploded" />
+        </option>
+      </method>
+    </configuration>
+    <configuration default="true" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" ALTERNATIVE_JRE_ENABLED="false">
+      <deployment />
+      <server-settings />
+      <predefined_log_file enabled="true" id="Tomcat" />
+      <predefined_log_file enabled="true" id="Tomcat Catalina" />
+      <predefined_log_file id="Tomcat Manager" />
+      <predefined_log_file id="Tomcat Host Manager" />
+      <predefined_log_file id="Tomcat Localhost Access" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Tomcat Server.Tomcat 10.1.18" />
+      <item itemvalue="TomEE Server.Unnamed" />
+    </list>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="57a0edb1-45bf-4a04-a1f0-1fb1b34f6fc2" name="Changes" comment="" />
+      <created>1748308619407</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1748308619407</updated>
+      <workItem from="1748308621761" duration="175000" />
+      <workItem from="1748309021533" duration="7198000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/webapp/verify.jsp</url>
+          <line>60</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
