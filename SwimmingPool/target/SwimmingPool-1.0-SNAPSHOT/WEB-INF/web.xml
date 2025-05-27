@@ -3,26 +3,41 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
+<<<<<<< HEAD
     <!-- Servlet for login -->
+=======
+>>>>>>> origin/ngocnthe176424
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>controller.LoginServlet</servlet-class>
     </servlet>
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/ngocnthe176424
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
+<<<<<<< HEAD
 
     <!-- Servlet for Register -->
+=======
+>>>>>>> origin/ngocnthe176424
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>controller.RegisterServlet</servlet-class>
     </servlet>
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/ngocnthe176424
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
 
+<<<<<<< HEAD
     <!-- Servlet for forget password -->
     <servlet>
         <servlet-name>ForgotPasswordServlet</servlet-name>
@@ -71,3 +86,6 @@
         <url-pattern>/unsubscribe</url-pattern>
     </servlet-mapping>
 </web-app>
+=======
+</web-app>
+>>>>>>> origin/ngocnthe176424
