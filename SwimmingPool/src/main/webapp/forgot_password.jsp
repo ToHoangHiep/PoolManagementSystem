@@ -1,4 +1,4 @@
-<%--
+<%@ page import="java.lang.String" %><%--
   Created by IntelliJ IDEA.
   User: LAPTOP
   Date: 23-May-25
@@ -11,47 +11,145 @@
     <title>Forgot Password</title>
 </head>
 <body>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
 
-<div>
-    <%
-        String step = request.getParameter("step");
-        if (step == null) {
-            step = "email";
-        } // Default to first step
+    .container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 800px;
+        padding: 30px;
+        display: flex;
+        position: relative;
+    }
 
-        boolean isEmailStep = step.equals("email");
-    %>
+    .form-section {
+        flex: 1;
+        padding: 20px;
+    }
 
-    <form style="<%= isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="sendCode">
-        <label for="email">Account Email: </label>
-        <input type="email" id="email" name="email" required placeholder="Enter your email"/>
+    .divider {
+        width: 1px;
+        background-color: #ddd;
+        position: absolute;
+        top: 10%;
+        bottom: 10%;
+        left: 50%;
+    }
 
-        <div class="error_p1">
-            <%= request.getAttribute("error_p1") != null ? request.getAttribute("error_p1") : "" %>
-        </div>
+    h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
 
-        <button type="submit" value="Send Reset Password Verification Code"/>
-    </form>
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
 
-    <form style="<%= !isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="checkCode">
-        <% if (!isEmailStep) { %>
-        <div style="color: green; font-weight: bold;">
-            Vui lòng kiểm tra email của bạn!
-        </div>
-        <% } %>
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
 
-        <label for="code">Verifcation Code: </label>
-        <input type="text" id="code" name="code" required placeholder="Enter your code sent to email"/>
+    button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+    }
 
-        <div class="error_p2">
-            <%= request.getAttribute("error_p2") != null ? request.getAttribute("error_p2") : "" %>
-        </div>
+    button:hover {
+        background-color: #45a049;
+    }
 
-        <button type="submit" value="Reset Password"/>
-    </form>
+    .error {
+        color: #f44336;
+        margin: 5px 0 15px;
+        font-size: 14px;
+    }
+
+    a {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #2196F3;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container">
+    <div class="form-section">
+        <h2>Let's find your account</h2>
+        <%
+            String step = request.getParameter("step");
+            if (step == null) {
+                step = "email";
+            } // Default to first step
+
+            boolean isEmailStep = step.equals("email");
+        %>
+
+        <form style="<%= !isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="sendCode">
+            <label for="email">Account Email: </label>
+            <input type="email" id="email" name="email" required placeholder="Enter your email"/>
+
+            <div class="error">
+                <%= request.getAttribute("error_p1") != null ? request.getAttribute("error_p1") : "" %>
+            </div>
+
+            <button type="submit">Send Reset Password Code</button>
+        </form>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-section">
+        <h2>Got a code?</h2>
+        <form style="<%= isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="checkCode">
+            <% if (!isEmailStep) { %>
+            <div style="color: green; font-weight: bold; margin-bottom: 15px;">
+                Vui lòng kiểm tra email của bạn!
+            </div>
+            <% } %>
+
+            <label for="code">Verification Code: </label>
+            <input type="text" id="code" name="code" required placeholder="Enter your code sent to email"/>
+
+            <div class="error">
+                <%= request.getAttribute("error_p2") != null ? request.getAttribute("error_p2") : "" %>
+            </div>
+
+            <button type="submit">Reset Password</button>
+        </form>
+    </div>
 </div>
 
-<a href="login.jsp">Remembered Your Password ?</a>
-
+<a href="login.jsp">Remembered Your Password?</a>
 </body>
+
 </html>
