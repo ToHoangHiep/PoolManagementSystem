@@ -62,4 +62,5 @@
         <servlet-name>VerifyServlet</servlet-name>
         <url-pattern>/verify</url-pattern>
     </servlet-mapping>
+
 </web-app>

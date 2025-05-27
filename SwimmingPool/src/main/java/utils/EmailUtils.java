@@ -31,7 +31,9 @@ public class EmailUtils {
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             message.setReplyTo(InternetAddress.parse(USERNAME));
             message.setSubject(MimeUtility.encodeText(subject, "UTF-8", "B"));
-
+            // Header hỗ trợ hủy đăng ký (List-Unsubscribe)
+            String unsubscribeLink = "https://yourdomain.com/unsubscribe?email=" + toEmail;
+            message.setHeader("List-Unsubscribe", "<" + unsubscribeLink + ">");
 
             // Nội dung HTML của email
             String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px;'>"
@@ -42,10 +44,9 @@ public class EmailUtils {
                     + "<p>Nếu bạn không yêu cầu đăng ký, vui lòng bỏ qua email này.</p>"
                     + "<hr>"
                     + "<p style='font-size: 0.85em; color: #999;'>"
-                    + "Email được gửi tự động từ hệ thống xác minh của chúng tôi. Nếu có câu hỏi, vui lòng liên hệ: "
-                    + "<a href='mailto:support@example.com'>support@example.com</a></p>"
+                    + "Email được gửi tự động từ hệ thống xác minh của chúng tôi. "
+                    + "Nếu có câu hỏi, vui lòng liên hệ: <a href='mailto:support@example.com'>support@example.com</a>."
                     + "</div>";
-
 
             message.setContent(htmlContent, "text/html; charset=UTF-8");
 

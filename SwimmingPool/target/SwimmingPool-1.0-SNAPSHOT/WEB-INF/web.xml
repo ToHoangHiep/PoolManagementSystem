@@ -62,4 +62,12 @@
         <servlet-name>VerifyServlet</servlet-name>
         <url-pattern>/verify</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>UnsubscribeServlet</servlet-name>
+        <servlet-class>controller.UnsubscribeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UnsubscribeServlet</servlet-name>
+        <url-pattern>/unsubscribe</url-pattern>
+    </servlet-mapping>
 </web-app>

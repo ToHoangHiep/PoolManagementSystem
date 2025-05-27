@@ -11,11 +11,9 @@
   <component name="ChangeListManager">
     <list default="true" id="57a0edb1-45bf-4a04-a1f0-1fb1b34f6fc2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/controller/LoginServlet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/controller/LoginServlet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/utils/EmailUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/utils/EmailUtils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/verify.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/controller/LoginServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/classes/controller/LoginServlet.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/controller/LoginServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/controller/LoginServlet.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/target/SwimmingPool-1.0-SNAPSHOT/WEB-INF/web.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,8 +23,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="Jsp File" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -264,7 +262,7 @@
       <workItem from="1748308621761" duration="175000" />
       <workItem from="1748309021533" duration="7198000" />
       <workItem from="1748320060116" duration="60000" />
-      <workItem from="1748327678834" duration="2406000" />
+      <workItem from="1748327678834" duration="4313000" />
     </task>
     <servers />
   </component>
