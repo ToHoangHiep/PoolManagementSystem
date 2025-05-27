@@ -30,6 +30,14 @@ public class LoginServlet extends HttpServlet {
         User user = UserDAO.login(email, password);
 
         if (user != null) {
+            // Kiểm tra trạng thái tài khoản
+            String status = user.getUserStatus();
+            if (!"Active".equalsIgnoreCase(status)) {
+                request.setAttribute("error", "Tài khoản chưa được kích hoạt hoặc đã bị khóa. Vui lòng kiểm tra email để xác minh.");
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+                return;
+            }
+
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
             System.out.println(">>> Đăng nhập thành công! Vai trò: " + user.getRole().getName());
