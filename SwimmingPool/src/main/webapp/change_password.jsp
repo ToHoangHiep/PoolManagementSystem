@@ -174,7 +174,7 @@
         </ul>
     </div>
 
-    <form method="post" action="change_password">
+    <form method="post" action="change-password">
         <div class="password-field">
             <label for="oldPass">Old Password</label>
             <div class="password-container">
