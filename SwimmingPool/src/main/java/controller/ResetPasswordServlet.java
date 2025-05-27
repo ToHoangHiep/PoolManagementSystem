@@ -61,4 +61,11 @@ public class ResetPasswordServlet extends HttpServlet {
 
         response.sendRedirect("login.jsp");
     }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Chuyển hướng về trang reset_password.jsp nếu có GET
+        request.getRequestDispatcher("reset_password.jsp").forward(request, response);
+    }
 }

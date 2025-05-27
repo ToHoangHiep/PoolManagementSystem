@@ -83,6 +83,13 @@ public class ChangePasswordServlet extends HttpServlet {
             request.getRequestDispatcher("change_password.jsp").forward(request, response);
         }
     }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Chuyển hướng đến trang thay đổi mật khẩu
+        request.getRequestDispatcher("change_password.jsp").forward(request, response);
+    }
 }
 
 
