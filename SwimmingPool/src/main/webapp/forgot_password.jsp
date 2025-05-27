@@ -114,7 +114,7 @@
             boolean isEmailStep = step.equals("email");
         %>
 
-        <form style="<%= !isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="sendCode">
+        <form style="<%= !isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post">
             <label for="email">Account Email: </label>
             <input type="email" id="email" name="email" required placeholder="Enter your email"/>
 
@@ -123,6 +123,7 @@
             </div>
 
             <button type="submit">Send Reset Password Code</button>
+            <input type="hidden" name="action" value="sendCode"/>
         </form>
     </div>
 
@@ -130,7 +131,7 @@
 
     <div class="form-section">
         <h2>Got a code?</h2>
-        <form style="<%= isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="checkCode">
+        <form style="<%= isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post">
             <% if (!isEmailStep) { %>
             <div style="color: green; font-weight: bold; margin-bottom: 15px;">
                 Vui lòng kiểm tra email của bạn!
@@ -145,6 +146,7 @@
             </div>
 
             <button type="submit">Reset Password</button>
+            <input type="hidden" name="action" value="checkCode"/>
         </form>
     </div>
 </div>

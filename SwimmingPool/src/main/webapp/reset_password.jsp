@@ -154,7 +154,7 @@
         </ul>
     </div>
 
-    <form method="post" action="reset">
+    <form method="post">
         <input type="hidden" name="email" value="<%= email %>">
 
         <div class="password-field">
