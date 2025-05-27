@@ -211,9 +211,9 @@
         <%= message %>
     </div>
     <% } %>
-        <a href="home.jsp" style="position: fixed; top: 10px; left: 10px; color: #007bff; font-weight: 600; text-decoration: none; user-select: none;">
-            ← Back to Home
-        </a>
+    <a href="home.jsp" style="position: fixed; top: 10px; left: 10px; color: #007bff; font-weight: 600; text-decoration: none; user-select: none;">
+        ← Back to Home
+    </a>
 
     <div class="tabs">
         <button class="active" type="button">Profile</button>
@@ -260,7 +260,9 @@
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input id="email" name="email" type="email" value="<%= user.getEmail() != null ? user.getEmail() : "" %>" disabled required />
+                <!-- Email readonly và thêm hidden để gửi lên server -->
+                <input id="email" type="email" value="<%= user.getEmail() != null ? user.getEmail() : "" %>" readonly style="background-color:#eee; cursor:not-allowed;" />
+                <input type="hidden" name="email" value="<%= user.getEmail() != null ? user.getEmail() : "" %>" />
             </div>
 
             <div class="form-group">
@@ -310,7 +312,9 @@
             document.getElementById("avatarPreview").src = avatar;
         } else {
             // Nếu đang ở chế độ xem, bật edit (enable tất cả input)
-            inputs.forEach(input => input.disabled = false);
+            inputs.forEach(input => {
+                if (input.id !== 'email') input.disabled = false; // Email vẫn không sửa được
+            });
             document.querySelector(".avatar-section input[type=file]").disabled = false;
 
             btnSave.disabled = false;
