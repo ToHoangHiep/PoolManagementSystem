@@ -11,11 +11,13 @@ public class User {
     private String address;
     private Date dob;
     private String gender; // Male, Female, Other
+    private String userStatus; // Active, Deactive, Banned
     private Role role;
     private Date createdAt;
     private Date updatedAt;
 
-    public User() {}
+    public User() {
+    }
 
     // Getter
     public int getId() {
@@ -48,6 +50,10 @@ public class User {
 
     public String getGender() {
         return gender;
+    }
+
+    public String getUserStatus() {
+        return userStatus;
     }
 
     public Role getRole() {
@@ -93,6 +99,10 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public void setUserStatus(String userStatus) {
+        this.userStatus = userStatus;
     }
 
     public void setRole(Role role) {
