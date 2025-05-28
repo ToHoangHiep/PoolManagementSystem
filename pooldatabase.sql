@@ -1,16 +1,10 @@
--- Chỉ để drop và reset database
-DROP database swimming_pool_management;
+-- Drop table
+drop database swimming_pool_management;
+
 
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
-INSERT INTO Roles(id, name) VALUES
-  (1, 'Admin'),
-  (2, 'Manager'),
-  (3, 'Coach'),
-  (4, 'Customer'),
-  (5, 'Staff');
-
 -- Roles
 CREATE TABLE Roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -34,6 +28,7 @@ CREATE TABLE Users (
     dob DATE,
     gender ENUM('Male', 'Female', 'Other'),
     role_id INT,
+    user_status enum('Active', 'Deactive', 'Banned'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES Roles(id)
@@ -84,6 +79,7 @@ CREATE TABLE Course_Registrations (
 --     FOREIGN KEY (service_id) REFERENCES Services(id)
 -- );
 
+
 -- Reset Password
 CREATE TABLE UserCode (
 	user_id int primary key,
@@ -91,6 +87,7 @@ CREATE TABLE UserCode (
     created_at datetime,
     foreign key (user_id) references users(id)
 );
+
 
 -- Iventory
 CREATE TABLE Inventory (
@@ -103,6 +100,7 @@ CREATE TABLE Inventory (
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
     last_updated datetime,
     foreign key (manager_id) references users(id)
+
 );
 
 -- Feedbacks
@@ -187,6 +185,7 @@ CREATE TABLE Blogs (
     FOREIGN KEY (author_id) REFERENCES Users(id)
 );
 
+
 CREATE TABLE Ticket (
 	ticket_id int primary key auto_increment,
     user_id int,
@@ -201,6 +200,7 @@ CREATE TABLE Ticket (
     foreign key (user_id) references users(id),
     foreign key (payment_id) references payments(id)
 );
+
 
 -- Study Roadmaps
 CREATE TABLE Study_Roadmaps (

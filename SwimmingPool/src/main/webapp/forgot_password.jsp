@@ -114,7 +114,7 @@
             boolean isEmailStep = step.equals("email");
         %>
 
-        <form style="<%= !isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post">
+        <form style="<%= !isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="forgot-password">
             <label for="email">Account Email: </label>
             <input type="email" id="email" name="email" required placeholder="Enter your email"/>
 
@@ -131,12 +131,25 @@
 
     <div class="form-section">
         <h2>Got a code?</h2>
-        <form style="<%= isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post">
+        <form style="<%= isEmailStep ? "pointer-events: none; opacity: 0.5;" : "" %>" method="post" action="forgot-password">
             <% if (!isEmailStep) { %>
             <div style="color: green; font-weight: bold; margin-bottom: 15px;">
                 Vui lòng kiểm tra email của bạn!
             </div>
             <% } %>
+
+            <div style="display: none">
+                <%
+                    String emailParam = request.getParameter("email");
+                    if (emailParam != null && !emailParam.isEmpty()) {
+                %>
+                <label>
+                    <input type="email" id="email" name="email" value="<%= emailParam %>" readonly/>
+                </label>
+                <%
+                    }
+                %>
+            </div>
 
             <label for="code">Verification Code: </label>
             <input type="text" id="code" name="code" required placeholder="Enter your code sent to email"/>

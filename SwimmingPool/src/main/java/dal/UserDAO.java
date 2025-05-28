@@ -32,6 +32,7 @@ public class UserDAO {
                 user.setDob(rs.getDate("dob"));
                 user.setGender(rs.getString("gender"));
                 user.setPasswordHash(rs.getString("password_hash"));
+                user.setUserStatus(rs.getString("user_status"));
                 user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
                 return user;
             }

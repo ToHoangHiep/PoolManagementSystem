@@ -7,9 +7,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.User;
+import utils.EmailUtils;
 import utils.Utils;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -18,6 +20,7 @@ public class ForgotPasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
+        System.out.println(">>> action = " + action);
 
         if ("sendCode".equals(action)) {
             String email = request.getParameter("email");
@@ -45,6 +48,8 @@ public class ForgotPasswordServlet extends HttpServlet {
             }
 
             User user = UserDAO.findUserFromEmail(email);
+            System.out.println(">>> email = " + email);
+            System.out.println(">>> user = " + user);
 
             if (user == null) {
                 request.setAttribute("error_p1", "Không tìm thấy người dùng với email này.");
@@ -56,14 +61,15 @@ public class ForgotPasswordServlet extends HttpServlet {
             if (codeCreated) {
                 String code = UserCodeDAO.getCode(user);
                 // Sau khi tạo mã, bạn có thể gửi email chứa mã xác nhận
-                Utils.SendEmail("Pool Management System Reset Password <pms@testmailgun.org>",
-                        email,
-                        "Xác nhận đặt lại mật khẩu",
-                        "Mã xác nhận của bạn là: " + code +
-                                "\nVui lòng không chia sẻ mã này với bất kỳ ai." +
-                                "\nNếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này." +
-                                "\nMã này sẽ hết hạn sau 15 phút." +
-                                "\n\nTrân trọng,\nPMS Team");
+//                Utils.SendEmail("Pool Management System Reset Password <pms@testmailgun.org>",
+//                        email,
+//                        "Xác nhận đặt lại mật khẩu",
+//                        "Mã xác nhận của bạn là: " + code +
+//                                "\nVui lòng không chia sẻ mã này với bất kỳ ai." +
+//                                "\nNếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này." +
+//                                "\nMã này sẽ hết hạn sau 15 phút." +
+//                                "\n\nTrân trọng,\nPMS Team");
+                EmailUtils.send(email, "Xác minh đặt lại mật khẩu", "Mã xác minh của bạn là: " + code);
 
 
                 // Chuyển hướng đến trang xác nhận mã
@@ -77,9 +83,13 @@ public class ForgotPasswordServlet extends HttpServlet {
         } else if ("checkCode".equals(action)) {
             String code = request.getParameter("code");
             String email = request.getParameter("email");
+            System.out.println(">>> code = " + code);
+            System.out.println(">>> email = " + email);
             // Kiểm tra mã xác nhận
 
-            User user = UserDAO.findUserFromEmail(email);
+            String decodedEmail = URLDecoder.decode(email, StandardCharsets.UTF_8);
+
+            User user = UserDAO.findUserFromEmail(decodedEmail);
             if (user == null) {
                 request.setAttribute("error_p2", "Không tìm thấy người dùng với email này.");
                 request.getRequestDispatcher("forgot_password.jsp").forward(request, response);
