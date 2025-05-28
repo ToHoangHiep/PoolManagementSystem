@@ -1,10 +1,87 @@
-@ -0,0 +1,79 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="entities.Inventory" %>
 <%@ page import="java.util.List" %>
 <html>
 <head>
     <title>Danh sách thiết bị</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 40px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        a {
+            display: inline-block;
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background-color: white;
+            color: black;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 6px 10px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 7px 12px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0b7dda;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1976D2;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .actions a {
+            color: black;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        .message {
+            color: green;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
 <h2>Danh sách thiết bị</h2>
@@ -16,20 +93,6 @@
 </form>
 
 <table>
-    <c:forEach var="item" items="${inventoryList}">
-        <tr>
-            <td>${item.itemName}</td>
-            <td>${item.category}</td>
-            <td>${item.quantity}</td>
-            <td>${item.unit}</td>
-            <td>${item.status}</td>
-            <td>${item.lastUpdated}</td>
-        </tr>
-    </c:forEach>
-</table>
-
-
-<table border="1" cellpadding="5" cellspacing="0">
     <tr>
         <th>ID</th>
         <th>Manager ID</th>
@@ -55,7 +118,7 @@
         <td><%= i.getUnit() %></td>
         <td><%= i.getStatus() %></td>
         <td><%= i.getLastUpdated() %></td>
-        <td>
+        <td class="actions">
             <a href="inventory?action=edit&id=<%= i.getInventoryId() %>">Sửa</a> |
             <a href="inventory?action=delete&id=<%= i.getInventoryId() %>"
                onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Xóa</a>
@@ -65,16 +128,17 @@
             }
         }
     %>
-    <%
-        String message = (String) session.getAttribute("message");
-        if (message != null) {
-    %>
-    <p style="color: green; font-weight: bold;"><%= message %></p>
-    <%
-            session.removeAttribute("message");
-        }
-    %>
-
 </table>
+
+<%
+    String message = (String) session.getAttribute("message");
+    if (message != null) {
+%>
+<p class="message"><%= message %></p>
+<%
+        session.removeAttribute("message");
+    }
+%>
+
 </body>
 </html>

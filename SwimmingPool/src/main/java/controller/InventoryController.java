@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import DAO.InventoryDAO;
 import entities.Inventory;
