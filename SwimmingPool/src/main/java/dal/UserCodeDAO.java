@@ -8,7 +8,7 @@ import java.sql.*;
 
 public class UserCodeDAO {
     public static String getCode(User user) {
-        String sql = "SELECT code FROM user_codes WHERE user_id = ?";
+        String sql = "SELECT user_code FROM usercode WHERE user_id = ?";
         String code = null;
 
         try (Connection conn = DBConnect.getConnection();
@@ -16,7 +16,7 @@ public class UserCodeDAO {
             ps.setInt(1, user.getId());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                code = rs.getString("code");
+                code = rs.getString("user_code");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -27,9 +27,11 @@ public class UserCodeDAO {
 
 
     public static boolean createCode(User user) {
-        String sql = "INSERT INTO user_codes (user_id, code, created_time) VALUES (?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE code = ?, created_time = ?";
+        String sql = "INSERT INTO usercode (user_id, user_code, created_at) VALUES (?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE user_code = ?, created_at = ?";
         String code = generateCode();
+        System.out.println("Code: " + code);
+
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
         try (Connection conn = DBConnect.getConnection();
@@ -67,14 +69,14 @@ public class UserCodeDAO {
     }
 
     public static boolean checkCode(User user, String code) {
-        String sql = "SELECT * FROM user_codes WHERE user_id = ?";
+        String sql = "SELECT * FROM usercode WHERE user_id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, user.getId());
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                String storedCode = rs.getString("code");
+                String storedCode = rs.getString("user_code");
 
                 if (storedCode == null || storedCode.isEmpty()) {
                     return false; // Không có mã nào được lưu trữ
@@ -85,7 +87,7 @@ public class UserCodeDAO {
                 }
 
                 // Check if code has expired (15 minutes)
-                Timestamp createdTime = rs.getTimestamp("created_time");
+                Timestamp createdTime = rs.getTimestamp("created_at");
                 if (createdTime == null || System.currentTimeMillis() - createdTime.getTime() > 15 * 60 * 1000) {
                     return false; // Code has expired
                 }
@@ -102,7 +104,7 @@ public class UserCodeDAO {
     }
 
     public static boolean deleteCode(User user) {
-        String sql = "DELETE FROM user_codes WHERE user_id = ?";
+        String sql = "DELETE FROM usercode WHERE user_id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
