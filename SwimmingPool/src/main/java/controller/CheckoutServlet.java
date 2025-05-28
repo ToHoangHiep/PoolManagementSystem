@@ -47,7 +47,7 @@ public class CheckoutServlet extends HttpServlet {
                 if (updated) {
                     session.removeAttribute("ticket"); // clear khỏi session
                     request.setAttribute("message", "Thanh toán thành công!");
-//                    request.getRequestDispatcher("success.jsp").forward(request, response);
+                    request.getRequestDispatcher("checkout.jsp").forward(request, response);
                 } else {
                     throw new Exception("Cập nhật trạng thái thất bại");
                 }

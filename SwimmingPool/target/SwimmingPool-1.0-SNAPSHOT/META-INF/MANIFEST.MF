@@ -1,5 +1,9 @@
 Manifest-Version: 1.0
 Created-By: IntelliJ IDEA
 Built-By: Admin
+<<<<<<< Updated upstream
 Build-Jdk: Microsoft OpenJDK 17.0.15
+=======
+Build-Jdk: Microsoft OpenJDK 21.0.7
+>>>>>>> Stashed changes
 

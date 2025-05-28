@@ -1,2 +1,30 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+CREATE TABLE TicketType (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,
+    price DECIMAL(10,2) NOT NULL
+);
+INSERT INTO TicketType (type_name, price) VALUES
+('Single',        50000.00),
+('Monthly',      300000.00),
+('ThreeMonthly', 850000.00),
+('SixMonthly',  1600000.00),
+('Year',         3000000.00);
+
+-- Ticket
+CREATE TABLE Ticket (
+    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    ticket_type_id INT,
+    quantity INT,
+    start_date DATE,
+    end_date DATE,
+    ticket_status ENUM('Active', 'Expired', 'Cancelled'),
+    payment_status ENUM('Paid', 'Unpaid'),
+    payment_id INT NULL,
+    total DECIMAL(10,2),
+    created_at DATETIME,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (payment_id) REFERENCES Payments(id),
+    FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
+);
