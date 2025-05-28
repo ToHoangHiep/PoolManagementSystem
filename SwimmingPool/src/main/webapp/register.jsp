@@ -11,66 +11,43 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
         }
         .register-box {
-            background: #fff;
+            background: white;
             padding: 30px;
-            width: 320px;
-            border-radius: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
+            width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px gray;
         }
-        h2 { margin-bottom: 25px; }
-        input[type="text"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="password"] {
+        input, select {
             width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            box-sizing: border-box;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 8px;
+            margin: 6px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         .btn {
-            background-color: #7a73ff;
+            background-color: #5c6bc0;
             color: white;
-            padding: 10px;
-            margin-top: 15px;
-            width: 100%;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            padding: 10px;
             font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 4px;
         }
         .btn:hover {
-            background-color: #5d53d4;
-        }
-        .login-link {
-            margin-top: 20px;
-            display: block;
-            color: black;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .login-link:hover {
-            text-decoration: underline;
-        }
-        .error {
-            color: red;
-            margin-top: 10px;
-            font-size: 14px;
+            background-color: #3f51b5;
         }
     </style>
-
     <script>
         function validateForm() {
             const email = document.forms["regForm"]["email"].value;
             const phone = document.forms["regForm"]["phone"].value;
             const password = document.forms["regForm"]["password"].value;
             const confirm = document.forms["regForm"]["confirmPassword"].value;
+            const dobInput = document.forms["regForm"]["dob"].value;
 
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             const phoneRegex = /^[0-9]{10,11}$/;
@@ -96,10 +73,16 @@
                 return false;
             }
 
+            const dob = new Date(dobInput);
+            const today = new Date();
+            if (dob > today) {
+                alert("Ngày sinh không được vượt quá ngày hiện tại!");
+                return false;
+            }
+
             return true;
         }
     </script>
-
 </head>
 <body>
 <div class="register-box">
@@ -107,14 +90,20 @@
     <form name="regForm" action="register" method="post" onsubmit="return validateForm();">
         <input type="text" name="fullname" placeholder="Full Name" required />
         <input type="email" name="email" placeholder="Email" required />
-        <input type="tel" name="phone" placeholder="Phone Number" required />
+        <input type="text" name="phone" placeholder="Phone Number (10-11 digits)" required />
         <input type="password" name="password" placeholder="Password" required />
         <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
-        <input type="submit" value="Sign in" class="btn" />
+        <input type="text" name="address" placeholder="Address" required />
+        <input type="date" name="dob" required />
+        <select name="gender" required>
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+        <input type="submit" value="Register" class="btn" />
     </form>
-    <a href="login.jsp" class="login-link">Login</a>
-
-    <div class="error">
+    <div style="color: red;">
         <%= request.getAttribute("error") != null ? request.getAttribute("error") : "" %>
     </div>
 </div>

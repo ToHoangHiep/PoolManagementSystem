@@ -1,18 +1,21 @@
+-- Drop table
+drop database swimming_pool_management;
+
+
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
+-- Roles
+CREATE TABLE Roles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50) NOT NULL
+);
 INSERT INTO Roles(id, name) VALUES
   (1, 'Admin'),
   (2, 'Manager'),
   (3, 'Coach'),
   (4, 'Customer'),
   (5, 'Staff');
-
--- Roles
-CREATE TABLE Roles (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL
-);
 
 -- Users
 CREATE TABLE Users (
@@ -25,6 +28,7 @@ CREATE TABLE Users (
     dob DATE,
     gender ENUM('Male', 'Female', 'Other'),
     role_id INT,
+    user_status enum('Active', 'Deactive', 'Banned'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES Roles(id)
@@ -75,15 +79,28 @@ CREATE TABLE Course_Registrations (
 --     FOREIGN KEY (service_id) REFERENCES Services(id)
 -- );
 
+
+-- Reset Password
+CREATE TABLE UserCode (
+	user_id int primary key,
+    user_code varchar(8),
+    created_at datetime,
+    foreign key (user_id) references users(id)
+);
+
+
 -- Iventory
 CREATE TABLE Inventory (
 	inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+    manager_id int,
     item_name varchar(100),
     category varchar(100),
     quantity int,
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
-    last_updated datetime
+    last_updated datetime,
+    foreign key (manager_id) references users(id)
+
 );
 
 -- Feedbacks
@@ -168,6 +185,23 @@ CREATE TABLE Blogs (
     FOREIGN KEY (author_id) REFERENCES Users(id)
 );
 
+
+CREATE TABLE Ticket (
+	ticket_id int primary key auto_increment,
+    user_id int,
+    ticket_type enum('Single', 'Monthly', 'Combo'),
+    quantity int,
+    start_date date,
+    end_date date,
+    ticket_status enum('Active', 'Expired', 'Cancelled'),
+    payment_status enum('Paid', 'Unpaid'),
+    payment_id int,
+    created_at datetime,
+    foreign key (user_id) references users(id),
+    foreign key (payment_id) references payments(id)
+);
+
+
 -- Study Roadmaps
 CREATE TABLE Study_Roadmaps (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -177,4 +211,3 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
-blogs
