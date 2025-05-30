@@ -1,24 +1,24 @@
 package controller;
 
-import dal.UserProfileDAO;
+import dal.CustomerDAO;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import model.Customer;
 import model.User;
-import model.UserProfile;
 import utils.DBConnect;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Part;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Date;
 
-@WebServlet("/userProfile")
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, maxFileSize = 1024 * 1024 * 10, maxRequestSize = 1024 * 1024 * 50)
-public class UserProfileServlet extends HttpServlet {
+@WebServlet("/userprofile")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2,
+        maxFileSize = 1024 * 1024 * 10,
+        maxRequestSize = 1024 * 1024 * 50)
+public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -28,18 +28,17 @@ public class UserProfileServlet extends HttpServlet {
             return;
         }
 
-        User user = (User) session.getAttribute("user");
+        User userSession = (User) session.getAttribute("user");
 
         try (var conn = DBConnect.getConnection()) {
-            UserProfileDAO dao = new UserProfileDAO(conn);
-            UserProfile profile = dao.getUserById(user.getId());
+            CustomerDAO dao = new CustomerDAO(conn);
+            Customer profile = dao.getCustomerById(userSession.getId());
 
             if (profile == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "User profile not found");
                 return;
             }
 
-            // Get flash message from session if available
             String message = (String) session.getAttribute("message");
             if (message != null) {
                 request.setAttribute("message", message);
@@ -55,9 +54,7 @@ public class UserProfileServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
         HttpSession session = request.getSession(false);
@@ -84,57 +81,41 @@ public class UserProfileServlet extends HttpServlet {
             }
         }
 
-        // Handle avatar upload
         Part filePart = request.getPart("avatar");
         String avatarPath = null;
 
-        // Upload directory inside webapp
         String uploadDirPath = getServletContext().getRealPath("/uploads");
         File uploadDir = new File(uploadDirPath);
         if (!uploadDir.exists()) {
-            if (!uploadDir.mkdirs()) {
-                throw new IOException("Cannot create uploads directory at " + uploadDirPath);
-            }
+            uploadDir.mkdirs();
         }
 
         if (filePart != null && filePart.getSize() > 0) {
-            String submittedFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); // lấy tên file an toàn
-            if (submittedFileName != null && !submittedFileName.isEmpty()) {
-                String fileName = "user_" + userId + "_" + System.currentTimeMillis() + "_" + submittedFileName.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
-                File fileSaveDir = new File(uploadDirPath);
-                if (!fileSaveDir.exists()) {
-                    fileSaveDir.mkdirs();
-                }
-                String savePath = uploadDirPath + File.separator + fileName;
-                try {
-                    filePart.write(savePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new IOException("Error saving uploaded file", e);
-                }
-                avatarPath = "uploads/" + fileName;
-            }
-
-
-
-    }
-
-
+            String submittedFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            String fileName = "user_" + userId + "_" + System.currentTimeMillis() + "_" +
+                    submittedFileName.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
+            String savePath = uploadDirPath + File.separator + fileName;
+            filePart.write(savePath);
+            avatarPath = "uploads/" + fileName;
+        }
 
         try (var conn = DBConnect.getConnection()) {
-            UserProfileDAO dao = new UserProfileDAO(conn);
-            String existingAvatar = dao.getUserById(userId).getProfile_picture();
+            CustomerDAO dao = new CustomerDAO(conn);
+            Customer existing = dao.getCustomerById(userId);
 
             if (avatarPath == null || avatarPath.isEmpty()) {
-                avatarPath = existingAvatar; // Keep old avatar if no new upload
+                avatarPath = existing != null ? existing.getProfilePicture() : null;
             }
 
-            UserProfile updated = new UserProfile(userId, fullName, phone, gender, address, dob, email, avatarPath);
-            dao.updateUser(updated);
+            Customer updated = new Customer(userId, fullName, phone, dob, gender, address, avatarPath, email);
+            boolean success = dao.updateUser(updated);
 
-            // Update session message or keep as is
-            session.setAttribute("message", "Profile updated successfully!");
-            response.sendRedirect("userProfile");
+            if (success) {
+                session.setAttribute("message", "Profile updated successfully!");
+            } else {
+                session.setAttribute("message", "Failed to update profile!");
+            }
+            response.sendRedirect("userprofile");
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error updating profile");
