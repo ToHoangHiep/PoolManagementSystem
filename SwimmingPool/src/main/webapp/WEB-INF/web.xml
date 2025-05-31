@@ -65,7 +65,7 @@
 
     <servlet>
         <servlet-name>InventoryServlet</servlet-name>
-        <servlet-class>controller.</servlet-class>
+        <servlet-class>controller.InventoryServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

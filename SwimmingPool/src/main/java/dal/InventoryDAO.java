@@ -158,8 +158,8 @@ public class InventoryDAO {
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, offset);
-            stmt.setInt(2, limit);
+            stmt.setInt(2, offset);
+            stmt.setInt(1, limit);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
