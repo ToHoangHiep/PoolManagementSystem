@@ -28,7 +28,14 @@
   boolean existing = feedback != null;
 %>
 
-<form action="feedback/<%  %>">
+<form action="feedback/<%= existing ? "edit" : "create" %>" method="post">
+    <%
+      if (existing) {
+    %>
+      <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
+    <%
+      }
+    %>
 
 </form>
 
