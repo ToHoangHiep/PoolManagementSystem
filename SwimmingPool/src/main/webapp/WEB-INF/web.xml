@@ -63,4 +63,13 @@
         <url-pattern>/verify</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>InventoryServlet</servlet-name>
+        <servlet-class>controller.</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>InventoryServlet</servlet-name>
+        <url-pattern>/inventory</url-pattern>
+    </servlet-mapping>
 </web-app>

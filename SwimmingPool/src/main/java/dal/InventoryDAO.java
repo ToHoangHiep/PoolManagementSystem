@@ -1,6 +1,6 @@
-package DAO;
+package dal;
 
-import entities.Inventory;
+import model.Inventory;
 import utils.DBConnect;
 
 import java.sql.*;
@@ -9,8 +9,8 @@ import java.util.List;
 
 public class InventoryDAO {
 
-    public boolean insertInventory(Inventory inventory) {
-        String sql = "INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public static boolean insertInventory(Inventory inventory) {
+        String sql = "INSERT INTO inventory (manager_id, item_name, category, quantity, unit, status) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -20,7 +20,6 @@ public class InventoryDAO {
             stmt.setInt(4, inventory.getQuantity());
             stmt.setString(5, inventory.getUnit());
             stmt.setString(6, inventory.getStatus());
-            stmt.setTimestamp(7, java.sql.Timestamp.valueOf(inventory.getLastUpdated()));
 
 
             int rowsAffected = stmt.executeUpdate();
@@ -33,7 +32,7 @@ public class InventoryDAO {
     }
 
 
-    public List<Inventory> getAllInventories() {
+    public static List<Inventory> getAllInventories() {
         List<Inventory> list = new ArrayList<>();
         String sql = "SELECT * FROM Inventory";
 
@@ -47,7 +46,7 @@ public class InventoryDAO {
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
-                inv.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
+                inv.setLastUpdated(rs.getDate("last_updated"));
 
                 list.add(inv);
             }
@@ -58,8 +57,8 @@ public class InventoryDAO {
         return list;
     }
 
-    public Inventory getInventoryById(int id) {
-        String sql = "SELECT * FROM Inventory WHERE inventory_id = ?";
+    public static Inventory getInventoryById(int id) {
+        String sql = "SELECT * FROM inventory WHERE inventory_id = ?";
         Inventory inv = null;
 
         try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -75,7 +74,7 @@ public class InventoryDAO {
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
-                inv.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
+                inv.setLastUpdated(rs.getDate("last_updated"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,8 +83,8 @@ public class InventoryDAO {
         return inv;
     }
 
-    public boolean updateInventory(Inventory inventory) {
-        String sql = "UPDATE Inventory SET manager_id = ?, item_name = ?, category = ?, quantity = ?, unit = ?, status = ?, last_updated = ? WHERE inventory_id = ?";
+    public static boolean updateInventory(Inventory inventory) {
+        String sql = "UPDATE inventory SET manager_id = ?, item_name = ?, category = ?, quantity = ?, unit = ?, status = ?, last_updated = ? WHERE inventory_id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -95,7 +94,6 @@ public class InventoryDAO {
             stmt.setInt(4, inventory.getQuantity());
             stmt.setString(5, inventory.getUnit());
             stmt.setString(6, inventory.getStatus());
-            stmt.setTimestamp(7, java.sql.Timestamp.valueOf(inventory.getLastUpdated()));
 
             stmt.setInt(8, inventory.getInventoryId());
 
@@ -109,8 +107,8 @@ public class InventoryDAO {
     }
 
 
-    public boolean deleteInventory(int id) {
-        String sql = "DELETE FROM Inventory WHERE inventory_id = ?";
+    public static boolean deleteInventory(int id) {
+        String sql = "DELETE FROM inventory WHERE inventory_id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -124,9 +122,9 @@ public class InventoryDAO {
         }
     }
 
-    public List<Inventory> searchInventory(String keyword) {
+    public static List<Inventory> searchInventory(String keyword) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT * FROM Inventory WHERE item_name LIKE ?";
+        String sql = "SELECT * FROM inventory WHERE item_name LIKE ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -142,7 +140,7 @@ public class InventoryDAO {
                 item.setQuantity(rs.getInt("quantity"));
                 item.setUnit(rs.getString("unit"));
                 item.setStatus(rs.getString("status"));
-                item.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
+                item.setLastUpdated(rs.getDate("last_updated"));
 
                 list.add(item);
             }
@@ -153,6 +151,84 @@ public class InventoryDAO {
         return list;
     }
 
+    public static List<Inventory> getInventoriesByPage(int offset, int limit) {
+        List<Inventory> list = new ArrayList<>();
+        String sql = "SELECT * FROM inventory ORDER BY inventory_id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+            stmt.setInt(1, offset);
+            stmt.setInt(2, limit);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setInventoryId(rs.getInt("inventory_id"));
+                inv.setManagerId(rs.getInt("manager_id"));
+                inv.setItemName(rs.getString("item_name"));
+                inv.setCategory(rs.getString("category"));
+                inv.setQuantity(rs.getInt("quantity"));
+                inv.setUnit(rs.getString("unit"));
+                inv.setStatus(rs.getString("status"));
+                inv.setLastUpdated(rs.getDate("last_updated"));
+
+                list.add(inv);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static int getTotalInventoryCount() {
+        String sql = "SELECT COUNT(*) FROM inventory";
+
+        try (Connection conn = DBConnect.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public static List<Inventory> filterInventoryByStatus(String status) {
+        List<Inventory> list = new ArrayList<>();
+        String sql = "SELECT * FROM inventory WHERE status = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setInventoryId(rs.getInt("inventory_id"));
+                inv.setManagerId(rs.getInt("manager_id"));
+                inv.setItemName(rs.getString("item_name"));
+                inv.setCategory(rs.getString("category"));
+                inv.setQuantity(rs.getInt("quantity"));
+                inv.setUnit(rs.getString("unit"));
+                inv.setStatus(rs.getString("status"));
+                inv.setLastUpdated(rs.getDate("last_updated"));
+
+                list.add(inv);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
 }

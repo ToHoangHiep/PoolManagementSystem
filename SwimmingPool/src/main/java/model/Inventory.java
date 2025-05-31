@@ -1,6 +1,7 @@
 
-package entities;
+package model;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 
 public class Inventory {
@@ -11,7 +12,7 @@ public class Inventory {
     private int quantity;
     private String unit;
     private String status; // Có thể dùng Enum, nhưng Java thuần thì dùng String
-    private LocalDateTime lastUpdated;
+    private Date lastUpdated;
 
     // Getters and Setters
     public int getInventoryId() {
@@ -70,11 +71,11 @@ public class Inventory {
         this.status = status;
     }
 
-    public LocalDateTime getLastUpdated() {
+    public Date getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(LocalDateTime lastUpdated) {
+    public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 }

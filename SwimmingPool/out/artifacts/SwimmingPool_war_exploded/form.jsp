@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="entities.Inventory" %>
+<%@ page import="model.Inventory" %>
 <%
     Inventory inv = (Inventory) request.getAttribute("inventory");
     String action = (inv != null) ? "update" : "insert";

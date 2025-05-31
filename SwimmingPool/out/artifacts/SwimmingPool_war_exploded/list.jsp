@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="entities.Inventory" %>
+<%@ page import="model.Inventory" %>
 <%@ page import="java.util.List" %>
 <html>
 <head>
