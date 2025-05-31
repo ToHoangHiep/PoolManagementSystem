@@ -153,7 +153,7 @@ public class InventoryDAO {
 
     public static List<Inventory> getInventoriesByPage(int offset, int limit) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT * FROM inventory ORDER BY inventory_id OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT * FROM inventory ORDER BY inventory_id LIMIT ? OFFSET ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -172,6 +172,8 @@ public class InventoryDAO {
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
                 inv.setLastUpdated(rs.getDate("last_updated"));
+
+                System.out.println("Inventory ID: " + inv.getInventoryId());
 
                 list.add(inv);
             }
