@@ -70,7 +70,7 @@ public class InventoryServlet extends HttpServlet {
         System.out.println("Total Pages: " + totalPages);
 
         for (Inventory inventory : list) {
-            System.out.println(inventory);
+            System.out.println(inventory.getItemName());
         }
 
         request.setAttribute("inventoryList", list);
