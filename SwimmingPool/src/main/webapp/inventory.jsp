@@ -10,15 +10,31 @@
 <head>
     <title>Inventory List</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h2 {
+            color: #333;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
+            background-color: #fff;
         }
 
         th, td {
-            padding: 8px;
-            border: 1px solid #ccc;
+            padding: 10px;
+            border: 1px solid #ddd;
             text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
         }
 
         .pagination a {
@@ -31,9 +47,67 @@
         }
 
         .pagination a.active {
-            background-color: #ccc;
+            background-color: #007BFF;
+            color: white;
             font-weight: bold;
         }
+
+        .btn {
+            padding: 5px 10px;
+            color: white;
+            background-color: #28a745;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .btn-edit {
+            background-color: #ffc107;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+        search-form {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        search-input {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        search-input:focus {
+            border-color: #007bff;
+        }
+
+        search-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: 2px solid #007bff;
+            border-radius: 0 8px 8px 0;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
@@ -41,10 +115,14 @@
 <h2>Inventory List</h2>
 
 <!-- Tìm kiếm -->
-<form method="get" action="inventory">
-    <input type="text" name="keyword" placeholder="Search item..." value="<%= keyword != null ? keyword : "" %>"/>
-    <button type="submit">Search</button>
+<form method="get" action="inventory" class="search-form">
+    <input type="hidden" name="action" value="search" />
+    <input type="text" name="keyword" placeholder="Search item..." value="<%= keyword != null ? keyword : "" %>" class="search-input" />
+    <button type="submit" class="search-button">Search</button>
 </form>
+
+
+<a href="inventory?action=new" class="btn">Add New Item</a>
 
 <!-- Bảng danh sách -->
 <table>
@@ -58,6 +136,7 @@
         <th>Unit</th>
         <th>Status</th>
         <th>Last Updated</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -78,12 +157,17 @@
         <td><%= inv.getUnit() %></td>
         <td><%= inv.getStatus() %></td>
         <td><%= inv.getLastUpdated() %></td>
+        <td>
+            <a href="inventory?action=edit&id=<%= inv.getInventoryId() %>" class="btn btn-edit">Edit</a>
+            <a href="inventory?action=delete&id=<%= inv.getInventoryId() %>" class="btn btn-delete"
+               onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Delete</a>
+        </td>
     </tr>
     <%
         }
     } else {
     %>
-    <tr><td colspan="8">No data found.</td></tr>
+    <tr><td colspan="9">No data found.</td></tr>
     <%
         }
     %>

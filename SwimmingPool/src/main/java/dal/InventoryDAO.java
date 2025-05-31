@@ -10,7 +10,7 @@ import java.util.List;
 public class InventoryDAO {
 
     public static boolean insertInventory(Inventory inventory) {
-        String sql = "INSERT INTO inventory (manager_id, item_name, category, quantity, unit, status) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO inventory (manager_id, item_name, category, quantity, unit, status, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -20,7 +20,7 @@ public class InventoryDAO {
             stmt.setInt(4, inventory.getQuantity());
             stmt.setString(5, inventory.getUnit());
             stmt.setString(6, inventory.getStatus());
-
+            stmt.setDate(7, new java.sql.Date(inventory.getLastUpdated().getTime()));
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -30,7 +30,6 @@ public class InventoryDAO {
             return false;
         }
     }
-
 
     public static List<Inventory> getAllInventories() {
         List<Inventory> list = new ArrayList<>();
@@ -94,7 +93,7 @@ public class InventoryDAO {
             stmt.setInt(4, inventory.getQuantity());
             stmt.setString(5, inventory.getUnit());
             stmt.setString(6, inventory.getStatus());
-
+            stmt.setDate(7, new java.sql.Date(inventory.getLastUpdated().getTime()));
             stmt.setInt(8, inventory.getInventoryId());
 
             int rowsAffected = stmt.executeUpdate();
@@ -105,7 +104,6 @@ public class InventoryDAO {
             return false;
         }
     }
-
 
     public static boolean deleteInventory(int id) {
         String sql = "DELETE FROM inventory WHERE inventory_id = ?";
@@ -158,8 +156,8 @@ public class InventoryDAO {
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(2, offset);
             stmt.setInt(1, limit);
+            stmt.setInt(2, offset);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -233,4 +231,12 @@ public class InventoryDAO {
 
         return list;
     }
+
+
+
+
+
+
 }
+
+
