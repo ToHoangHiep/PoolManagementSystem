@@ -75,4 +75,16 @@
         <url-pattern>/feedback</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>home.jsp</welcome-file>
+    </welcome-file-list>
+
 </web-app>

@@ -1,36 +1,35 @@
 package dal;
 
-import model.UserProfile;
+import model.Customer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserProfileDAO {
+public class CustomerDAO {
 
     private Connection conn;
 
-    public UserProfileDAO(Connection conn) {
+    public CustomerDAO(Connection conn) {
         this.conn = conn;
     }
 
-    public UserProfile getUserById(int userId) {
-        String sql = "SELECT id, full_name, phone_number, gender, address, dob, email, profile_picture FROM users WHERE id = ?";
+    public Customer getCustomerById(int userId) {
+        String sql = "SELECT id, full_name, phone_number, dob, gender, address, email, profile_picture FROM users WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
-
             if (rs.next()) {
-                return new UserProfile(
+                return new Customer(
                         rs.getInt("id"),
                         rs.getString("full_name"),
                         rs.getString("phone_number"),
+                        rs.getDate("dob"),
                         rs.getString("gender"),
                         rs.getString("address"),
-                        rs.getDate("dob"),
-                        rs.getString("email"),
-                        rs.getString("profile_picture")
+                        rs.getString("profile_picture"),
+                        rs.getString("email")
                 );
             }
         } catch (SQLException e) {
@@ -38,20 +37,20 @@ public class UserProfileDAO {
         }
         return null;
     }
-    public void updateUser(UserProfile user) throws SQLException {
-        String sql = "UPDATE users SET full_name = ?, phone_number = ?, gender = ?, address = ?, dob = ?, email = ?, profile_picture = ? WHERE id = ?";
+
+    public boolean updateUser(Customer user) throws SQLException {
+        String sql = "UPDATE users SET full_name = ?, phone_number = ?, dob = ?, gender = ?, address = ?, email = ?, profile_picture = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.getFullName());
             stmt.setString(2, user.getPhoneNumber());
-            stmt.setString(3, user.getGender());
-            stmt.setString(4, user.getAddress());
-            stmt.setDate(5, user.getDob());
+            stmt.setDate(3, user.getDob());
+            stmt.setString(4, user.getGender());
+            stmt.setString(5, user.getAddress());
             stmt.setString(6, user.getEmail());
-            stmt.setString(7, user.getProfile_picture());
+            stmt.setString(7, user.getProfilePicture());
             stmt.setInt(8, user.getUserId());
-
-            stmt.executeUpdate();
+            int rows = stmt.executeUpdate();
+            return rows > 0;
         }
     }
-
 }
