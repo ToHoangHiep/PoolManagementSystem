@@ -301,7 +301,7 @@
         <li>Private Pool Booking for Events & Families</li>
         <li>Water Aerobics & Therapy Sessions</li>
         <li>Maintenance & Pool Cleaning Services</li>
-        <li><a href="ticketPurchase.jsp" style="color: #005caa; font-weight: bold;">→ Ticket Purchase</a></li>
+        <li><a href="ticketPurchase.jsp" style="color: #005caa; font-weight: bold;">Ticket Purchase</a></li>
       </ul>
     </div>
   </div>

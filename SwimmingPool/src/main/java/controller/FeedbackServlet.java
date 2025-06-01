@@ -30,6 +30,9 @@ public class FeedbackServlet extends HttpServlet {
             case "delete":
 				deleteAction(request, response);
 				break;
+			case "delete_multiple":
+				deleteMultipleAction(request, response);
+				break;
 			case "sort":
 				sortAction(request, response);
 				break;
@@ -120,6 +123,14 @@ public class FeedbackServlet extends HttpServlet {
 		FeedbackDAO.deleteFeedback(feedbackId);
 	}
 
+	private void deleteMultipleAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String[] feedbackIds = request.getParameterValues("feedback_id");
+
+		for (String feedbackId : feedbackIds) {
+			FeedbackDAO.deleteFeedback(Integer.parseInt(feedbackId));
+		}
+	}
+
 	private void sortAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Integer coachId = !Objects.equals(request.getParameter("coach_id"), "all") ? Integer.parseInt(request.getParameter("coach_id")) : null;
 		Integer courseId = !Objects.equals(request.getParameter("course_id"), "all") ? Integer.parseInt(request.getParameter("course_id")) : null;
@@ -160,7 +171,7 @@ public class FeedbackServlet extends HttpServlet {
 		String mode = request.getParameter("mode");
 		System.out.println("Mode: " + mode);
 
-		if (mode.equals("list")){
+		if (mode != null && mode.equals("list")){
 			User user = (User) request.getSession().getAttribute("user");
 			boolean show_all = request.getParameter("admin_show") != null;
 

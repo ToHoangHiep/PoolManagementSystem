@@ -110,7 +110,7 @@ CREATE TABLE Feedbacks (
     feedback_type ENUM('Course', 'Coach', 'General'),
     coach_id INT,
     course_id INT,
-    general_feedback_type ENUM('Food', 'Service', 'Facility'),
+    general_feedback_type ENUM('Food', 'Service', 'Facility', 'Other'),
     content TEXT,
     rating INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
