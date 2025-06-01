@@ -98,7 +98,7 @@ CREATE TABLE Inventory (
     quantity int,
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
-    last_updated datetime,
+    last_updated datetime DEFAULT CURRENT_TIMESTAMP,
     foreign key (manager_id) references users(id)
 
 );

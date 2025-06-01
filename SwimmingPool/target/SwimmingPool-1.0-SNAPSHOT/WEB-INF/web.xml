@@ -64,6 +64,15 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>InventoryServlet</servlet-name>
+        <servlet-class>controller.InventoryServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>InventoryServlet</servlet-name>
+        <url-pattern>/inventory</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>LogoutServlet</servlet-name>
         <servlet-class>controller.LogoutServlet</servlet-class>
     </servlet>
