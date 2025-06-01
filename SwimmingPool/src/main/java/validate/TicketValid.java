@@ -1,35 +1,31 @@
 package validate;
 
 import model.Ticket;
-
 import java.time.LocalDate;
 
 public class TicketValid {
 
-    // Trả về true nếu ngày kết thúc hợp lệ với loại vé
-    public static boolean isEndDateValid(Ticket.TicketTypeName type, LocalDate start, LocalDate end) {
-        LocalDate expectedEnd;
-
+    // Hàm tính ngày kết thúc dựa vào loại vé
+    public static LocalDate calculateEndDate(Ticket.TicketTypeName type, LocalDate startDate) {
         switch (type) {
             case Single:
-                expectedEnd = start;
-                break;
+                return startDate.plusDays(1);
             case Monthly:
-                expectedEnd = start.plusMonths(1);
-                break;
+                return startDate.plusDays(30);
             case ThreeMonthly:
-                expectedEnd = start.plusMonths(3);
-                break;
+                return startDate.plusDays(90);
             case SixMonthly:
-                expectedEnd = start.plusMonths(6);
-                break;
+                return startDate.plusDays(180);
             case Year:
-                expectedEnd = start.plusYears(1);
-                break;
+                return startDate.plusDays(365);
             default:
-                return false;
+                return null;
         }
+    }
 
-        return end.equals(expectedEnd);
+    // Hàm kiểm tra ngày kết thúc có đúng theo loại vé không
+    public static boolean isEndDateValid(Ticket.TicketTypeName type, LocalDate start, LocalDate end) {
+        LocalDate expectedEnd = calculateEndDate(type, start);
+        return expectedEnd != null && expectedEnd.equals(end);
     }
 }

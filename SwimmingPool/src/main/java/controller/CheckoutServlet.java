@@ -46,8 +46,9 @@ public class CheckoutServlet extends HttpServlet {
 
                 if (updated) {
                     session.removeAttribute("ticket"); // clear khỏi session
-                    request.setAttribute("message", "Thanh toán thành công!");
-                    request.getRequestDispatcher("checkout.jsp").forward(request, response);
+                    //  CHUYỂN SANG TRANG ticket_success.jsp
+                    response.sendRedirect("ticket_success.jsp");
+                    return;
                 } else {
                     throw new Exception("Cập nhật trạng thái thất bại");
                 }
@@ -59,6 +60,7 @@ public class CheckoutServlet extends HttpServlet {
                 if (deleted) {
                     session.removeAttribute("ticket");
                     request.setAttribute("message", "Đã hủy thanh toán và xóa vé.");
+                    //  QUAY LẠI TRANG ticketPurchase.jsp
                     request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 } else {
                     throw new Exception("Xóa vé thất bại");
