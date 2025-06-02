@@ -33,7 +33,7 @@
 
 <h1><i class="fa fa-comments-o" aria-hidden="true"></i> <%=existing ? "Edit" : "Submit" %> Feedback</h1>
 
-<form action="feedback/<%= existing ? "edit" : "create" %>" method="post">
+<form action="feedback" method="post">
     <%
       if (existing) {
     %>
@@ -46,8 +46,8 @@
         <label for="feedback_type">Feedback Type:</label>
         <select name="feedback_type" id="feedback_type" required onchange="showHideFields()">
             <option value="" disabled <%= !existing ? "selected" : "" %>>Select feedback type</option>
-            <option value="Coach" <%= existing && "Coach".equals(feedback.getFeedbackType()) ? "selected" : "" %>>Coach</option>
-            <option value="Course" <%= existing && "Course".equals(feedback.getFeedbackType()) ? "selected" : "" %>>Course</option>
+            <option value="Coach" disabled title="Coach feedback is currently unavailable">Coach (Unavailable)</option>
+            <option value="Course" disabled title="Course feedback is currently unavailable">Course (Unavailable)</option>
             <option value="General" <%= existing && "General".equals(feedback.getFeedbackType()) ? "selected" : "" %>>General</option>
         </select>
     </div>
@@ -107,7 +107,7 @@
     </div>
 
     <div class="form-group">
-        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+        <button type="submit" name="action" value="<%= existing ? "edit" : "create" %>" class="btn btn-primary">Submit Feedback</button>
     </div>
 </form>
 

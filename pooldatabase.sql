@@ -216,3 +216,5 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
+
+-- Add INSERT HERE

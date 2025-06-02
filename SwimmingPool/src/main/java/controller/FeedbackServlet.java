@@ -24,6 +24,9 @@ public class FeedbackServlet extends HttpServlet {
 			case "create":
 				submitAction(request, response);
 				break;
+			case "preedit":
+				editAction(request, response);
+				break;
 			case "edit":
 				editAction(request, response);
 				break;
@@ -49,6 +52,12 @@ public class FeedbackServlet extends HttpServlet {
 		Integer coachId = null;
 		Integer courseId = null;
 		String generalFeedbackType = "";
+
+		// Redirect to error page if feedback type is coach or course
+		if (feedBackType.equalsIgnoreCase("coach") || feedBackType.equalsIgnoreCase("course")) {
+			response.sendRedirect("error.jsp");
+			return;
+		}
 
 		if (feedBackType.equalsIgnoreCase("general")) {
 			generalFeedbackType = request.getParameter("general_feedback_type");
@@ -132,10 +141,17 @@ public class FeedbackServlet extends HttpServlet {
 	}
 
 	private void sortAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		String feedBackType = !Objects.equals(request.getParameter("feedback_type"), "all") ? request.getParameter("feedback_type") : null;
+
+		// Redirect to error page if feedback type is coach or course
+		if (feedBackType != null && (feedBackType.equalsIgnoreCase("coach") || feedBackType.equalsIgnoreCase("course"))) {
+			response.sendRedirect("error.jsp");
+			return;
+		}
+
 		Integer coachId = !Objects.equals(request.getParameter("coach_id"), "all") ? Integer.parseInt(request.getParameter("coach_id")) : null;
 		Integer courseId = !Objects.equals(request.getParameter("course_id"), "all") ? Integer.parseInt(request.getParameter("course_id")) : null;
 		String generalFeedbackType = !Objects.equals(request.getParameter("general_feedback_type"), "all") ? request.getParameter("general_feedback_type") : null;
-		String feedBackType = !Objects.equals(request.getParameter("feedback_type"), "all") ? request.getParameter("feedback_type") : null;
 		String sortBy = !Objects.equals(request.getParameter("sort_by"), "none") ? request.getParameter("sort_by") : null;
 		boolean sortOrder = !Objects.equals(request.getParameter("sort_order"), "ASC");
 

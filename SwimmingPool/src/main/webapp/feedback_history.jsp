@@ -28,8 +28,8 @@
         <label for="feedback_type">Feedback Type:</label>
         <select name="feedback_type" id="feedback_type" required onchange="showHideFields()">
             <option value="all" selected>Select feedback type</option>
-            <option value="Coach">Coach</option>
-            <option value="Course">Course</option>
+            <option value="Coach" disabled title="Coach feedback is currently unavailable">Coach (Unavailable)</option>
+            <option value="Course" disabled title="Course feedback is currently unavailable">Course (Unavailable)</option>
             <option value="General">General</option>
         </select>
     </div>
@@ -95,7 +95,7 @@
 </div>
 
 <div class="feedback-list">
-    <form id="deleteForm" action="feedback/delete-multiple" method="post">
+    <form id="deleteForm" action="feedback" method="post">
         <table class="feedback-table">
             <thead>
             <tr>
@@ -143,7 +143,9 @@
                 <td><%= feedback.getContent().length() > 50 ? feedback.getContent().substring(0, 47) + "..." : feedback.getContent() %></td>
                 <td><%= feedback.getCreatedAt() %></td>
                 <td>
-                    <a href="feedback/edit?id=<%= feedback.getId() %>" class="btn-icon"><i class="fa fa-edit"></i></a>
+                    <a href="feedback" class="btn-icon"><i class="fa fa-edit"></i></a>
+                    <input type="hidden" name="action" value="preedit">
+                    <input type="hidden" name="feedback_id" value="<%= feedback.getId() %>">
                     <a href="javascript:void(0)" onclick="confirmDelete(<%= feedback.getId() %>)" class="btn-icon"><i class="fa fa-trash"></i></a>
                 </td>
             </tr>

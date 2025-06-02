@@ -16,14 +16,14 @@ function showHideFields() {
     document.getElementById('general_feedback_type_group').style.display = 'none';
     generalFeedbackTypeSelect.removeAttribute('required');
 
+    // Redirect to error page if Coach or Course is selected
+    if (feedbackType === 'Coach' || feedbackType === 'Course') {
+        window.location.href = 'error.jsp';
+        return;
+    }
+
     // Show relevant fields based on selected feedback type and add required attribute
-    if (feedbackType === 'Coach') {
-        document.getElementById('coach_id_group').style.display = 'block';
-        coachSelect.setAttribute('required', 'required');
-    } else if (feedbackType === 'Course') {
-        document.getElementById('course_id_group').style.display = 'block';
-        courseSelect.setAttribute('required', 'required');
-    } else if (feedbackType === 'General') {
+    if (feedbackType === 'General') {
         document.getElementById('general_feedback_type_group').style.display = 'block';
         generalFeedbackTypeSelect.setAttribute('required', 'required');
     }

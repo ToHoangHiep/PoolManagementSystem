@@ -42,12 +42,14 @@ function confirmDelete(id) {
 function showHideFields() {
     const feedbackType = document.getElementById('feedback_type').value;
 
-    document.getElementById('coach_id_group').style.display =
-        feedbackType === 'Coach' ? 'block' : 'none';
+    // Redirect to error page if Coach or Course is selected
+    if (feedbackType === 'Coach' || feedbackType === 'Course') {
+        window.location.href = 'error.jsp';
+        return;
+    }
 
-    document.getElementById('course_id_group').style.display =
-        feedbackType === 'Course' ? 'block' : 'none';
-
+    document.getElementById('coach_id_group').style.display = 'none';
+    document.getElementById('course_id_group').style.display = 'none';
     document.getElementById('general_feedback_type_group').style.display =
         feedbackType === 'General' ? 'block' : 'none';
 }
