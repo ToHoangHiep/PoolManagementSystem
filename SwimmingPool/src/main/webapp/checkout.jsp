@@ -207,7 +207,7 @@
         </div>
         <div class="payment-methods">
             <form action="checkout" method="post">
-                <label><input type="radio" name="paymentMethod" value="bank" required> Direct Bank Transfer</label>
+                <label><input type="radio" name="paymentMethod" value="atTheCounter" required> at the counter</label>
                 <label><input type="radio" name="paymentMethod" value="cheque"> Cheque Payment</label>
                 <label><input type="radio" name="paymentMethod" value="card"> Credit Card</label>
                 <label><input type="radio" name="paymentMethod" value="paypal"> Paypal</label>
