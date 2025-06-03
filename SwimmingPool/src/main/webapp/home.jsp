@@ -229,10 +229,6 @@
 </head>
 
 <body>
-<<<<<<< Updated upstream
-<h2>Xin chào, <%= user.getFullName() %> (Vai trò: <%= user.getRole().getName() %>)</h2>
-=======
-
 <!-- Navbar -->
 <div class="navbar">
   <div class="logo">SwimmingPool</div>
@@ -322,6 +318,9 @@
 <!-- Contact -->
 <div class="section" id="contact">
   <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
+  <div style="text-align:center;" class="hero-content">
+    <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+  </div>
 </div>
 
 <!-- Footer -->
@@ -330,9 +329,6 @@
   <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
 
->>>>>>> Stashed changes
-  <div style="text-align:center;" class="hero-content">
-    <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
-  </div>
+
 </body>
 </html>
