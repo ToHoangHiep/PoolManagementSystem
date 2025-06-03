@@ -107,6 +107,85 @@
         .search-button:hover {
             background-color: #0056b3;
         }
+        .top-bar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: left;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn.green-btn {
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn.green-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .search-form,
+        .filter-form {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .search-input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .search-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .filter-button {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .btn.return-btn {
+            background-color: #f39c12;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn.return-btn:hover {
+            background-color: #e67e22;
+        }
+
+
+        @media (max-width: 600px) {
+            .inventory-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+
+
+
+
+
+
 
     </style>
 </head>
@@ -114,15 +193,37 @@
 
 <h2>Inventory List</h2>
 
-<!-- Tìm kiếm -->
-<form method="get" action="inventory" class="search-form">
-    <input type="hidden" name="action" value="search" />
-    <input type="text" name="keyword" placeholder="Search item..." value="<%= keyword != null ? keyword : "" %>" class="search-input" />
-    <button type="submit" class="search-button">Search</button>
-</form>
+<div class="top-bar">
+    <a href="home.jsp" class="btn green-btn">🏠 Home</a>
+    <a href="inventory?action=default" class="btn return-btn">🔙 Return To List</a>
+    <a href="inventory?action=new" class="btn green-btn">➕ Add New Item</a>
+
+    <form method="get" action="inventory" class="filter-form">
+        <input type="hidden" name="action" value="filter" />
+        <select name="status">
+            <option value="">-- Trạng thái --</option>
+            <option value="Available">Available</option>
+            <option value="In Use">In Use</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Broken">Broken</option>
+        </select>
+        <button type="submit" class="filter-button">Lọc</button>
+    </form>
 
 
-<a href="inventory?action=new" class="btn">Add New Item</a>
+
+    <form method="get" action="inventory" class="search-form">
+        <input type="hidden" name="action" value="search" />
+        <input type="text" name="keyword" placeholder="Search item..." class="search-input" />
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+
+
+
+</div>
+
+
 
 <!-- Bảng danh sách -->
 <table>
@@ -183,6 +284,7 @@
     <% } %>
 </div>
 <% } %>
+
 
 </body>
 </html>

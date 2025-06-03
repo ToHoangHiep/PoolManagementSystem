@@ -69,7 +69,7 @@
   </style>
 </head>
 <body>
-<h2 style="text-align: center;"><%= inv != null ? "Cập nhật thiết bị" : "Thêm thiết bị mới" %></h2>
+<h2 style="text-align: center;"><%= inv != null ? "Update Item" : "Add New Item" %></h2>
 <form action="inventory" method="post">
   <input type="hidden" name="action" value="<%= action %>"/>
   <% if (inv != null) { %>
@@ -79,19 +79,19 @@
   <label>Manager ID:</label>
   <input type="number" name="manager_id" value="<%= inv != null ? inv.getManagerId() : "" %>" required/>
 
-  <label>Tên thiết bị:</label>
+  <label>Item Name:</label>
   <input type="text" name="item_name" value="<%= inv != null ? inv.getItemName() : "" %>" required/>
 
-  <label>Loại:</label>
+  <label>Category:</label>
   <input type="text" name="category" value="<%= inv != null ? inv.getCategory() : "" %>" required/>
 
-  <label>Số lượng:</label>
+  <label>Quantity:</label>
   <input type="number" name="quantity" value="<%= inv != null ? inv.getQuantity() : "" %>" required/>
 
-  <label>Đơn vị:</label>
+  <label>Unit:</label>
   <input type="text" name="unit" value="<%= inv != null ? inv.getUnit() : "" %>" required/>
 
-  <label>Trạng thái:</label>
+  <label>Status:</label>
   <select name="status">
     <option value="Available" <%= (inv != null && "Available".equals(inv.getStatus())) ? "selected" : "" %>>Available</option>
     <option value="In Use" <%= (inv != null && "In Use".equals(inv.getStatus())) ? "selected" : "" %>>In Use</option>
@@ -99,8 +99,9 @@
     <option value="Broken" <%= (inv != null && "Broken".equals(inv.getStatus())) ? "selected" : "" %>>Broken</option>
   </select>
 
-  <input type="submit" value="Lưu"/>
-  <a href="inventory">Quay lại</a>
+  <input type="submit" value="Save"/>
+  <a href="inventory">Return</a>
 </form>
+
 </body>
 </html>

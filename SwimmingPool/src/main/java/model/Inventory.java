@@ -11,7 +11,7 @@ public class Inventory {
     private String category;
     private int quantity;
     private String unit;
-    private String status; // Có thể dùng Enum, nhưng Java thuần thì dùng String
+    private String status;
     private Date lastUpdated;
 
     // Getters and Setters
