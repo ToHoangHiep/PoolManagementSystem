@@ -301,7 +301,7 @@
         <li>Private Pool Booking for Events & Families</li>
         <li>Water Aerobics & Therapy Sessions</li>
         <li>Maintenance & Pool Cleaning Services</li>
-        <li><a href="ticketPurchase.jsp" style="color: #005caa; font-weight: bold;">→ Ticket Purchase</a></li>
+        <li><a href="ticketPurchase.jsp" style="color: #005caa; font-weight: bold;">Ticket Purchase</a></li>
       </ul>
     </div>
   </div>
@@ -316,7 +316,9 @@
 <!-- Contact -->
 <div class="section" id="contact">
   <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
-  <p style="text-align:center;">Contact form will be available soon.</p>
+  <div style="text-align:center;" class="hero-content">
+    <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+  </div>
 </div>
 
 <!-- Footer -->
