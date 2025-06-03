@@ -72,4 +72,15 @@
         <servlet-name>InventoryServlet</servlet-name>
         <url-pattern>/inventory</url-pattern>
     </servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>home.jsp</welcome-file>
+    </welcome-file-list>
+
 </web-app>
