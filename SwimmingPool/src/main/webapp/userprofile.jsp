@@ -16,88 +16,65 @@
     <meta charset="UTF-8" />
     <title>User Profile</title>
     <style>
-        /* CSS giữ nguyên như bạn đã có */
-        *, *::before, *::after {
+        * {
             box-sizing: border-box;
         }
         html, body {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f7;
-            overflow: hidden;
-        }
-        body {
+            margin: 0; padding: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background: white;
-            width: 700px;
-            max-width: 90vw;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            padding: 15px 25px 25px 25px;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
-        }
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #ddd;
-            margin-bottom: 15px;
-        }
-        .tabs button {
-            flex: 1;
-            padding: 10px 0;
-            font-weight: 600;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 16px;
-            color: #666;
-            border-bottom: 3px solid transparent;
-            transition: color 0.3s ease, border-bottom-color 0.3s ease;
-        }
-        .tabs button.active {
-            color: #007bff;
-            border-bottom-color: #007bff;
-        }
-        .content {
-            display: flex;
-            gap: 25px;
-            flex-wrap: nowrap;
-            flex: 1 1 auto;
-            max-height: 75vh;
+            align-items: flex-start;
+            background-color: #f0f2f7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-y: auto;
         }
-        .avatar-section {
-            flex: 0 0 140px;
-            text-align: center;
-            min-width: 140px;
+        .container {
+            display: flex;
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px 0;
+            overflow: visible;
         }
-        .avatar-section img {
+
+        .left-side {
+            width: 200px;
+            background-color: #ddd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-radius: 10px 0 0 10px;
+        }
+        .left-side img {
             width: 140px;
             height: 140px;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #007bff;
-            box-shadow: 0 0 15px rgba(0,123,255,0.3);
+            margin-bottom: 15px;
+            /* Bỏ viền, box-shadow */
+            box-shadow: none !important;
+            border: none !important;
         }
-        .avatar-section input[type="file"] {
-            margin-top: 12px;
-            font-size: 14px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            max-width: 140px;
+        .left-side input[type="file"] {
+            cursor: pointer;
+            width: 100%;
         }
+
+        .right-side {
+            flex-grow: 1;
+            padding: 40px 40px;
+            overflow-y: visible;
+        }
+
         form {
-            flex: 1 1 auto;
             display: flex;
             flex-direction: column;
-            min-width: 280px;
         }
         .form-group {
             margin-bottom: 10px;
@@ -156,77 +133,65 @@
         .form-actions button:hover:not(:disabled) {
             background-color: #0056b3;
         }
-        /* Scrollbar chrome */
-        .content::-webkit-scrollbar {
-            width: 8px;
+
+        .back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease;
+            z-index: 1000;
         }
-        .content::-webkit-scrollbar-thumb {
-            background: rgba(0,123,255,0.3);
-            border-radius: 4px;
+        .back-home:hover {
+            background-color: #0056b3;
         }
-        .content::-webkit-scrollbar-track {
-            background: #f0f2f7;
-        }
-        /* Responsive */
-        @media (max-width: 720px) {
-            .container {
-                width: 90vw;
-                padding: 10px 15px 20px 15px;
-            }
-            .content {
-                flex-direction: column;
-                overflow-y: visible;
-            }
-            .avatar-section {
-                margin-bottom: 20px;
-                flex: none;
-                width: 100%;
-                text-align: center;
-            }
-            .avatar-section img, .avatar-section input[type=file] {
-                max-width: 140px;
-                height: auto;
-                margin: 0 auto;
+        @media (max-width: 768px) {
+            html, body {
                 display: block;
+                overflow-y: auto;
+                height: auto;
+                padding: 10px;
             }
-            form {
-                min-width: auto;
+            .container {
+                flex-direction: column;
+                max-width: 100%;
+                padding: 10px 0;
+            }
+            .left-side {
                 width: 100%;
+                border-radius: 10px 10px 0 0;
+                padding: 10px;
+                margin-bottom: 20px;
             }
-            .form-actions {
-                text-align: center;
-                margin-top: 15px;
+            .right-side {
+                width: 100%;
+                padding: 20px 15px;
+                border-radius: 0 0 10px 10px;
             }
         }
     </style>
 </head>
 <body>
 
+<a href="home.jsp" class="back-home">&larr; Back to Home</a>
+
 <div class="container">
 
-    <%-- Display message --%>
-    <% String message = (String) request.getAttribute("message"); %>
-    <% if (message != null) { %>
-    <div style="color: green; font-weight: bold; margin-bottom: 15px; text-align: center;">
-        <%= message %>
-    </div>
-    <% } %>
-    <a href="home.jsp" style="position: fixed; top: 10px; left: 10px; color: #007bff; font-weight: 600; text-decoration: none; user-select: none;">
-        ← Back to Home
-    </a>
+    <form id="profileForm" method="post" action="userprofile" enctype="multipart/form-data" novalidate onsubmit="return validateForm()" style="display:flex; width:100%;">
 
-    <div class="tabs">
-        <button class="active" type="button">Profile</button>
-        <button type="button" disabled>History</button>
-    </div>
-    <div class="content">
+        <div class="left-side">
+            <img id="avatarPreview" src="<%= (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) ? user.getProfilePicture() : "https://via.placeholder.com/160x160?text=No+Image" %>" alt="Avatar" />
+            <input type="file" name="avatar" accept="image/*" onchange="previewImage(event)" disabled />
+        </div>
 
-        <form id="profileForm" method="post" action="userprofile" enctype="multipart/form-data" novalidate onsubmit="return validateForm()">
-            <div class="avatar-section">
-                <img id="avatarPreview" src="<%= (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty())
-                  ? user.getProfilePicture() : "https://via.placeholder.com/140" %>" alt="Avatar" />
-                <input type="file" name="avatar" accept="image/*" onchange="previewImage(event)" disabled />
-            </div>
+        <div class="right-side">
+
             <input type="hidden" name="userId" value="<%= user.getUserId() %>" />
 
             <div class="form-group">
@@ -242,9 +207,7 @@
             <div class="form-group">
                 <label for="gender">Gender</label>
                 <select id="gender" name="gender" disabled required>
-                    <option value="" <%= (user.getGender() == null || user.getGender().isEmpty()) ? "selected" : "" %>>
-                        -- Select Gender --
-                    </option>
+                    <option value="" <%= (user.getGender() == null || user.getGender().isEmpty()) ? "selected" : "" %>>-- Select Gender --</option>
                     <option value="Male" <%= "Male".equalsIgnoreCase(user.getGender()) ? "selected" : "" %>>Male</option>
                     <option value="Female" <%= "Female".equalsIgnoreCase(user.getGender()) ? "selected" : "" %>>Female</option>
                     <option value="Other" <%= "Other".equalsIgnoreCase(user.getGender()) ? "selected" : "" %>>Other</option>
@@ -253,8 +216,7 @@
 
             <div class="form-group">
                 <label for="phoneNumber">Phone</label>
-                <input id="phoneNumber" name="phoneNumber" type="tel" pattern="[0-9+ \\-]*" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>"
-                       disabled required minlength="7" />
+                <input id="phoneNumber" name="phoneNumber" type="tel" pattern="[0-9+ \\-]*" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>" disabled required minlength="7" />
             </div>
 
             <div class="form-group">
@@ -268,15 +230,22 @@
                 <input id="address" name="address" type="text" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" disabled />
             </div>
 
-            <div class="form-actions">
+            <div class="form-actions" style="margin-top:auto; text-align:right;">
                 <button type="button" id="btnEdit" onclick="toggleEdit()">Edit</button>
                 <button type="submit" id="btnSave" disabled>Save</button>
             </div>
-        </form>
-    </div>
+        </div>
+
+    </form>
 </div>
 
 <script>
+    // Hiển thị popup alert khi có message từ server (thay thế thông báo dòng)
+    <% String message = (String) request.getAttribute("message"); %>
+    <% if (message != null && !message.isEmpty()) { %>
+    alert("<%= message.replace("\"", "\\\"") %>");
+    <% } %>
+
     function previewImage(event) {
         const reader = new FileReader();
         reader.onload = function () {
@@ -290,28 +259,22 @@
         const inputs = form.querySelectorAll("input, select");
         const btnSave = document.getElementById("btnSave");
         const btnEdit = document.getElementById("btnEdit");
-
-        const avatar = "<%= (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) ? user.getProfilePicture() : "https://via.placeholder.com/140" %>";
+        const avatarInput = document.querySelector(".left-side input[type=file]");
 
         const isEditing = btnEdit.textContent === "Cancel";
 
         if (isEditing) {
             inputs.forEach(input => input.disabled = true);
-            document.querySelector(".avatar-section input[type=file]").disabled = true;
-
             btnSave.disabled = true;
             btnEdit.textContent = "Edit";
-
-            form.reset();
-            document.getElementById("avatarPreview").src = avatar;
+            avatarInput.disabled = true;
         } else {
             inputs.forEach(input => {
-                if (input.id !== 'email') input.disabled = false; // Email không sửa được
+                if (input.id !== 'email') input.disabled = false;
             });
-            document.querySelector(".avatar-section input[type=file]").disabled = false;
-
             btnSave.disabled = false;
             btnEdit.textContent = "Cancel";
+            avatarInput.disabled = false;
         }
     }
 
@@ -363,6 +326,5 @@
         return true;
     }
 </script>
-
 </body>
 </html>

@@ -229,6 +229,9 @@
 </head>
 
 <body>
+<<<<<<< Updated upstream
+<h2>Xin chào, <%= user.getFullName() %> (Vai trò: <%= user.getRole().getName() %>)</h2>
+=======
 
 <!-- Navbar -->
 <div class="navbar">
@@ -245,12 +248,15 @@
     <a class="login-btn" href="login.jsp">Login</a>
     <a class="register-btn" href="register.jsp">Register</a>
     <% } else { %>
-    <span>Hello, <%= user.getFullName() %>!</span>
-    <form action="logout" method="post">
+    <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
+            <%= user.getFullName() %>
+        </a>!</span>
+    <form action="logout" method="post" style="display:inline;">
       <input type="submit" value="Logout">
     </form>
     <% } %>
   </div>
+
 </div>
 
 <!-- Spacer tránh bị che -->
@@ -316,9 +322,6 @@
 <!-- Contact -->
 <div class="section" id="contact">
   <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
-  <div style="text-align:center;" class="hero-content">
-    <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
-  </div>
 </div>
 
 <!-- Footer -->
@@ -327,5 +330,9 @@
   <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
 
+>>>>>>> Stashed changes
+  <div style="text-align:center;" class="hero-content">
+    <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+  </div>
 </body>
 </html>

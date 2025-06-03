@@ -1,6 +1,7 @@
 package dal;
 
 import model.Customer;
+import utils.DBConnect;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,6 +21,7 @@ public class CustomerDAO {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
                 return new Customer(
                         rs.getInt("id"),
@@ -49,6 +51,7 @@ public class CustomerDAO {
             stmt.setString(6, user.getEmail());
             stmt.setString(7, user.getProfilePicture());
             stmt.setInt(8, user.getUserId());
+
             int rows = stmt.executeUpdate();
             return rows > 0;
         }
