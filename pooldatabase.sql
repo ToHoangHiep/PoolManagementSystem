@@ -28,6 +28,7 @@ CREATE TABLE Users (
     dob DATE,
     gender ENUM('Male', 'Female', 'Other'),
     role_id INT,
+    profile_picture VARCHAR(255) DEFAULT NULL,
     user_status enum('Active', 'Deactive', 'Banned'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -190,20 +191,35 @@ CREATE TABLE Blogs (
     FOREIGN KEY (author_id) REFERENCES Users(id)
 );
 
+CREATE TABLE TicketType (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,
+    price DECIMAL(10,2) NOT NULL
+);
+INSERT INTO TicketType (type_name, price) VALUES
+  ('Single',        50000.00),
+  ('Monthly',      300000.00),
+  ('ThreeMonthly', 850000.00),
+  ('SixMonthly',  1600000.00),
+  ('Year',         3000000.00);
 
+-- Ticket
 CREATE TABLE Ticket (
-	ticket_id int primary key auto_increment,
-    user_id int,
-    ticket_type enum('Single', 'Monthly', 'Combo'),
-    quantity int,
-    start_date date,
-    end_date date,
-    ticket_status enum('Active', 'Expired', 'Cancelled'),
-    payment_status enum('Paid', 'Unpaid'),
-    payment_id int,
-    created_at datetime,
-    foreign key (user_id) references users(id),
-    foreign key (payment_id) references payments(id)
+    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    ticket_type_id INT,
+    quantity INT,
+    start_date DATE,
+    end_date DATE,
+    ticket_status ENUM('Active', 'Expired', 'Cancelled'),
+    payment_status ENUM('Paid', 'Unpaid'),
+    payment_id INT NULL,
+    total DECIMAL(10,2),
+    created_at DATETIME,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (payment_id) REFERENCES Payments(id),
+    FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
 
 
@@ -322,12 +338,12 @@ INSERT INTO Blogs (title, content, author_id) VALUES
 ('Improving Your Freestyle Technique', 'Step-by-step guide to perfecting your freestyle swimming technique...', 4);
 
 -- Insert fake data for Ticket table
-INSERT INTO Ticket (user_id, ticket_type, quantity, start_date, end_date, ticket_status, payment_status, payment_id, created_at) VALUES
-(6, 'Monthly', 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 1, '2023-05-30 14:25:00'),
-(7, 'Single', 5, '2023-06-02', '2023-06-02', 'Active', 'Paid', 2, '2023-06-01 09:30:00'),
-(8, 'Combo', 1, '2023-06-01', '2023-07-31', 'Active', 'Paid', 3, '2023-05-29 11:45:00'),
-(9, 'Monthly', 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 4, '2023-05-30 16:20:00'),
-(10, 'Single', 3, '2023-06-03', '2023-06-03', 'Active', 'Paid', 5, '2023-06-02 10:15:00');
+INSERT INTO Ticket (user_id, ticket_type_id, quantity, start_date, end_date, ticket_status, payment_status, payment_id, total, created_at) VALUES
+(6, 2, 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 1, 300000.00, '2023-05-30 14:25:00'),
+(7, 1, 5, '2023-06-02', '2023-06-02', 'Active', 'Paid', 2, 250000.00, '2023-06-01 09:30:00'),
+(8, 3, 1, '2023-06-01', '2023-08-31', 'Active', 'Paid', 3, 850000.00, '2023-05-29 11:45:00'),
+(9, 2, 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 4, 300000.00, '2023-05-30 16:20:00'),
+(10, 1, 3, '2023-06-03', '2023-06-03', 'Active', 'Paid', 5, 150000.00, '2023-06-02 10:15:00');
 
 -- Insert fake data for Study_Roadmaps table
 INSERT INTO Study_Roadmaps (title, content, created_by) VALUES
