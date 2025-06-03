@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // Individual delete confirmation
 function confirmDelete(id) {
     if (confirm('Are you sure you want to delete this feedback?')) {
-        window.location.href = 'feedback/delete?id=' + id;
+        window.location.href = 'feedback?action=delete?postId=' + id;
     }
 }
 

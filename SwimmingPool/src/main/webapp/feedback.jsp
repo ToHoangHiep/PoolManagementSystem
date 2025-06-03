@@ -33,7 +33,7 @@
 
 <h1><i class="fa fa-comments-o" aria-hidden="true"></i> <%=existing ? "Edit" : "Submit" %> Feedback</h1>
 
-<form action="feedback" method="post">
+<form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">
     <%
       if (existing) {
     %>
@@ -106,8 +106,9 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <button type="submit" name="action" value="<%= existing ? "edit" : "create" %>" class="btn btn-primary">Submit Feedback</button>
+    <div class="form-group" style="display: flex; justify-content: space-between;">
+        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='home.jsp'">Cancel</button>
     </div>
 </form>
 

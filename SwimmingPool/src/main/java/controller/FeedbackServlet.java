@@ -24,8 +24,8 @@ public class FeedbackServlet extends HttpServlet {
 			case "create":
 				submitAction(request, response);
 				break;
-			case "preedit":
-				editAction(request, response);
+			case "pre_edit":
+				preEditAction(request, response);
 				break;
 			case "edit":
 				editAction(request, response);
@@ -38,6 +38,9 @@ public class FeedbackServlet extends HttpServlet {
 				break;
 			case "sort":
 				sortAction(request, response);
+				break;
+			case "view":
+				viewAction(request, response);
 				break;
 			default:
 				response.sendRedirect("error.jsp");
@@ -88,6 +91,10 @@ public class FeedbackServlet extends HttpServlet {
 		}
 
 		FeedbackDAO.createFeedback(userId, feedBackType, coachId, courseId, generalFeedbackType, content, rating);
+	}
+
+	private void preEditAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
 	}
 
 	private void editAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -170,14 +177,18 @@ public class FeedbackServlet extends HttpServlet {
 			} else {
 				List<Feedback> f_list = FeedbackDAO.getFeedbacks(coachId, courseId, generalFeedbackType, feedBackType, sortBy, sortOrder);
 				request.setAttribute("feedback_list", f_list);
-				request.getRequestDispatcher("feedback_list.jsp").forward(request, response);
+				request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
 			}
 		} 
 		else {
 			List<Feedback> f_list = FeedbackDAO.getFeedbacks(user.getId(), coachId, courseId, generalFeedbackType, feedBackType, sortBy, sortOrder);
 			request.setAttribute("feedback_list", f_list);
-			request.getRequestDispatcher("feedback_list.jsp").forward(request, response);
+			request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
 		}
+	}
+
+	private void viewAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
 	}
 
 	//endregion
@@ -185,8 +196,45 @@ public class FeedbackServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String mode = request.getParameter("mode");
-		System.out.println("Mode: " + mode);
+		String action = request.getParameter("action");
 
+		// Handle action parameter if present
+		if (action != null) {
+			switch (action) {
+				case "create":
+					// Just display the empty form for creation
+					request.getRequestDispatcher("feedback.jsp").forward(request, response);
+					return;
+				case "edit":
+					// Get the ID from the URL
+					String idParam = request.getParameter("id");
+					if (idParam != null && !idParam.isEmpty()) {
+						int id = Integer.parseInt(idParam);
+						Feedback f = FeedbackDAO.getSpecificFeedback(id);
+						request.setAttribute("feedback", f);
+						request.getRequestDispatcher("feedback.jsp").forward(request, response);
+					} else {
+						response.sendRedirect("error.jsp");
+					}
+					return;
+				case "delete":
+					// Handle delete action
+					idParam = request.getParameter("id");
+					if (idParam != null && !idParam.isEmpty()) {
+						int id = Integer.parseInt(idParam);
+						FeedbackDAO.deleteFeedback(id);
+						response.sendRedirect("feedback?mode=list");
+					} else {
+						response.sendRedirect("error.jsp");
+					}
+					return;
+				default:
+					response.sendRedirect("error.jsp");
+					return;
+			}
+		}
+
+		// Existing code for mode=list
 		if (mode != null && mode.equals("list")){
 			User user = (User) request.getSession().getAttribute("user");
 			boolean show_all = request.getParameter("admin_show") != null;
@@ -207,15 +255,14 @@ public class FeedbackServlet extends HttpServlet {
 			}
 
 			request.setAttribute("feedback_list", f_list);
-			request.getRequestDispatcher("feedback_list.jsp").forward(request, response);
+			request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
 
 			System.out.println("Reached List");
 			return;
 		}
 
+		// Existing code for handling id parameter
 		String urlId = request.getParameter("id");
-		System.out.println("url requested id: " + urlId);
-
 		if (!Utils.CheckIfEmpty(urlId)){
 			int id = Integer.parseInt(urlId);
 			Feedback f = FeedbackDAO.getSpecificFeedback(id);
@@ -224,6 +271,4 @@ public class FeedbackServlet extends HttpServlet {
 
 		request.getRequestDispatcher("feedback.jsp").forward(request, response);
 	}
-
-
 }

@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<form action="feedback/sort" method="post" class="filter-form">
+<form action="feedback?action=sort" method="post" class="filter-form">
     <div class="form-group">
         <label for="feedback_type">Feedback Type:</label>
         <select name="feedback_type" id="feedback_type" required onchange="showHideFields()">
@@ -90,12 +90,11 @@
 
 <!-- Feedback History Section -->
 <div class="feedback-controls">
-    <h2>Feedback History</h2>
     <button id="deleteSelectedBtn" class="btn btn-danger" disabled>Delete Selected</button>
 </div>
 
 <div class="feedback-list">
-    <form id="deleteForm" action="feedback" method="post">
+    <form id="deleteForm" action="feedback?action=delete_multiple" method="post">
         <table class="feedback-table">
             <thead>
             <tr>
@@ -110,11 +109,8 @@
             <tbody>
             <%@ page import="model.Feedback" %>
             <%@ page import="java.util.List" %>
-            <%@ page import="java.time.format.DateTimeFormatter" %>
             <%
-                List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedbackList");
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-
+                List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedback_list");
                 if (feedbackList != null && !feedbackList.isEmpty()) {
                     for (Feedback feedback : feedbackList) {
             %>
@@ -143,9 +139,7 @@
                 <td><%= feedback.getContent().length() > 50 ? feedback.getContent().substring(0, 47) + "..." : feedback.getContent() %></td>
                 <td><%= feedback.getCreatedAt() %></td>
                 <td>
-                    <a href="feedback" class="btn-icon"><i class="fa fa-edit"></i></a>
-                    <input type="hidden" name="action" value="preedit">
-                    <input type="hidden" name="feedback_id" value="<%= feedback.getId() %>">
+                    <a href="feedback?action=pre_edit&postId=<%= feedback.getId() %>" class="btn-icon"><i class="fa fa-edit"></i></a>
                     <a href="javascript:void(0)" onclick="confirmDelete(<%= feedback.getId() %>)" class="btn-icon"><i class="fa fa-trash"></i></a>
                 </td>
             </tr>

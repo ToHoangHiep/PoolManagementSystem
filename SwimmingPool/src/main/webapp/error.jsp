@@ -39,6 +39,6 @@
         <p>Oops! Something went wrong.</p>
         <p>Let's go back to the main page, maybe you'll find something there?</p>
     </div>
-    <a href=""" class="back-button">Go Back to Home</a>
+    <a href="home.jsp" class="back-button">Go Back to Home</a>
 </body>
 </html>
