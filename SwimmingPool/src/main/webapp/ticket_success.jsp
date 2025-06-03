@@ -9,7 +9,8 @@
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
-            background: linear-gradient(to right, #dff2fd, #e6f7ff);
+            background: url('https://images.pexels.com/photos/2535206/pexels-photo-2535206.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,7 +18,7 @@
             text-align: center;
         }
         .success-box {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 60px 40px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);

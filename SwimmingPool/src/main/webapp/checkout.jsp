@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="model.User" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,18 +13,62 @@
             margin: 0;
             background-color: #ffffff;
         }
-        .header {
-            background: #002B5B;
-            color: white;
-            padding: 10px 40px;
+
+        /* ===== HEADER from homepage ===== */
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 14px;
+            background: rgba(0, 92, 170, 0.9);
+            padding: 15px 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+            backdrop-filter: blur(4px);
         }
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+            color: white;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .auth {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .auth a.login-btn,
+        .auth a.register-btn,
+        .auth form input[type="submit"] {
+            padding: 8px 16px;
+            background-color: #ffffff;
+            color: #005caa;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .auth a.login-btn:hover,
+        .auth a.register-btn:hover,
+        .auth form input[type="submit"]:hover {
+            background-color: #e6e6e6;
+        }
+
+        /* ===== CONTENT ===== */
         .container {
             max-width: 1140px;
-            margin: 40px auto;
+            margin: 100px auto 40px;
             padding: 0 20px;
         }
         h2 {
@@ -56,13 +101,13 @@
             width: 60px;
             height: auto;
         }
-        .payment-methods {
-            flex: 0 0 35%;
-        }
         .summary-total {
             margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
+        }
+        .payment-methods {
+            flex: 0 0 35%;
         }
         .payment-methods label {
             display: block;
@@ -82,30 +127,60 @@
             margin-top: 20px;
             cursor: pointer;
         }
-        .footer {
-            background: #0b1c39;
+        .btn-cancel {
+            background-color: #dc3545;
             color: white;
-            padding: 40px;
-            display: flex;
-            justify-content: space-between;
+            padding: 10px 20px;
             font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .footer-column {
-            flex: 1;
-            margin: 0 10px;
+
+        /* ===== FOOTER from homepage ===== */
+        footer {
+            background: #003e73;
+            color: white;
+            padding: 30px 10%;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
         }
-        .footer a {
-            color: #aad4ff;
-            text-decoration: none;
+        footer p {
+            margin-bottom: 5px;
         }
     </style>
 </head>
 <body>
-<div class="header">
-    <strong>Poolax</strong>
-    <div>support@poolax.com</div>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+%>
+
+<!-- HEADER NAVBAR -->
+<div class="navbar">
+    <div class="logo">SwimmingPool</div>
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#about">About Us</a>
+        <a href="#services">Services</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#contact">Contact</a>
+    </div>
+    <div class="auth">
+        <span>Hello, <%= user.getFullName() %>!</span>
+        <form action="logout" method="post">
+            <input type="submit" value="Logout">
+        </form>
+    </div>
 </div>
 
+<!-- MAIN CONTENT -->
 <div class="container">
     <h2>Your Order</h2>
     <div class="checkout-box">
@@ -127,8 +202,6 @@
                 </tr>
             </table>
             <div class="summary-total">
-                <p>Subtotal: ${ticket.total}đ</p>
-                <p>Shipping: Free</p>
                 <p><strong>Total: ${ticket.total}đ</strong></p>
             </div>
         </div>
@@ -143,26 +216,17 @@
             </form>
             <form action="checkout" method="post" style="margin-top: 10px;">
                 <input type="hidden" name="action" value="cancel">
-                <button type="submit" class="btn btn-cancel">✖ CANCEL ORDER</button>
+                <button type="submit" class="btn-cancel">✖ CANCEL ORDER</button>
             </form>
         </div>
     </div>
 </div>
 
-<div class="footer">
-    <div class="footer-column">
-        <strong>About Company</strong>
-        <p>We provide specialized pool services for your seasonal needs.</p>
-    </div>
-    <div class="footer-column">
-        <strong>Contact</strong>
-        <p>📞 +468 254 76243</p>
-        <p>📧 info@poolax.com</p>
-    </div>
-    <div class="footer-column">
-        <strong>Working Hours</strong>
-        <p>Mon - Fri: 9AM - 6PM</p>
-    </div>
-</div>
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
+    <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
+</footer>
+
 </body>
 </html>
