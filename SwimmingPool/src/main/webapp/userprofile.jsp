@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="model.UserProfile" %>
+<%@ page import="model.Customer" %>
 <%
-    UserProfile user = (UserProfile) request.getAttribute("user");
+    Customer user = (Customer) request.getAttribute("user");
     if (user == null) {
 %>
 <h2 style="text-align:center; color:red;">User information not found</h2>
@@ -217,15 +217,14 @@
 
     <div class="tabs">
         <button class="active" type="button">Profile</button>
-        <button type="button">History</button>
+        <button type="button" disabled>History</button>
     </div>
     <div class="content">
 
-
-        <form id="profileForm" method="post" action="userProfile" enctype="multipart/form-data" novalidate onsubmit="return validateForm()">
+        <form id="profileForm" method="post" action="userprofile" enctype="multipart/form-data" novalidate onsubmit="return validateForm()">
             <div class="avatar-section">
-                <img id="avatarPreview" src="<%= (user.getProfile_picture() != null && !user.getProfile_picture().isEmpty())
-          ? user.getProfile_picture() : "https://via.placeholder.com/140" %>" alt="Avatar" />
+                <img id="avatarPreview" src="<%= (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty())
+                  ? user.getProfilePicture() : "https://via.placeholder.com/140" %>" alt="Avatar" />
                 <input type="file" name="avatar" accept="image/*" onchange="previewImage(event)" disabled />
             </div>
             <input type="hidden" name="userId" value="<%= user.getUserId() %>" />
@@ -254,13 +253,12 @@
 
             <div class="form-group">
                 <label for="phoneNumber">Phone</label>
-                <input id="phoneNumber" name="phoneNumber" type="tel" pattern="[0-9+ \-]*" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>"
+                <input id="phoneNumber" name="phoneNumber" type="tel" pattern="[0-9+ \\-]*" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>"
                        disabled required minlength="7" />
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <!-- Email readonly và thêm hidden để gửi lên server -->
                 <input id="email" type="email" value="<%= user.getEmail() != null ? user.getEmail() : "" %>" readonly style="background-color:#eee; cursor:not-allowed;" />
                 <input type="hidden" name="email" value="<%= user.getEmail() != null ? user.getEmail() : "" %>" />
             </div>
@@ -293,27 +291,22 @@
         const btnSave = document.getElementById("btnSave");
         const btnEdit = document.getElementById("btnEdit");
 
-        // Lấy avatar gốc từ biến JSP để dùng khi reset
-        const avatar = "<%= (user.getProfile_picture() != null && !user.getProfile_picture().isEmpty()) ? user.getProfile_picture() : "https://via.placeholder.com/140" %>";
+        const avatar = "<%= (user.getProfilePicture() != null && !user.getProfilePicture().isEmpty()) ? user.getProfilePicture() : "https://via.placeholder.com/140" %>";
 
-        // Kiểm tra trạng thái hiện tại dựa vào text nút Edit/Cancel
         const isEditing = btnEdit.textContent === "Cancel";
 
         if (isEditing) {
-            // Nếu đang ở chế độ edit, bấm Cancel thì disable tất cả input lại
             inputs.forEach(input => input.disabled = true);
             document.querySelector(".avatar-section input[type=file]").disabled = true;
 
             btnSave.disabled = true;
             btnEdit.textContent = "Edit";
 
-            // Reset form về dữ liệu ban đầu
             form.reset();
             document.getElementById("avatarPreview").src = avatar;
         } else {
-            // Nếu đang ở chế độ xem, bật edit (enable tất cả input)
             inputs.forEach(input => {
-                if (input.id !== 'email') input.disabled = false; // Email vẫn không sửa được
+                if (input.id !== 'email') input.disabled = false; // Email không sửa được
             });
             document.querySelector(".avatar-section input[type=file]").disabled = false;
 
@@ -328,15 +321,12 @@
         const gender = document.getElementById("gender").value;
         const phone = document.getElementById("phoneNumber").value.trim();
         const email = document.getElementById("email").value.trim();
-        const address = document.getElementById("address").value.trim();
 
-        // Full name check
         if (fullName.length < 2) {
             alert("Full name must be at least 2 characters.");
             return false;
         }
 
-        // DOB check - required and not in the future
         if (!dob) {
             alert("Please select your date of birth.");
             return false;
@@ -348,35 +338,29 @@
             return false;
         }
 
-        // Gender check
         if (gender !== "Male" && gender !== "Female" && gender !== "Other") {
             alert("Please select your gender.");
             return false;
         }
 
-        // Phone check - only digits, +, -, spaces allowed
         const phonePattern = /^[0-9+ \-]+$/;
         if (!phonePattern.test(phone)) {
             alert("Phone number is invalid. Only digits, +, -, and spaces are allowed.");
             return false;
         }
-        // Count digits only length must be 10 or 11
         const digitsOnly = phone.replace(/\D/g, '');
         if (digitsOnly.length < 10 || digitsOnly.length > 11) {
             alert("Phone number must contain between 10 and 11 digits.");
             return false;
         }
 
-        // Email check - simple regex
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email)) {
             alert("Invalid email address.");
             return false;
         }
 
-        // Address: optional, no validation here
-
-        return true; // all checks passed
+        return true;
     }
 </script>
 
