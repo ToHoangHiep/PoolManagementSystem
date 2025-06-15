@@ -33,22 +33,14 @@
 
 <h1><i class="fa fa-comments-o" aria-hidden="true"></i> <%=existing ? "Edit" : "Submit" %> Feedback</h1>
 
-<form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">
-    <%
-      if (existing) {
-    %>
-      <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
-    <%
-      }
-    %>
-
+<form action="feedback?action=<%= existing ? "confirm_edit?id=" + feedback.getId() : "create" %>" method="post">
     <div class="form-group">
         <label for="feedback_type">Feedback Type:</label>
-        <select name="feedback_type" id="feedback_type" required onchange="showHideFields()">
+        <select name="feedback_type" id="feedback_type" required onchange="showHideFields()" <%= existing ? "disabled" : "" %>
             <option value="" disabled <%= !existing ? "selected" : "" %>>Select feedback type</option>
             <option value="Coach" disabled title="Coach feedback is currently unavailable">Coach (Unavailable)</option>
             <option value="Course" disabled title="Course feedback is currently unavailable">Course (Unavailable)</option>
-            <option value="General" <%= existing && "General".equals(feedback.getFeedbackType()) ? "selected" : "" %>>General</option>
+            <option value="General" <%= existing && feedback.getFeedbackType().equals("General") ? "selected" : "" %>>General</option>
         </select>
     </div>
 
@@ -78,10 +70,10 @@
         <label for="general_feedback_type">General Feedback Type:</label>
         <select name="general_feedback_type" id="general_feedback_type">
             <option value="" disabled <%= !existing || feedback.getGeneralFeedbackType() == null ? "selected" : "" %>>Select general feedback type</option>
-            <option value="Food" <%= existing && "Food".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Food</option>
-            <option value="Service" <%= existing && "Service".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Service</option>
-            <option value="Facility" <%= existing && "Facility".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Facility</option>
-            <option value="Other" <%= existing && "Other".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Other</option>
+            <option value="Food" <%= existing && feedback.getGeneralFeedbackType().equals("Food") ? "selected" : "" %>>Food</option>
+            <option value="Service" <%= existing && feedback.getGeneralFeedbackType().equals("Service") ? "selected" : "" %>>Service</option>
+            <option value="Facility" <%= existing && feedback.getGeneralFeedbackType().equals("Facility") ? "selected" : "" %>>Facility</option>
+            <option value="Other" <%= existing && feedback.getGeneralFeedbackType().equals("Other") ? "selected" : "" %>>Other</option>
         </select>
     </div>
 
@@ -104,6 +96,10 @@
             <div class="rating-text">0 stars</div>
             <input type="hidden" name="rating" id="rating" value="<%= existing ? feedback.getRating() : 0 %>" required>
         </div>
+    </div>
+
+    <div class="form-group" id="error_message" style="color: red; display: <%= request.getAttribute("error") != null ? "block" : "none" %>;">
+        <p><%= request.getAttribute("error")%></p>
     </div>
 
     <div class="form-group" style="display: flex; justify-content: space-between;">
