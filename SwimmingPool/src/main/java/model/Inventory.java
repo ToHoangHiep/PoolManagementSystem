@@ -13,6 +13,10 @@ public class Inventory {
     private String unit;
     private String status;
     private Date lastUpdated;
+    private int thresholdQuantity;
+    private int usageId;
+    private String usageName;
+
 
     // Getters and Setters
     public int getInventoryId() {
@@ -78,4 +82,15 @@ public class Inventory {
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
+
+    public int getThresholdQuantity() { return thresholdQuantity;}
+
+    public void setThresholdQuantity(int thresholdQuantity) { this.thresholdQuantity = thresholdQuantity;}
+
+    public int getUsageId() {return usageId;}
+    public void setUsageId(int usageId) { this.usageId = usageId;}
+
+    public String getUsageName() {return usageName;}
+    public void setUsageName(String usageName) { this.usageName = usageName;}
+
 }
