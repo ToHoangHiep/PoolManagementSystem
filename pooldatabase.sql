@@ -119,7 +119,6 @@ CREATE TABLE Inventory (
     quantity int,
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
-    last_updated datetime,
     last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     usage_id int,
 	foreign key (usage_id)   references Inventory_usage(usage_id),
@@ -128,10 +127,8 @@ CREATE TABLE Inventory (
 
 CREATE TABLE Inventory_usage(
 	usage_id INT PRIMARY KEY AUTO_INCREMENT,
-    usage_name varchar(100)
-    last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    foreign key (manager_id) references users(id)
-
+    usage_name varchar(100),
+    last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 INSERT INTO Inventory_usage(usage_name)
@@ -286,22 +283,6 @@ VALUES
   (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1);
 
 
-Select * from inventory
-ALTER TABLE Inventory ADD threshold_quantity INT DEFAULT 10;
-ALTER TABLE Inventory
-ADD rentable BIT DEFAULT 1;
-UPDATE Inventory
-SET rentable = 0
-WHERE category IN ('Thiết bị chiếu sáng',  'Thiết bị nghỉ ngơi');
-
-Select * from inventory
-
-SET SQL_SAFE_UPDATES = 1;
-
-Drop table inventory
-
--- Add INSERT HERE
-
 -- Insert fake data for Users table
 INSERT INTO Users (full_name, email, password_hash, phone_number, address, dob, gender, role_id, user_status) VALUES
 ('John Admin', 'admin@pool.com', 'hashed_password_123', '1234567890', '123 Admin St, City', '1985-05-15', 'Male', 1, 'Active'),
@@ -419,5 +400,5 @@ VALUES
   (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
   (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
   (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1);
-  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1),
+  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1),
+  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1);
