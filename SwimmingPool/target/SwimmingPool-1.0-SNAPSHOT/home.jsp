@@ -229,7 +229,6 @@
 </head>
 
 <body>
-
 <!-- Navbar -->
 <div class="navbar">
   <div class="logo">SwimmingPool</div>
@@ -245,12 +244,15 @@
     <a class="login-btn" href="login.jsp">Login</a>
     <a class="register-btn" href="register.jsp">Register</a>
     <% } else { %>
-    <span>Hello, <%= user.getFullName() %>!</span>
-    <form action="logout" method="post">
+    <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
+            <%= user.getFullName() %>
+        </a>!</span>
+    <form action="logout" method="post" style="display:inline;">
       <input type="submit" value="Logout">
     </form>
     <% } %>
   </div>
+
 </div>
 
 <!-- Spacer tránh bị che -->
@@ -316,7 +318,9 @@
 <!-- Contact -->
 <div class="section" id="contact">
   <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
-  <p style="text-align:center;">Contact form will be available soon.</p>
+  <div style="text-align:center;" class="hero-content">
+    <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+  </div>
 </div>
 
 <!-- Footer -->
@@ -324,6 +328,7 @@
   <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
   <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
+
 
 </body>
 </html>

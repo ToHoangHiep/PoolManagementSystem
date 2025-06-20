@@ -27,69 +27,70 @@ public class TicketPurchaseServlet extends HttpServlet {
             // 1. Lấy dữ liệu từ form
             String typeStr = request.getParameter("ticketType");
             String quantityStr = request.getParameter("quantity");
-            String startDateStr = request.getParameter("startDate");
-            String endDateStr = request.getParameter("endDate");
 
             // 2. Kiểm tra dữ liệu null
-            if (typeStr == null || quantityStr == null || startDateStr == null || endDateStr == null ||
-                    typeStr.isEmpty() || quantityStr.isEmpty() || startDateStr.isEmpty() || endDateStr.isEmpty()) {
+            if (typeStr == null || quantityStr == null ||
+                    typeStr.isEmpty() || quantityStr.isEmpty()) {
                 request.setAttribute("error", "Vui lòng điền đầy đủ thông tin.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
             }
 
-            // 3. Parse và validate quantity
-            int quantity = Integer.parseInt(quantityStr);
-            if (quantity <= 0) {
-                request.setAttribute("error", "Số lượng vé phải lớn hơn 0.");
+            // 3. Parse và validate số lượng
+            int quantity;
+            try {
+                quantity = Integer.parseInt(quantityStr);
+                if (quantity <= 0) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Số lượng vé phải là số nguyên dương.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
             }
 
-            // 4. Parse kiểu vé và ngày
+            // 4. Parse loại vé
             TicketTypeName ticketType = TicketTypeName.valueOf(typeStr);
-            LocalDate startDate = LocalDate.parse(startDateStr);
-            LocalDate endDate = LocalDate.parse(endDateStr);
 
-            // 5. Kiểm tra ngày kết thúc hợp lệ
-            if (!TicketValid.isEndDateValid(ticketType, startDate, endDate)) {
-                request.setAttribute("error", "Ngày kết thúc không phù hợp với loại vé đã chọn.");
-                request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
-                return;
-            }
+            // 5. Xác định ngày bắt đầu và ngày kết thúc
+            LocalDate startDate = LocalDate.now(); // luôn là hôm nay
+            LocalDate endDate = TicketValid.calculateEndDate(ticketType, startDate); // tự tính
 
-            // 6. Lấy ID và giá vé từ DB
+
+            // 6. Lấy thông tin loại vé từ DB
             int ticketTypeId = TicketDAO.getTicketTypeIdByEnum(ticketType);
             BigDecimal price = TicketDAO.getTicketTypePrice(ticketType);
             BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));
 
-            //get userr id from sesssion
+            // 7. Lấy người dùng từ session
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
-            Ticket ticket = new Ticket();
-            if (user != null) {
-                // 7. Tạo vé
-                ticket.setUserId(user.getId());
-                ticket.setTicketTypeName(ticketType.name());
-                ticket.setPrice(price);
-                ticket.setTicketTypeId(ticketTypeId);
-                ticket.setQuantity(quantity);
-                ticket.setStartDate(startDate);
-                ticket.setEndDate(endDate);
-                ticket.setTicketStatus(TicketStatus.Cancelled);
-                ticket.setPaymentStatus(PaymentStatus.Unpaid);
-                ticket.setCreatedAt(LocalDateTime.now());
-                ticket.setTotal(total);
+
+            if (user == null) {
+                response.sendRedirect("home.jsp");
+                return;
             }
-            // 8. Lưu vé
-            Integer ticket_id = new TicketDAO().saveTicket(ticket);
 
-            if (ticket_id != null) {
-                // Lưu vào session để dùng tiếp ở checkout.jsp
-                ticket.setTicketId(ticket_id);
+            // 8. Tạo đối tượng vé
+            Ticket ticket = new Ticket();
+            ticket.setUserId(user.getId());
+            ticket.setTicketTypeName(ticketType.name());
+            ticket.setTicketTypeId(ticketTypeId);
+            ticket.setPrice(price);
+            ticket.setQuantity(quantity);
+            ticket.setStartDate(startDate);
+            ticket.setEndDate(endDate);
+            ticket.setTotal(total);
+            ticket.setTicketStatus(TicketStatus.Cancelled); // chưa thanh toán thì Cancelled
+            ticket.setPaymentStatus(PaymentStatus.Unpaid);
+            ticket.setCreatedAt(LocalDateTime.now());
+
+            // 9. Lưu vào DB
+            Integer ticketId = new TicketDAO().saveTicket(ticket);
+
+            if (ticketId != null) {
+                ticket.setTicketId(ticketId);
                 session.setAttribute("ticket", ticket);
-
-                // Chuyển sang trang thanh toán
                 response.sendRedirect("checkout.jsp");
             } else {
                 request.setAttribute("error", "Lỗi cơ sở dữ liệu. Không thể lưu vé.");
