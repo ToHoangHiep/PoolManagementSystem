@@ -13,6 +13,10 @@ public class Feedback {
     private int rating; //0 to 10
     private Date createdAt;
     private Date updatedAt;
+    
+    // User details
+    private String userName;
+    private String userEmail;
 
     public Feedback() {
     }
@@ -95,5 +99,21 @@ public class Feedback {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }

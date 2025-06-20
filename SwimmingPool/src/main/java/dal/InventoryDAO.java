@@ -33,7 +33,8 @@ public class InventoryDAO {
 
     public static List<Inventory> getAllInventories() {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT * FROM Inventory";
+        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
+                "JOIN inventory_usage u ON i.usage_id = u.usage_id ";
 
         try (Connection conn = DBConnect.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -45,6 +46,7 @@ public class InventoryDAO {
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
+                inv.setUsageName(rs.getString("usage_name"));
                 inv.setLastUpdated(rs.getDate("last_updated"));
 
                 list.add(inv);
@@ -231,6 +233,81 @@ public class InventoryDAO {
 
         return list;
     }
+
+    public List<Inventory> getLowStockItems() {
+        List<Inventory> lowStockItems = new ArrayList<>();
+        String sql = "SELECT * FROM Inventory WHERE quantity < threshold_quantity";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Inventory item = new Inventory();
+                item.setInventoryId(rs.getInt("inventory_id"));
+                item.setItemName(rs.getString("item_name"));
+                item.setQuantity(rs.getInt("quantity"));
+                item.setThresholdQuantity(rs.getInt("threshold_quantity"));
+                lowStockItems.add(item);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lowStockItems;
+    }
+
+
+
+    public static List<Inventory> getRentableItems() {
+        List<Inventory> list = new ArrayList<>();
+        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
+                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "WHERE u.usage_name = 'item for rent'";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setInventoryId(rs.getInt("inventory_id"));
+                inv.setManagerId(rs.getInt("manager_id"));
+                inv.setItemName(rs.getString("item_name"));
+                inv.setCategory(rs.getString("category"));
+                inv.setQuantity(rs.getInt("quantity"));
+                inv.setUnit(rs.getString("unit"));
+                inv.setStatus(rs.getString("status"));
+                inv.setLastUpdated(rs.getTimestamp("last_updated"));
+                inv.setUsageName(rs.getString("usage_name"));
+
+                list.add(inv);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public static void main(String[] args) {
+        List<Inventory> rentableItems = getAllInventories();
+
+
+            System.out.println("Danh sách thiết bị ");
+            for (Inventory inv : rentableItems) {
+                System.out.println("ID: " + inv.getInventoryId() +
+                        " | Tên: " + inv.getItemName() +
+                        " | Loại: " + inv.getCategory() +
+                        " | SL: " + inv.getQuantity() +
+                        " | Đơn vị: " + inv.getUnit() +
+                        " | Trạng thái: " + inv.getStatus() +
+                        " | Mục đích sử dụng: " + inv.getUsageName());
+            }
+
+    }
+
+
+
+
+
 
 
 

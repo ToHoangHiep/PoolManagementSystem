@@ -96,4 +96,6 @@
         <servlet-name>InventoryServlet</servlet-name>
         <url-pattern>/inventory</url-pattern>
     </servlet-mapping>
+
+    <!-- TODO - ERROR HANDLER -->
 </web-app>

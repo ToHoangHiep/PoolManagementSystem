@@ -197,17 +197,18 @@
     <a href="home.jsp" class="btn green-btn">🏠 Home</a>
     <a href="inventory?action=default" class="btn return-btn">🔙 Return To List</a>
     <a href="inventory?action=new" class="btn green-btn">➕ Add New Item</a>
+    <a href="inventory?action=rentable" class="btn green-btn">Show Rentable Item</a>
 
     <form method="get" action="inventory" class="filter-form">
         <input type="hidden" name="action" value="filter" />
         <select name="status">
-            <option value="">-- Trạng thái --</option>
+            <option value="">-- Status --</option>
             <option value="Available">Available</option>
             <option value="In Use">In Use</option>
             <option value="Maintenance">Maintenance</option>
             <option value="Broken">Broken</option>
         </select>
-        <button type="submit" class="filter-button">Lọc</button>
+        <button type="submit" class="filter-button">Filter</button>
     </form>
 
 

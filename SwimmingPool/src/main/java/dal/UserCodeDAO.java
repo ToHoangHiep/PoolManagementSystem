@@ -26,7 +26,7 @@ public class UserCodeDAO {
     }
 
 
-    public static boolean createCode(User user) {
+    public static String createCode(User user) {
         String sql = "INSERT INTO usercode (user_id, user_code, created_at) VALUES (?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE user_code = ?, created_at = ?";
         String code = generateCode();
@@ -45,12 +45,12 @@ public class UserCodeDAO {
             ps.setTimestamp(5, now);
             int result = ps.executeUpdate();
 
-            return result > 0; // Trả về true nếu tạo mã thành công
+            return result > 0 ? code : ""; // Trả về true nếu tạo mã thành công
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return false; // Trả về true nếu tạo mã thành công
+        return ""; // Trả về true nếu tạo mã thành công
     }
 
     private static String generateCode() {
