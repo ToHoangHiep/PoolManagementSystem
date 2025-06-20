@@ -42,8 +42,9 @@ CREATE TABLE Courses (
     description TEXT,
     price DECIMAL(10, 2),
     duration INT,
+    student_limit INT DEFAULT 2,
     coach_id INT,
-    status ENUM('Active', 'Inactive'),
+    status ENUM('Active', 'Inactive', 'Full'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (coach_id) REFERENCES Users(id)
 );
@@ -103,6 +104,28 @@ CREATE TABLE Inventory (
     foreign key (manager_id) references users(id)
 
 );
+
+INSERT INTO Inventory_usage(usage_name)
+VALUES 
+  ('item for rent'),
+  ('item for maintannance'),
+  ('item for sold'),
+  ('item for facility');
+
+-- Blog
+CREATE TABLE Blogs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200),
+    content TEXT,
+    author_id INT,
+    course_id INT,
+    tags VARCHAR(255),
+    likes INT DEFAULT 0,
+    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES Users(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
+
 
 -- Feedbacks
 CREATE TABLE Feedbacks (
@@ -179,16 +202,6 @@ CREATE TABLE Tracking (
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES Users(id),
     FOREIGN KEY (course_id) REFERENCES Courses(id)
-);
-
--- Blogs
-CREATE TABLE Blogs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
-    content TEXT,
-    author_id INT,
-    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES Users(id)
 );
 
 CREATE TABLE TicketType (
