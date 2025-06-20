@@ -34,6 +34,26 @@ CREATE TABLE Users (
     FOREIGN KEY (role_id) REFERENCES Roles(id)
 );
 
+INSERT INTO Users (
+    full_name,
+    email,
+    password_hash,
+    phone_number,
+    address,
+    dob,
+    gender,
+    role_id
+) VALUES (
+    'Nguyễn Văn A',
+    'nguyenvana@example.com',
+    'hashed_password_here', -- giả sử bạn dùng hash
+    '0909123456',
+    '123 Đường ABC, Quận 1, TP.HCM',
+    '1990-01-01',
+    'Male',
+    2
+);
+
 -- Courses
 CREATE TABLE Courses (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -98,10 +118,25 @@ CREATE TABLE Inventory (
     quantity int,
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
-    last_updated datetime DEFAULT CURRENT_TIMESTAMP,
-    foreign key (manager_id) references users(id)
+    last_updated datetime,
+    usage_id int,
+    foreign key (manager_id) references users(id),
+	foreign key (usage_id)   references Inventory_usage(usage_id)
+);
+CREATE TABLE Inventory_usage(
+	usage_id INT PRIMARY KEY AUTO_INCREMENT,
+    usage_name varchar(100)
 
 );
+INSERT INTO Inventory_usage(usage_name)
+VALUES 
+  ('item for rent'),
+  ('item for maintannance'),
+  ('item for sold'),
+  ('item for facility');
+
+
+
 
 -- Feedbacks
 CREATE TABLE Feedbacks (
@@ -211,3 +246,30 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
+INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
+VALUES
+  (1, 'Gậy bơi', 'Thiết bị tập luyện', 100, 'cây', 'Available', NOW(), 1),
+  (1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', NOW(), 1),
+  (1, 'Phao tay', 'Phao cứu sinh', 80, 'cái', 'Available', NOW(), 1),
+  (1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', NOW(), 4),
+  (1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', NOW(), 4),
+  (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
+  (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
+  (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
+  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1),
+  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1);
+
+
+Select * from inventory
+ALTER TABLE Inventory ADD threshold_quantity INT DEFAULT 10;
+ALTER TABLE Inventory
+ADD rentable BIT DEFAULT 1;
+UPDATE Inventory
+SET rentable = 0
+WHERE category IN ('Thiết bị chiếu sáng',  'Thiết bị nghỉ ngơi');
+
+Select * from inventory
+
+SET SQL_SAFE_UPDATES = 1;
+
+Drop table inventory
