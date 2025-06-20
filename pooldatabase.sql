@@ -119,15 +119,16 @@ CREATE TABLE Inventory (
     quantity int,
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
+    last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     usage_id int,
-	foreign key (usage_id)   references Inventory_usage(usage_id)
+	foreign key (usage_id)   references Inventory_usage(usage_id),
+    foreign key (manager_id) references users(id)
 );
 
 CREATE TABLE Inventory_usage(
 	usage_id INT PRIMARY KEY AUTO_INCREMENT,
     usage_name varchar(100)
     last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    foreign key (manager_id) references users(id)
 );
 
 INSERT INTO Inventory_usage(usage_name)
