@@ -35,6 +35,26 @@ CREATE TABLE Users (
     FOREIGN KEY (role_id) REFERENCES Roles(id)
 );
 
+INSERT INTO Users (
+    full_name,
+    email,
+    password_hash,
+    phone_number,
+    address,
+    dob,
+    gender,
+    role_id
+) VALUES (
+    'Nguyễn Văn A',
+    'nguyenvana@example.com',
+    'hashed_password_here', -- giả sử bạn dùng hash
+    '0909123456',
+    '123 Đường ABC, Quận 1, TP.HCM',
+    '1990-01-01',
+    'Male',
+    2
+);
+
 -- Courses
 CREATE TABLE Courses (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -99,10 +119,26 @@ CREATE TABLE Inventory (
     quantity int,
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
+    usage_id int,
+	foreign key (usage_id)   references Inventory_usage(usage_id)
+);
+
+CREATE TABLE Inventory_usage(
+	usage_id INT PRIMARY KEY AUTO_INCREMENT,
+    usage_name varchar(100)
     last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     foreign key (manager_id) references users(id)
-
 );
+
+INSERT INTO Inventory_usage(usage_name)
+VALUES 
+  ('item for rent'),
+  ('item for maintannance'),
+  ('item for sold'),
+  ('item for facility');
+
+
+
 
 -- Feedbacks
 CREATE TABLE Feedbacks (
@@ -273,15 +309,6 @@ INSERT INTO UserCode (user_id, user_code, created_at) VALUES
 (7, 'DEF67890', '2023-05-16 11:45:00'),
 (8, 'GHI13579', '2023-05-17 09:15:00');
 
--- Insert fake data for Inventory table
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status) VALUES
-(2, 'Swimming Goggles', 'Equipment', 50, 'Piece', 'Available'),
-(2, 'Swimming Caps', 'Equipment', 75, 'Piece', 'Available'),
-(2, 'Kickboards', 'Training', 30, 'Piece', 'Available'),
-(2, 'Pull Buoys', 'Training', 25, 'Piece', 'Available'),
-(2, 'Swim Fins', 'Training', 20, 'Pair', 'In Use'),
-(2, 'Lane Ropes', 'Facility', 10, 'Piece', 'Available'),
-(2, 'Cleaning Chemicals', 'Maintenance', 15, 'Bottle', 'Available');
 
 -- Insert fake data for Feedbacks table
 INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating) VALUES
@@ -350,3 +377,16 @@ INSERT INTO Study_Roadmaps (title, content, created_by) VALUES
 ('Beginner to Intermediate Swimmer', 'Week 1-4: Focus on basic techniques...\nWeek 5-8: Introduce different strokes...', 3),
 ('Competitive Swimming Preparation', 'Month 1: Build endurance...\nMonth 2: Speed training...\nMonth 3: Competition strategies...', 4),
 ('Water Safety Certification Path', 'Step 1: Basic water safety...\nStep 2: Rescue techniques...\nStep 3: First aid certification...', 2);
+
+INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
+VALUES
+  (1, 'Gậy bơi', 'Thiết bị tập luyện', 100, 'cây', 'Available', NOW(), 1),
+  (1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', NOW(), 1),
+  (1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', NOW(), 4),
+  (1, 'Phao tay', 'Phao cứu sinh', 80, 'cái', 'Available', NOW(), 1),
+  (1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', NOW(), 4),
+  (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
+  (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
+  (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
+  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1);
+  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1),
