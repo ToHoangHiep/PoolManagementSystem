@@ -230,15 +230,22 @@
 
 <body>
 <!-- Navbar -->
+
 <div class="navbar">
   <div class="logo">SwimmingPool</div>
   <div class="nav-links">
     <a href="#">Home</a>
     <a href="#about">About Us</a>
     <a href="#services">Services</a>
-    <a href="#gallery">Gallery</a>
+    <a href="#maintenance">Maintenance</a>
     <a href="#contact">Contact</a>
+
+    <%-- Chỉ hiện "User List" nếu là Admin --%>
+    <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
+    <a href="admin-user">User List</a>
+    <% } %>
   </div>
+
   <div class="auth">
     <% if (user == null) { %>
     <a class="login-btn" href="login.jsp">Login</a>
@@ -253,6 +260,7 @@
     <% } %>
   </div>
 
+</div>
 </div>
 
 <!-- Spacer tránh bị che -->
@@ -309,11 +317,36 @@
   </div>
 </div>
 
-<!-- Gallery -->
-<div class="section" id="gallery">
-  <h2 style="text-align:center; color:#005caa;">Gallery</h2>
-  <p style="text-align:center;">Coming soon...</p>
+<!-- Maintenance -->
+<%
+  boolean showMaintenance = false;
+  if (user != null && user.getRole() != null) {
+    int roleId = user.getRole().getId();
+    if (roleId == 1 || roleId == 2 || roleId == 5) {
+      showMaintenance = true;
+    }
+  }
+%>
+
+<% if (showMaintenance) { %>
+<div class="section" id="maintenance">
+  <% if (user != null) {
+    String roleName = user.getRole().getName();
+    if ("Admin".equalsIgnoreCase(roleName) ||
+            "Manager".equalsIgnoreCase(roleName) ||
+            "Staff".equalsIgnoreCase(roleName)) {
+  %>
+  <a href="maintenance">Maintenance</a>
+  <% }} %>
+
+  <h2 style="text-align:center; color:#005caa;">Maintenance</h2>
+  <p style="text-align:center;">Access maintenance tasks, schedules, and repair requests here.</p>
+  <div style="text-align:center;" class="hero-content">
+    <button class="btn btn-primary" onclick="window.location.href='maintenance.jsp';">Go to Maintenance</button>
+  </div>
 </div>
+<% } %>
+
 
 <!-- Contact -->
 <div class="section" id="contact">

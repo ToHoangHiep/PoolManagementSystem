@@ -27,7 +27,7 @@ CREATE TABLE Users (
     address TEXT,
     dob DATE,
     gender ENUM('Male', 'Female', 'Other'),
-    role_id INT,
+    role_id INT default 4,
     profile_picture VARCHAR(255) DEFAULT NULL,
     user_status enum('Active', 'Deactive', 'Banned'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
