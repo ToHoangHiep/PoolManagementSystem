@@ -26,9 +26,126 @@
 </head>
 <body>
 
+<!-- Style block for better readability and appearance -->
+<style>
+/* Enhanced feedback form styles */
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background: #f4f8fb;
+    margin: 0;
+    padding: 0;
+}
+h1 {
+    text-align: center;
+    color: #0077b6;
+    margin-top: 30px;
+    font-weight: 600;
+}
+form {
+    background: #fff;
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 30px 40px 20px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+.form-group {
+    margin-bottom: 22px;
+}
+label {
+    display: block;
+    margin-bottom: 7px;
+    color: #333;
+    font-weight: 500;
+}
+input[type="text"], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 6px;
+    font-size: 1em;
+    background: #f9fafb;
+    transition: border 0.2s;
+}
+input[type="text"]:focus, select:focus, textarea:focus {
+    border-color: #0077b6;
+    outline: none;
+}
+textarea {
+    resize: vertical;
+}
+.star-rating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.stars {
+    display: flex;
+    gap: 3px;
+}
+.star {
+    font-size: 1.7em;
+    color: #b0bec5;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.star.selected, .star:hover, .star.selected ~ .star {
+    color: #ffd700;
+}
+.rating-text {
+    font-size: 1em;
+    color: #555;
+    margin-left: 10px;
+}
+.btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-primary {
+    background: #0077b6;
+    color: #fff;
+}
+.btn-primary:hover {
+    background: #005f8a;
+}
+.btn-secondary {
+    background: #b0bec5;
+    color: #333;
+}
+.btn-secondary:hover {
+    background: #90a4ae;
+}
+@media (max-width: 600px) {
+    form {
+        padding: 18px 8px 12px 8px;
+    }
+}
+</style>
+
 <%
   Feedback feedback = (Feedback) request.getAttribute("feedback");
   boolean existing = feedback != null;
+%>
+
+<%
+    if (request.getAttribute("alert_message") != null) {
+        String alertMessage = (String) request.getAttribute("alert_message");
+        String alertAction = (String) request.getAttribute("alert_action");
+        boolean existPostAction = request.getAttribute("alert_action") != null;
+%>
+<script>
+    alert("<%= alertMessage %>");
+    if (<%= existPostAction %>) {
+        window.location.href = "${pageContext.request.contextPath}<%= alertAction %>";
+    }
+</script>
+<%
+    }
 %>
 
 <h1><i class="fa fa-comments-o" aria-hidden="true"></i> <%=existing ? "Edit" : "Submit" %> Feedback</h1>
@@ -112,7 +229,8 @@
     </div>
 </form>
 
-<script rel="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script rel="text/javascript" src="./Resources/JavaScript/FeedbackForm.js"></script>
+<!-- Move scripts to just before closing body tag for better readability -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="./Resources/JavaScript/FeedbackForm.js"></script>
 </body>
 </html>

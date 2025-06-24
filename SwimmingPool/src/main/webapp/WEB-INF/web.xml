@@ -96,4 +96,35 @@
         <servlet-name>InventoryServlet</servlet-name>
         <url-pattern>/inventory</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>BlogServlet</servlet-name>
+        <servlet-class>controller.BlogsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>BlogServlet</servlet-name>
+        <url-pattern>/blogs</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>SwimCourseServlet</servlet-name>
+        <servlet-class>controller.SwimCourseServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SwimCourseServlet</servlet-name>
+        <url-pattern>/swimcourse</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CourseServlet</servlet-name>
+        <servlet-class>controller.CourseServlet</servlet-class>
+    </servlet>
+
+
+    <servlet-mapping>
+        <servlet-name>CourseServlet</servlet-name>
+        <url-pattern>/coachcourse</url-pattern>
+    </servlet-mapping>
+    <!-- TODO - ERROR HANDLER -->
 </web-app>

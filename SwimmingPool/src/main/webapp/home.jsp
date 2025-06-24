@@ -237,15 +237,25 @@
         <a href="#about">About Us</a>
         <a href="#services">Services</a>
 
+        <%-- Chỉ hiện "User List" nếu là Admin --%>
+        <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="admin-user">User List</a>
+        <% } %>
+        <%-- Chỉ hiện "User List" nếu là Admin --%>
+        <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="equipment-rental">Equiqment Rental</a>
+        <% } %>
+
         <% if (user != null && user.getRole() != null) {
-            String roleName = user.getRole().getName();
-            if ("Admin".equalsIgnoreCase(roleName) ||
-                    "Manager".equalsIgnoreCase(roleName)
-                   ) {
+        String roleName = user.getRole().getName();
+        if ("Admin".equalsIgnoreCase(roleName) ||
+                "Manager".equalsIgnoreCase(roleName)
+            ) {
         %>
         <a href="maintenance">Maintenance</a>
         <% }
         } %>
+
 
         <%-- Chỉ hiển thị "View My Maintenance" nếu người dùng có role = 5 (Staff) --%>
         <% if (user != null && user.getRole() != null && user.getRole().getId() == 5) { %>
@@ -253,6 +263,7 @@
         <% } %>
 
         <a href="#contact">Contact</a>
+        <a href="blogs">Blogs</a>
 
         <%-- Chỉ hiện "User List" nếu là Admin --%>
         <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
@@ -338,6 +349,11 @@
     <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
     <div style="text-align:center;" class="hero-content">
         <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+    </div>
+
+    <h2 style="text-align:center; color:#005caa;">See your old feedback</h2>
+    <div style="text-align:center;" class="hero-content">
+        <button class="btn btn-primary" onclick="window.location.href='feedback?mode=list';">Feedback History</button>
     </div>
 </div>
 

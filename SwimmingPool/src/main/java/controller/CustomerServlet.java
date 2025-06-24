@@ -112,6 +112,8 @@ public class CustomerServlet extends HttpServlet {
 
             if (success) {
                 session.setAttribute("message", "Profile updated successfully!");
+                userSession.setFullName(updated.getFullName());
+                session.setAttribute("user", userSession);
             } else {
                 session.setAttribute("message", "Failed to update profile!");
             }

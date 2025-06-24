@@ -56,11 +56,6 @@ public class TicketPurchaseServlet extends HttpServlet {
             LocalDate startDate = LocalDate.now(); // luôn là hôm nay
             LocalDate endDate = TicketValid.calculateEndDate(ticketType, startDate); // tự tính
 
-            if (endDate == null) {
-                request.setAttribute("error", "Không thể xác định ngày kết thúc hợp lệ.");
-                request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
-                return;
-            }
 
             // 6. Lấy thông tin loại vé từ DB
             int ticketTypeId = TicketDAO.getTicketTypeIdByEnum(ticketType);
@@ -72,7 +67,7 @@ public class TicketPurchaseServlet extends HttpServlet {
             User user = (User) session.getAttribute("user");
 
             if (user == null) {
-                response.sendRedirect("login.jsp");
+                response.sendRedirect("home.jsp");
                 return;
             }
 
