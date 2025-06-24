@@ -1,5 +1,10 @@
 Manifest-Version: 1.0
 Created-By: IntelliJ IDEA
+<<<<<<< HEAD
 Built-By: admin
 Build-Jdk: Oracle OpenJDK 17.0.11
+=======
+Built-By: ADMIN
+Build-Jdk: Amazon Corretto 17.0.15
+>>>>>>> origin/ngocnthe176424
 
