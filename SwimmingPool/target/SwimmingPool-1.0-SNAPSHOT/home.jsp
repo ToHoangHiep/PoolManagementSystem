@@ -247,6 +247,18 @@
     <a href="blogs">Community Blogs</a>
     <a href="#gallery">Gallery</a>
     <a href="#contact">Contact</a>
+<<<<<<< HEAD
+=======
+
+    <%-- Chỉ hiện "User List" nếu là Admin --%>
+    <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
+    <a href="admin-user">User List</a>
+    <% } %>
+    <%-- Chỉ hiện "User List" nếu là Admin --%>
+    <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
+    <a href="equipment-rental">Equiqment Rental</a>
+    <% } %>
+>>>>>>> origin/Huypqhe172172
   </div>
   <div class="auth">
     <% if (user == null) { %>

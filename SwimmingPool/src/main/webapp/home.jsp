@@ -237,15 +237,26 @@
         <a href="#about">About Us</a>
         <a href="#services">Services</a>
 
-        <% if (user != null && user.getRole() != null) {
+    <%-- Chỉ hiện "User List" nếu là Admin --%>
+    <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
+    <a href="admin-user">User List</a>
+    <% } %>
+    <%-- Chỉ hiện "User List" nếu là Admin --%>
+    <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
+    <a href="equipment-rental">Equiqment Rental</a>
+    <% } %>
+
+            <% if (user != null && user.getRole() != null) {
             String roleName = user.getRole().getName();
             if ("Admin".equalsIgnoreCase(roleName) ||
                     "Manager".equalsIgnoreCase(roleName)
-                   ) {
+                ) {
         %>
-        <a href="maintenance">Maintenance</a>
-        <% }
-        } %>
+    <a href="maintenance">Maintenance</a>
+    <% }
+    } %>
+  </div>
+
 
         <%-- Chỉ hiển thị "View My Maintenance" nếu người dùng có role = 5 (Staff) --%>
         <% if (user != null && user.getRole() != null && user.getRole().getId() == 5) { %>
