@@ -203,7 +203,7 @@
         <table class="table table-hover table-bordered align-middle">
           <thead class="table-light">
           <tr>
-            <th><i class="fas fa-hashtag"></i> ID</th>
+
             <th><i class="fas fa-heading"></i> Title</th>
             <th><i class="fas fa-file-alt"></i> Description</th>
             <th><i class="fas fa-redo-alt"></i> Frequency</th>
@@ -218,7 +218,7 @@
           <tbody>
           <% for (MaintenanceSchedule m : schedules) { %>
           <tr>
-            <td><%= m.getId() %></td>
+
             <td><%= m.getTitle() %></td>
             <td><%= m.getDescription() %></td>
             <td><%= m.getFrequency() %></td>
