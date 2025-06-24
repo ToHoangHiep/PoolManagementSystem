@@ -6,6 +6,8 @@ import utils.DBConnect;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
 
@@ -150,6 +152,225 @@ public class UserDAO {
             e.printStackTrace();
         }
     }
+
+    // LẤY DANH SÁCH USER KÈM ROLE (CHO ADMIN QUẢN LÝ)
+    public static List<User> getAllUsersWithRoles() {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, r.name AS role_name FROM users u JOIN roles r ON u.role_id = r.id";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setUserStatus(rs.getString("user_status"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                user.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                Role role = new Role(rs.getInt("role_id"), rs.getString("role_name"));
+                user.setRole(role);
+
+                list.add(user);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    // CẬP NHẬT ROLE CHO USER
+    public static boolean updateUserRole(int userId, int roleId) {
+        String sql = "UPDATE users SET role_id = ? WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, roleId);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static List<User> getAllUsers(String name, String status, String roleId) {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, r.name as role_name FROM users u " +
+                "JOIN roles r ON u.role_id = r.id WHERE 1=1 ";
+
+        if (name != null && !name.trim().isEmpty()) {
+            sql += " AND u.full_name LIKE ?";
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql += " AND u.user_status = ?";
+        }
+        if (roleId != null && !roleId.trim().isEmpty()) {
+            sql += " AND u.role_id = ?";
+        }
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            int idx = 1;
+            if (name != null && !name.trim().isEmpty()) {
+                ps.setString(idx++, "%" + name + "%");
+            }
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(idx++, status);
+            }
+            if (roleId != null && !roleId.trim().isEmpty()) {
+                ps.setInt(idx++, Integer.parseInt(roleId));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setAddress(rs.getString("address"));
+                user.setDob(rs.getDate("dob"));
+                user.setGender(rs.getString("gender"));
+                user.setPasswordHash(rs.getString("password_hash"));
+                user.setUserStatus(rs.getString("user_status"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                user.setUpdatedAt(rs.getTimestamp("updated_at"));
+                user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
+                list.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
+    public static User getUserById(int id) {
+        String sql = "SELECT u.*, r.name AS role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setAddress(rs.getString("address"));
+                user.setDob(rs.getDate("dob"));
+                user.setGender(rs.getString("gender"));
+                user.setUserStatus(rs.getString("user_status"));
+                user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
+                return user;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean deleteUser(int id) {
+        String sql = "DELETE FROM users WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean updateUser(int userId, int roleId, String status) {
+        String sql = "UPDATE users SET role_id = ?, user_status = ? WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, roleId);
+            ps.setString(2, status);
+            ps.setInt(3, userId);
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public static void updateStatusById(int userId, String status) {
+        String sql = "UPDATE users SET user_status = ? WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<User> getAllStaff() {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, r.name AS role_name " +
+                "FROM users u JOIN roles r ON u.role_id = r.id " +
+                "WHERE u.role_id = 5"; // 5 là Staff
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setAddress(rs.getString("address"));
+                user.setDob(rs.getDate("dob"));
+                user.setGender(rs.getString("gender"));
+                user.setUserStatus(rs.getString("user_status"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                user.setUpdatedAt(rs.getTimestamp("updated_at"));
+                user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
+                list.add(user);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+
+    public static String getFullNameById(int userId) {
+        String sql = "SELECT full_name FROM users WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("full_name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
 
 
 }
