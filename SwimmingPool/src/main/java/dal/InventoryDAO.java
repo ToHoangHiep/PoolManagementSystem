@@ -3,6 +3,7 @@ package dal;
 import model.Inventory;
 import utils.DBConnect;
 
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -426,28 +427,7 @@ public class InventoryDAO {
 
 
 
-    public static void main(String[] args) {
 
-        int offset = 0;           // Bắt đầu từ bản ghi đầu tiên
-        int limit = 10;           // Lấy 10 bản ghi
-
-        List<Inventory> rentableItems = getInventoriesByPage(offset, limit);
-
-        if (rentableItems.isEmpty()) {
-            System.out.println("Không có sản phẩm nào cho thuê với trạng thái 'Available'.");
-        } else {
-            for (Inventory inv : rentableItems) {
-                System.out.println("ID: " + inv.getInventoryId()
-                        + ", Name: " + inv.getItemName()
-                        + ", Category: " + inv.getCategory()
-                        + ", Quantity: " + inv.getQuantity()
-                        + ", Unit: " + inv.getUnit()
-                        + ", Status: " + inv.getStatus()
-                        + ", Usage: " + inv.getUsageName()
-                        + ", Last Updated: " + inv.getLastUpdated());
-            }
-        }
-    }
 
 
 

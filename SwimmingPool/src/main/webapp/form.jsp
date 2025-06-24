@@ -41,6 +41,7 @@
     <option value="Broken" <%= (inv != null && "Broken".equals(inv.getStatus())) ? "selected" : "" %>>Broken</option>
   </select>
 
+  <label>Usage:</label>
   <select name="usage_id">
     <option value="1">item for rent</option>
     <option value="2">item for maintainance</option>
