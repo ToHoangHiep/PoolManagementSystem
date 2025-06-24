@@ -319,6 +319,57 @@ public class UserDAO {
         }
     }
 
+    public static List<User> getAllStaff() {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT u.*, r.name AS role_name " +
+                "FROM users u JOIN roles r ON u.role_id = r.id " +
+                "WHERE u.role_id = 5"; // 5 là Staff
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setAddress(rs.getString("address"));
+                user.setDob(rs.getDate("dob"));
+                user.setGender(rs.getString("gender"));
+                user.setUserStatus(rs.getString("user_status"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                user.setUpdatedAt(rs.getTimestamp("updated_at"));
+                user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
+                list.add(user);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+
+    public static String getFullNameById(int userId) {
+        String sql = "SELECT full_name FROM users WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("full_name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
 
 
 
