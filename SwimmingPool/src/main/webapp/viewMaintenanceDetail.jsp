@@ -117,10 +117,7 @@
             <div class="table-responsive">
                 <table class="table table-striped-details table-bordered">
                     <tbody>
-                    <tr>
-                        <th><i class="fas fa-hashtag me-2"></i>ID</th>
-                        <td><%= schedule.getId() %></td>
-                    </tr>
+
                     <tr>
                         <th><i class="fas fa-heading me-2"></i>Tiêu đề</th>
                         <td><%= schedule.getTitle() %></td>

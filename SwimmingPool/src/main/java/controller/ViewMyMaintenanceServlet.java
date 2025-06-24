@@ -38,6 +38,9 @@ public class ViewMyMaintenanceServlet extends HttpServlet {
 
         User currentUser = (User) session.getAttribute("user");
 
+        // Lấy staffId của người dùng đang đăng nhập
+        int staffId = currentUser.getId();
+
         // Kiểm tra nếu đang xem chi tiết của một lịch bảo trì cụ thể
         String scheduleId = request.getParameter("id");
 
@@ -46,7 +49,7 @@ public class ViewMyMaintenanceServlet extends HttpServlet {
             int id = Integer.parseInt(scheduleId);
             MaintenanceSchedule schedule = maintenanceDAO.getScheduleById(id);
 
-            if (schedule != null) {
+            if (schedule != null && schedule.getAssignedStaffId() == staffId) {
                 // Truyền thông tin lịch bảo trì vào request
                 request.setAttribute("schedule", schedule);
 
@@ -54,18 +57,18 @@ public class ViewMyMaintenanceServlet extends HttpServlet {
                 RequestDispatcher dispatcher = request.getRequestDispatcher("viewMaintenanceDetail.jsp");
                 dispatcher.forward(request, response);
             } else {
-                // Nếu không tìm thấy lịch bảo trì, quay lại danh sách và thông báo lỗi
-                request.setAttribute("errorMessage", "Lịch bảo trì không tồn tại.");
-                listSchedules(request, response);
+                // Nếu không tìm thấy lịch bảo trì hoặc không phải của nhân viên hiện tại, quay lại danh sách và thông báo lỗi
+                request.setAttribute("errorMessage", "Lịch bảo trì không tồn tại hoặc không phải của bạn.");
+                listSchedules(request, response, staffId);  // Lấy lại danh sách lịch bảo trì của nhân viên hiện tại
             }
         } else {
             // Nếu không có ID, hiển thị danh sách lịch bảo trì
-            listSchedules(request, response);
+            listSchedules(request, response, staffId);  // Lấy lại danh sách lịch bảo trì của nhân viên hiện tại
         }
     }
 
     // Hàm xử lý danh sách lịch bảo trì
-    private void listSchedules(HttpServletRequest request, HttpServletResponse response)
+    private void listSchedules(HttpServletRequest request, HttpServletResponse response, int staffId)
             throws ServletException, IOException {
         int pageNo = 1;
         int pageSize = 10;
@@ -84,8 +87,8 @@ public class ViewMyMaintenanceServlet extends HttpServlet {
             pageSize = 10;
         }
 
-        // Lấy danh sách lịch bảo trì của người dùng đã đăng nhập
-        List<MaintenanceSchedule> schedules = maintenanceDAO.getSchedulesWithSearch(status, title, pageNo, pageSize);
+        // Lấy danh sách lịch bảo trì của nhân viên đã đăng nhập (staffId)
+        List<MaintenanceSchedule> schedules = maintenanceDAO.getSchedulesForStaff(staffId, pageNo, pageSize);
         request.setAttribute("schedules", schedules);
 
         // Truyền thông tin trạng thái và tiêu đề tìm kiếm về JSP
@@ -129,7 +132,7 @@ public class ViewMyMaintenanceServlet extends HttpServlet {
             // Lấy thông tin lịch bảo trì hiện tại
             MaintenanceSchedule schedule = maintenanceDAO.getScheduleById(id);
 
-            if (schedule != null) {
+            if (schedule != null && schedule.getAssignedStaffId() == currentUser.getId()) {
                 // Cập nhật trạng thái cho lịch bảo trì
                 schedule.setStatus(newStatus);
 
@@ -137,15 +140,15 @@ public class ViewMyMaintenanceServlet extends HttpServlet {
                 maintenanceDAO.updateSchedule(schedule);
 
                 // Sau khi cập nhật, trả về trang danh sách
-                listSchedules(request, response);
+                listSchedules(request, response, currentUser.getId());
             } else {
                 // Nếu không tìm thấy lịch bảo trì, thông báo lỗi
-                request.setAttribute("errorMessage", "Lịch bảo trì không tồn tại.");
-                listSchedules(request, response);
+                request.setAttribute("errorMessage", "Lịch bảo trì không tồn tại hoặc không phải của bạn.");
+                listSchedules(request, response, currentUser.getId());
             }
         } else {
             // Nếu thiếu thông tin, quay lại danh sách lịch bảo trì
-            listSchedules(request, response);
+            listSchedules(request, response, currentUser.getId());
         }
     }
 }

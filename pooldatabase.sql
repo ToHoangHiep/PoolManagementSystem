@@ -1,6 +1,7 @@
 -- Drop table
 drop database swimming_pool_management;
 
+
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
@@ -34,26 +35,6 @@ CREATE TABLE Users (
     FOREIGN KEY (role_id) REFERENCES Roles(id)
 );
 
-INSERT INTO Users (
-    full_name,
-    email,
-    password_hash,
-    phone_number,
-    address,
-    dob,
-    gender,
-    role_id
-) VALUES (
-    'Nguyễn Văn A',
-    'nguyenvana@example.com',
-    'hashed_password_here', -- giả sử bạn dùng hash
-    '0909123456',
-    '123 Đường ABC, Quận 1, TP.HCM',
-    '1990-01-01',
-    'Male',
-    2
-);
-
 -- Courses
 CREATE TABLE Courses (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -61,9 +42,8 @@ CREATE TABLE Courses (
     description TEXT,
     price DECIMAL(10, 2),
     duration INT,
-    student_limit INT DEFAULT 2,
     coach_id INT,
-    status ENUM('Active', 'Inactive', 'Full'),
+    status ENUM('Active', 'Inactive'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (coach_id) REFERENCES Users(id)
 );
@@ -100,6 +80,7 @@ CREATE TABLE Course_Registrations (
 --     FOREIGN KEY (service_id) REFERENCES Services(id)
 -- );
 
+
 -- Reset Password
 CREATE TABLE UserCode (
 	user_id int primary key,
@@ -108,12 +89,6 @@ CREATE TABLE UserCode (
     foreign key (user_id) references users(id)
 );
 
-
-CREATE TABLE Inventory_usage(
-    usage_id INT PRIMARY KEY AUTO_INCREMENT,
-    usage_name varchar(100),
-    last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
 
 -- Iventory
 CREATE TABLE Inventory (
@@ -125,44 +100,8 @@ CREATE TABLE Inventory (
     unit varchar(100),
     status enum('Available', 'In Use', 'Maintenance', 'Broken'),
     last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    usage_id int,
-	foreign key (usage_id)   references Inventory_usage(usage_id),
     foreign key (manager_id) references users(id)
-);
 
-
-
-INSERT INTO Inventory_usage(usage_name)
-VALUES 
-  ('item for rent'),
-  ('item for maintannance'),
-  ('item for sold'),
-  ('item for facility');
-
--- Blog
-CREATE TABLE Blogs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
-    content TEXT,
-    author_id INT,
-    course_id INT,
-    tags VARCHAR(255),
-    likes INT DEFAULT 0,
-    active BOOLEAN DEFAULT FALSE,
-    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES Users(id),
-    FOREIGN KEY (course_id) REFERENCES Courses(id)
-);
-
--- Blog Comments
-CREATE TABLE Blog_Comments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    blog_id INT,
-    user_id INT,
-    content TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (blog_id) REFERENCES Blogs(id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
 -- Feedbacks
@@ -180,17 +119,6 @@ CREATE TABLE Feedbacks (
     FOREIGN KEY (user_id) REFERENCES Users(id),
     FOREIGN KEY (coach_id) REFERENCES Users(id),
     FOREIGN KEY (course_id) REFERENCES Courses(id)
-);
-
-CREATE TABLE FeedbackReplies (
-     id INT PRIMARY KEY AUTO_INCREMENT,
-     feedback_id INT NOT NULL,
-     user_id INT NOT NULL,
-     content TEXT NOT NULL,
-     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-     FOREIGN KEY (feedback_id) REFERENCES Feedbacks(id),
-     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
 -- Complaints
@@ -253,6 +181,16 @@ CREATE TABLE Tracking (
     FOREIGN KEY (course_id) REFERENCES Courses(id)
 );
 
+-- Blogs
+CREATE TABLE Blogs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200),
+    content TEXT,
+    author_id INT,
+    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES Users(id)
+);
+
 CREATE TABLE TicketType (
     id INT PRIMARY KEY AUTO_INCREMENT,
     type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,
@@ -284,6 +222,7 @@ CREATE TABLE Ticket (
     FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
 
+
 -- Study Roadmaps
 CREATE TABLE Study_Roadmaps (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -293,18 +232,8 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
-VALUES
-  (1, 'Gậy bơi', 'Thiết bị tập luyện', 100, 'cây', 'Available', NOW(), 1),
-  (1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', NOW(), 1),
-  (1, 'Phao tay', 'Phao cứu sinh', 80, 'cái', 'Available', NOW(), 1),
-  (1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', NOW(), 4),
-  (1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', NOW(), 4),
-  (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
-  (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
-  (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1);
+
+-- Add INSERT HERE
 
 -- Insert fake data for Users table
 INSERT INTO Users (full_name, email, password_hash, phone_number, address, dob, gender, role_id, user_status) VALUES
@@ -344,6 +273,16 @@ INSERT INTO UserCode (user_id, user_code, created_at) VALUES
 (7, 'DEF67890', '2023-05-16 11:45:00'),
 (8, 'GHI13579', '2023-05-17 09:15:00');
 
+-- Insert fake data for Inventory table
+INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status) VALUES
+(2, 'Swimming Goggles', 'Equipment', 50, 'Piece', 'Available'),
+(2, 'Swimming Caps', 'Equipment', 75, 'Piece', 'Available'),
+(2, 'Kickboards', 'Training', 30, 'Piece', 'Available'),
+(2, 'Pull Buoys', 'Training', 25, 'Piece', 'Available'),
+(2, 'Swim Fins', 'Training', 20, 'Pair', 'In Use'),
+(2, 'Lane Ropes', 'Facility', 10, 'Piece', 'Available'),
+(2, 'Cleaning Chemicals', 'Maintenance', 15, 'Bottle', 'Available');
+
 -- Insert fake data for Feedbacks table
 INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating) VALUES
 (6, 'Course', NULL, 1, NULL, 'Great course for beginners! I learned a lot.', 5),
@@ -353,141 +292,11 @@ INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feed
 (10, 'General', NULL, NULL, 'Service', 'The staff is friendly and helpful.', 5),
 (6, 'General', NULL, NULL, 'Food', 'The snack bar offers healthy options.', 3);
 
--- Insert more fake data for FeedbackReplies table
-INSERT INTO FeedbackReplies (feedback_id, user_id, content) VALUES
--- Replies to feedback #1 (Course feedback from user 6)
-(1, 3, 'Thank you for the positive feedback! I\'m glad the beginner course was helpful for you.'),
-(1, 2, 'We appreciate your review. Keep up the great work in your swimming journey!'),
-(1, 6, 'Thanks Mike! Looking forward to the intermediate course next month.'),
-(1, 4, 'That\'s wonderful to hear! The beginner course is designed to build confidence.'),
-(1, 6, 'Absolutely! I feel so much more confident in the water now.'),
-
--- Replies to feedback #2 (Coach feedback about Mike from user 7)
-(2, 3, 'Thank you so much! It\'s always rewarding to help students improve their swimming skills.'),
-(2, 7, 'You\'re the best coach! Thanks for being so patient with my technique.'),
-(2, 2, 'Mike is indeed one of our most dedicated coaches. Great to see this feedback!'),
-(2, 4, 'Collaboration between coaches helps us all improve. Well done Mike!'),
-
--- Replies to feedback #3 (General facility feedback from user 8)
-(3, 5, 'Thank you for noticing! Our maintenance team works hard to keep everything clean.'),
-(3, 2, 'We take pride in maintaining high standards for our facilities.'),
-(3, 8, 'Keep up the excellent work! The pool area always looks spotless.'),
-(3, 6, 'I agree! The cleanliness here is outstanding compared to other facilities.'),
-(3, 10, 'The attention to detail really shows. Thank you for maintaining such high standards.'),
-
--- Replies to feedback #4 (Competitive course feedback from user 9)
-(4, 4, 'I\'m thrilled you\'re enjoying the competitive program! You\'re making excellent progress.'),
-(4, 9, 'Thanks Lisa! The training is intense but I can feel myself getting stronger.'),
-(4, 3, 'The competitive program is challenging but very rewarding. Keep pushing!'),
-(4, 2, 'We\'re proud of all our competitive swimmers. Great dedication!'),
-
--- Replies to feedback #5 (Service feedback from user 10)
-(5, 5, 'We really appreciate your kind words! Our team strives to provide the best service.'),
-(5, 2, 'Thank you for taking the time to share your positive experience.'),
-(5, 6, 'The staff here is always so helpful and friendly!'),
-(5, 7, 'I second this! Everyone here makes you feel welcome.'),
-
--- Replies to feedback #6 (Food feedback from user 6)
-(6, 2, 'Thank you for the feedback. We\'re always looking to improve our snack bar offerings.'),
-(6, 6, 'Maybe consider adding more protein options for post-workout meals?'),
-(6, 5, 'We\'ll pass your suggestion to our food service team. Thanks for the input!'),
-(6, 9, 'More protein bars and shakes would be great after intense training sessions.'),
-(6, 10, 'Some fresh fruit options would also be nice!');
-
--- Insert additional Blogs
-INSERT INTO Blogs (title, content, author_id, course_id, tags, likes) VALUES
-('Winter Swimming: Staying Motivated During Cold Months', 'As temperatures drop, maintaining your swimming routine can be challenging. Here are proven strategies to stay motivated during winter months:\n\n1. Set indoor goals and challenges\n2. Focus on technique improvement\n3. Join group training sessions\n4. Track your progress with apps\n5. Reward yourself for consistency\n\nRemember, consistency beats intensity. Even shorter sessions are better than no sessions at all!', 3, NULL, 'winter,motivation,consistency,training', 19),
-
-('Breathing Techniques for Better Performance', 'Proper breathing is fundamental to swimming efficiency. Many swimmers struggle with breathing rhythm, which can limit their performance and endurance.\n\nKey breathing principles:\n- Exhale underwater through nose and mouth\n- Turn head, don\'t lift it\n- Practice bilateral breathing\n- Maintain steady rhythm\n- Don\'t hold your breath\n\nMaster these basics and watch your swimming transform!', 4, 2, 'breathing,technique,performance,fundamentals', 34),
-
-('Pool Etiquette: Sharing Lanes Respectfully', 'Swimming in shared lanes requires courtesy and awareness. Here\'s your guide to pool etiquette:\n\n**Lane Selection:**\n- Choose appropriate speed lane\n- Ask before joining occupied lane\n- Observe posted lane directions\n\n**Swimming Protocol:**\n- Stay to the right side\n- Pass on the left when faster\n- Rest at lane ends, not middle\n- Use equipment considerately\n\nGood etiquette creates a pleasant environment for everyone!', 2, NULL, 'etiquette,pool-rules,courtesy,sharing', 26),
-
-('Swimming Gear Essentials for Beginners', 'Starting your swimming journey? Here\'s what you really need versus what\'s nice to have:\n\n**Essential Gear:**\n- Proper fitting swimsuit\n- Goggles (most important!)\n- Towel and water bottle\n\n**Helpful Additions:**\n- Kickboard for technique practice\n- Pull buoy for arm strength\n- Swim cap for hair protection\n- Waterproof watch for timing\n\nStart simple, add equipment as you progress!', 3, 1, 'gear,equipment,beginners,essentials', 22),
-
-('Overcoming Fear of Deep Water', 'Water anxiety is more common than you think. If deep water makes you nervous, you\'re not alone. Here\'s how to build confidence:\n\n**Gradual Exposure:**\n- Start in shallow end\n- Practice floating with support\n- Use flotation aids initially\n- Focus on breathing control\n\n**Mental Techniques:**\n- Visualization exercises\n- Positive self-talk\n- Set small, achievable goals\n- Celebrate every success\n\nRemember: every expert was once a beginner!', 3, NULL, 'fear,anxiety,confidence,mental-health', 41),
-
-('Swimming Injuries: Prevention and Recovery', 'Swimming is low-impact, but injuries can still occur. Most swimming injuries are preventable with proper technique and preparation.\n\n**Common Issues:**\n- Shoulder impingement\n- Lower back strain  \n- Knee pain from breaststroke\n- Neck tension\n\n**Prevention Tips:**\n- Warm up thoroughly\n- Focus on proper technique\n- Strengthen supporting muscles\n- Listen to your body\n- Don\'t ignore pain\n\nWhen in doubt, consult a healthcare professional!', 4, NULL, 'injury,prevention,health,recovery,safety', 18),
-
-('The Benefits of Open Water Swimming', 'Ready to take your swimming beyond the pool? Open water swimming offers unique challenges and rewards:\n\n**Physical Benefits:**\n- Full-body workout in varied conditions\n- Improved navigation skills\n- Enhanced mental toughness\n- Connection with nature\n\n**Getting Started:**\n- Master pool swimming first\n- Start in calm, supervised waters\n- Swim with experienced partners\n- Use proper safety equipment\n- Check weather and water conditions\n\nOpen water swimming can transform your relationship with the sport!', 4, 3, 'open-water,nature,adventure,challenge', 29);
-
--- Insert fake data for Blog_Comments table  
-INSERT INTO Blog_Comments (blog_id, user_id, content) VALUES
--- Comments on Blog #1 (Benefits of Swimming) - 5 comments
-(1, 6, 'This article really motivated me to start swimming regularly! Thanks for sharing.'),
-(1, 7, 'I never realized swimming worked so many muscle groups. Great information!'),
-(1, 8, 'As someone who just started swimming, this is very encouraging.'),
-(1, 10, 'Swimming has changed my life. Best decision I ever made for my health.'),
-(1, 9, 'Swimming has helped me recover from a knee injury. Low-impact is perfect!'),
-
--- Comments on Blog #2 (Preparing for Your First Competition) - 4 comments
-(2, 9, 'Perfect timing! I have my first competition next month. These tips are gold.'),
-(2, 7, 'The mental preparation section is so helpful. I get nervous before races.'),
-(2, 4, 'Great advice! I wish I had read this before my first competition years ago.'),
-(2, 8, 'The pre-race routine section helped calm my nerves significantly.'),
-
--- Comments on Blog #3 (Water Safety Tips for Summer) - 5 comments
-(3, 6, 'Every parent should read this. Water safety is so important.'),
-(3, 10, 'Sharing this with my family. These tips could save lives.'),
-(3, 8, 'The section about recognizing drowning signs is eye-opening.'),
-(3, 9, 'Shared this with my entire family. Water safety can\'t be emphasized enough.'),
-(3, 4, 'Every coach should share these tips with their students.'),
-
--- Comments on Blog #4 (Nutrition for Swimmers) - 4 comments
-(4, 9, 'I\'ve been struggling with what to eat before practice. This helps a lot!'),
-(4, 7, 'The post-workout meal suggestions are perfect. Thanks coach!'),
-(4, 6, 'Never thought about timing my meals around swimming. Will try this.'),
-(4, 8, 'The hydration tips are spot on. I used to underestimate water intake.'),
-
--- Comments on Blog #5 (Improving Your Freestyle Technique) - 5 comments
-(5, 8, 'The step-by-step breakdown is excellent. Finally understand the catch phase!'),
-(5, 6, 'My freestyle has improved so much after following these tips.'),
-(5, 10, 'The video references would be helpful too. Any plans for that?'),
-(5, 7, 'My stroke efficiency improved dramatically after following this guide.'),
-(5, 9, 'The catch phase explanation finally made sense to me!'),
-
--- Comments on Blog #6 (Common Swimming Mistakes to Avoid) - 4 comments
-(6, 7, 'Guilty of mistake #2! Working on keeping my head down now.'),
-(6, 9, 'This list is spot on. I made all these mistakes when I started.'),
-(6, 6, 'Wish I had read this when I first learned to swim. Would have saved time!'),
-(6, 8, 'Guilty of all five mistakes when I started! This would have saved me months.'),
-
--- Comments on Blog #7 (The Science Behind Swimming Efficiency) - 5 comments
-(7, 8, 'Fascinating read! The physics explanation makes so much sense.'),
-(7, 9, 'This scientific approach really helps me understand the \'why\' behind technique.'),
-(7, 6, 'The physics explanation helps me understand why technique matters so much.'),
-(7, 10, 'This scientific approach makes swimming more interesting and logical.'),
-(7, 4, 'Excellent breakdown of complex concepts in simple terms!');
-
--- Insert more Blog Comments
-INSERT INTO Blog_Comments (blog_id, user_id, content) VALUES
--- Additional comments on existing blogs for more engagement
--- Benefits of Swimming blog
-(1, 9, 'Swimming has helped me recover from a knee injury. Low-impact is perfect!'),
-(1, 4, 'Great to see such positive responses! Swimming truly is for everyone.'),
-
--- Preparing for Competition blog
-(2, 8, 'The pre-race routine section helped calm my nerves significantly.'),
-(2, 6, 'Mental preparation is just as important as physical training!'),
-
--- Water Safety blog
-(3, 9, 'Shared this with my entire family. Water safety can\'t be emphasized enough.'),
-(3, 4, 'Every coach should share these tips with their students.'),
-
--- Nutrition blog
-(4, 8, 'The hydration tips are spot on. I used to underestimate water intake.'),
-(4, 10, 'Post-workout nutrition timing has improved my recovery so much!'),
-
--- Freestyle Technique blog
-(5, 7, 'My stroke efficiency improved dramatically after following this guide.'),
-(5, 9, 'The catch phase explanation finally made sense to me!'),
-
--- Common Mistakes blog
-(6, 8, 'Guilty of all five mistakes when I started! This would have saved me months.'),
-(6, 10, 'The body rotation tip was eye-opening. Game changer!'),
-
--- Science Behind Swimming blog
-(7, 6, 'The physics explanation helps me understand why technique matters so much.'),
-(7, 10, 'This scientific approach makes swimming more interesting and logical.');
+-- Insert fake data for Complaints table
+INSERT INTO Complaints (user_id, staff_id, content, status) VALUES
+(7, 5, 'The water temperature was too cold during my last session.', 'Resolved'),
+(8, 5, 'The changing rooms need better ventilation.', 'In Progress'),
+(9, 5, 'One of the showers is not working properly.', 'New');
 
 -- Insert fake data for Schedules table
 INSERT INTO Schedules (course_id, coach_id, start_time, end_time, location) VALUES
@@ -542,21 +351,45 @@ INSERT INTO Study_Roadmaps (title, content, created_by) VALUES
 ('Competitive Swimming Preparation', 'Month 1: Build endurance...\nMonth 2: Speed training...\nMonth 3: Competition strategies...', 4),
 ('Water Safety Certification Path', 'Step 1: Basic water safety...\nStep 2: Rescue techniques...\nStep 3: First aid certification...', 2);
 
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
-VALUES
-  (1, 'Gậy bơi', 'Thiết bị tập luyện', 100, 'cây', 'Available', NOW(), 1),
-  (1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', NOW(), 1),
-  (1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', NOW(), 4),
-  (1, 'Phao tay', 'Phao cứu sinh', 80, 'cái', 'Available', NOW(), 1),
-  (1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', NOW(), 4),
-  (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
-  (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
-  (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1);
+-- Maintenance Schedule table
+CREATE TABLE Maintenance_Schedule (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    frequency ENUM('Daily', 'Weekly', 'Monthly'),
+    assigned_staff_id INT,
+    scheduled_time TIME,
+    status ENUM('Scheduled', 'Completed', 'Missed') DEFAULT 'Scheduled',
+    created_by INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (assigned_staff_id) REFERENCES Users(id),
+    FOREIGN KEY (created_by) REFERENCES Users(id)
+);
 
--- Insert fake data for Complaints table
-INSERT INTO Complaints (user_id, staff_id, content, status) VALUES
-(7, 5, 'The water temperature was too cold during my last session.', 'Resolved'),
-(8, 5, 'The changing rooms need better ventilation.', 'In Progress'),
-(9, 5, 'One of the showers is not working properly.', 'New');
+-- Maintenance Log table
+CREATE TABLE Maintenance_Log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    schedule_id INT,
+    staff_id INT,
+    maintenance_date DATE,
+    note TEXT,
+    status ENUM('Done', 'Missed', 'Rescheduled'),
+    log_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (schedule_id) REFERENCES Maintenance_Schedule(id),
+    FOREIGN KEY (staff_id) REFERENCES Users(id)
+);
+
+-- Insert sample daily maintenance schedules
+INSERT INTO Maintenance_Schedule (title, description, frequency, assigned_staff_id, scheduled_time, created_by)
+VALUES
+('Check Bathroom Cleanliness', 'Ensure all toilets and sinks are clean', 'Daily', 5, '08:00:00', 1),
+('Clean Pool Trash', 'Remove debris from pool and surroundings', 'Daily', 5, '07:30:00', 2),
+('Check Locker Rooms', 'Inspect and clean locker rooms', 'Daily', 5, '09:00:00', 1);
+
+-- Insert sample maintenance logs
+INSERT INTO Maintenance_Log (schedule_id, staff_id, maintenance_date, note, status)
+VALUES
+(1, 5, '2025-06-22', 'All bathrooms clean', 'Done'),
+(2, 5, '2025-06-22', 'Removed leaves and plastic bottles', 'Done'),
+(3, 5, '2025-06-22', 'Locker room floor mopped and cleaned properly', 'Done');
+

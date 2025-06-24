@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/maintenance")
@@ -100,10 +101,14 @@ public class MaintenanceServlet extends HttpServlet {
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<User> staffList = userDAO.getAllStaff();  // Lấy danh sách nhân viên
+        if (staffList == null) {
+            staffList = new ArrayList<>();  // Đảm bảo không null nếu không có nhân viên
+        }
         request.setAttribute("staffList", staffList);  // Truyền danh sách nhân viên vào request
         RequestDispatcher dispatcher = request.getRequestDispatcher("maintenance-form.jsp");
         dispatcher.forward(request, response);
     }
+
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -123,7 +128,15 @@ public class MaintenanceServlet extends HttpServlet {
             String description = request.getParameter("description");
             String frequency = request.getParameter("frequency");
             int staffId = Integer.parseInt(request.getParameter("assignedStaffId"));
-            java.sql.Time scheduledTime = java.sql.Time.valueOf(request.getParameter("scheduledTime"));
+
+            String scheduledTimeStr = request.getParameter("scheduledTime");
+            java.sql.Time scheduledTime = null;
+
+            if (scheduledTimeStr != null && !scheduledTimeStr.isEmpty()) {
+                // Kiểm tra định dạng thời gian và chuyển thành java.sql.Time
+                scheduledTime = java.sql.Time.valueOf(scheduledTimeStr + ":00");  // Thêm :00 để tạo định dạng đầy đủ HH:mm:ss
+            }
+
             String status = request.getParameter("status");
 
             HttpSession session = request.getSession();
@@ -138,16 +151,21 @@ public class MaintenanceServlet extends HttpServlet {
             schedule.setStatus(status);
             schedule.setCreatedBy(user.getId());
 
-            maintenanceDAO.insertSchedule(schedule);  // Gọi DAO để thêm lịch bảo trì
+            // Thêm lịch bảo trì vào cơ sở dữ liệu
+            maintenanceDAO.insertSchedule(schedule);
+
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra khi thêm lịch bảo trì.");
+            // Truyền thông báo lỗi về phía JSP
+            request.setAttribute("error", "Có lỗi xảy ra khi thêm lịch bảo trì. Vui lòng thử lại.");
             request.getRequestDispatcher("maintenance-form.jsp").forward(request, response);
             return;
         }
 
         response.sendRedirect("maintenance");  // Sau khi thêm thành công, chuyển về trang danh sách
     }
+
+
 
     // Xử lý cập nhật lịch bảo trì
     private void updateSchedule(HttpServletRequest request, HttpServletResponse response)

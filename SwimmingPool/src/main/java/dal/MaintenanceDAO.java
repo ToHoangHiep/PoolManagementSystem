@@ -372,6 +372,57 @@ public class MaintenanceDAO {
     }
 
 
+    public List<MaintenanceSchedule> getSchedulesForStaff(int staffId, int pageNo, int pageSize) {
+        List<MaintenanceSchedule> list = new ArrayList<>();
+        int offset = (pageNo - 1) * pageSize;
+
+        String sql = """
+            SELECT ms.*, 
+                   staff.full_name AS staff_name, 
+                   creator.full_name AS creator_name
+            FROM Maintenance_Schedule ms
+            LEFT JOIN Users staff ON ms.assigned_staff_id = staff.id
+            LEFT JOIN Users creator ON ms.created_by = creator.id
+            WHERE ms.assigned_staff_id = ?  -- Lọc theo staffId
+            ORDER BY ms.scheduled_time
+            LIMIT ? OFFSET ?
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, staffId);  // Lọc theo staffId
+            ps.setInt(2, pageSize); // Số bản ghi mỗi trang
+            ps.setInt(3, offset);   // Vị trí bắt đầu của trang (OFFSET)
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    MaintenanceSchedule m = new MaintenanceSchedule();
+                    m.setId(rs.getInt("id"));
+                    m.setTitle(rs.getString("title"));
+                    m.setDescription(rs.getString("description"));
+                    m.setFrequency(rs.getString("frequency"));
+                    m.setAssignedStaffId(rs.getInt("assigned_staff_id"));
+                    m.setScheduledTime(rs.getTime("scheduled_time"));
+                    m.setStatus(rs.getString("status"));
+                    m.setCreatedBy(rs.getInt("created_by"));
+                    m.setCreatedAt(rs.getTimestamp("created_at"));
+                    m.setAssignedStaffName(rs.getString("staff_name"));
+                    m.setCreatedByName(rs.getString("creator_name"));
+
+                    list.add(m);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+
+
 
 
 

@@ -182,7 +182,7 @@
                 <table class="table table-hover">
                     <thead>
                     <tr>
-                        <th>ID</th>
+
                         <th>Title</th>
                         <th>Description</th>
                         <th>Frequency</th>
@@ -195,7 +195,7 @@
                     <tbody>
                     <% for (MaintenanceSchedule m : schedules) { %>
                     <tr>
-                        <td><%= m.getId() %></td>
+
                         <td><%= m.getTitle() %></td>
                         <td><%= m.getDescription() %></td>
                         <td><%= m.getFrequency() %></td>
