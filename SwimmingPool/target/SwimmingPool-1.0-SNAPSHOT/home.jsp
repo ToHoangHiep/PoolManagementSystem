@@ -244,6 +244,10 @@
     <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
     <a href="admin-user">User List</a>
     <% } %>
+    <%-- Chỉ hiện "User List" nếu là Admin --%>
+    <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
+    <a href="equipment-rental">Equiqment Rental</a>
+    <% } %>
   </div>
 
   <div class="auth">
