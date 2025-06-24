@@ -7,66 +7,8 @@
 <html>
 <head>
   <title><%= inv != null ? "Cập nhật thiết bị" : "Thêm thiết bị mới" %></title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f6f8;
-      padding: 40px;
-    }
+  <link rel="stylesheet" href="./Resources/CSS/inventoryForm.css">
 
-    h2 {
-      color: #333;
-    }
-
-    form {
-      background-color: #fff;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      max-width: 500px;
-      margin: auto;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    input[type="number"],
-    select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    input[type="submit"] {
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-
-    input[type="submit"]:hover {
-      background-color: #45a049;
-    }
-
-    a {
-      text-decoration: none;
-      color: #2196F3;
-      font-weight: bold;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
 </head>
 <body>
 <h2 style="text-align: center;"><%= inv != null ? "Update Item" : "Add New Item" %></h2>
@@ -98,6 +40,15 @@
     <option value="Maintenance" <%= (inv != null && "Maintenance".equals(inv.getStatus())) ? "selected" : "" %>>Maintenance</option>
     <option value="Broken" <%= (inv != null && "Broken".equals(inv.getStatus())) ? "selected" : "" %>>Broken</option>
   </select>
+
+  <select name="usage_id">
+    <option value="1">item for rent</option>
+    <option value="2">item for maintainance</option>
+    <option value="3">item for sold</option>
+    <option value="1">item for facility</option>
+
+  </select>
+
 
   <input type="submit" value="Save"/>
   <a href="inventory">Return</a>
