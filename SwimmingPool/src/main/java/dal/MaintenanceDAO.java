@@ -114,24 +114,6 @@ public class MaintenanceDAO {
         }
     }
 
-    public static void main(String[] args) {
-        // Tạo đối tượng MaintenanceSchedule và gán giá trị cho các trường
-        MaintenanceSchedule schedule = new MaintenanceSchedule();
-        schedule.setTitle("Bảo trì bể bơi");
-        schedule.setDescription("Bảo trì hàng tháng cho bể bơi chính");
-        schedule.setFrequency("Monthly");
-        schedule.setAssignedStaffId(2);  // Ví dụ nhân viên có id = 2
-        schedule.setScheduledTime(Time.valueOf("10:00:00"));  // Thời gian bảo trì là 10:00 AM
-        schedule.setStatus("Scheduled");
-        schedule.setCreatedBy(1);  // Ví dụ người tạo có id = 1 (Admin)
-
-        // Tạo đối tượng MaintenanceDAO và gọi phương thức insertSchedule
-        MaintenanceDAO maintenanceDAO = new MaintenanceDAO();
-        maintenanceDAO.insertSchedule(schedule);
-
-        System.out.println("Đã thêm lịch bảo trì mới vào cơ sở dữ liệu.");
-    }
-
     // Phương thức xóa lịch bảo trì
     public void deleteSchedule(int scheduleId) {
         String sql = "DELETE FROM Maintenance_Schedule WHERE id = ?";
