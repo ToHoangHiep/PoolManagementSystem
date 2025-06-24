@@ -132,6 +132,22 @@ textarea {
   boolean existing = feedback != null;
 %>
 
+<%
+    if (request.getAttribute("alert_message") != null) {
+        String alertMessage = (String) request.getAttribute("alert_message");
+        String alertAction = (String) request.getAttribute("alert_action");
+        boolean existPostAction = request.getAttribute("alert_action") != null;
+%>
+<script>
+    alert("<%= alertMessage %>");
+    if (<%= existPostAction %>) {
+        window.location.href = "${pageContext.request.contextPath}<%= alertAction %>";
+    }
+</script>
+<%
+    }
+%>
+
 <h1><i class="fa fa-comments-o" aria-hidden="true"></i> <%=existing ? "Edit" : "Submit" %> Feedback</h1>
 
 <form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">

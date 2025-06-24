@@ -9,223 +9,7 @@
   <title>Swimming Pool - Home Page</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html, body {
-      height: 100%;
-      font-family: Arial, sans-serif;
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background-image: url('https://images.pexels.com/photos/221457/pexels-photo-221457.jpeg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      color: white;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0, 92, 170, 0.9);
-      padding: 15px 30px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 999;
-      backdrop-filter: blur(4px);
-    }
-
-    .logo {
-      font-size: 26px;
-      font-weight: bold;
-    }
-
-    .nav-links a {
-      color: white;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: 500;
-    }
-
-    .nav-links a:hover {
-      text-decoration: underline;
-    }
-
-    .auth {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .auth a.login-btn,
-    .auth a.register-btn,
-    .auth form input[type="submit"] {
-      padding: 8px 16px;
-      background-color: #ffffff;
-      color: #005caa;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .auth a.login-btn:hover,
-    .auth a.register-btn:hover,
-    .auth form input[type="submit"]:hover {
-      background-color: #e6e6e6;
-    }
-
-    .hero {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 0 10%;
-      background: rgba(0, 0, 0, 0.5);
-    }
-
-    .hero-content h4 {
-      color: #00d4ff;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-
-    .hero-content h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    .hero-content p {
-      font-size: 18px;
-      margin-bottom: 30px;
-    }
-
-    .hero-content .btn {
-      padding: 12px 20px;
-      margin: 5px;
-      border: none;
-      border-radius: 4px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary {
-      background-color: #005caa;
-      color: white;
-    }
-
-    .btn-outline {
-      background-color: transparent;
-      border: 2px solid white;
-      color: white;
-    }
-
-    .btn-outline:hover {
-      background: white;
-      color: #005caa;
-    }
-
-    .section {
-      padding: 80px 10%;
-      background: white;
-      color: #333;
-    }
-
-    .flex-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 40px;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .flex-row.reverse {
-      flex-direction: row-reverse;
-    }
-
-    .image-box {
-      flex: 1;
-      min-width: 280px;
-    }
-
-    .image-box img {
-      width: 100%;
-      max-width: 500px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    .text-box {
-      flex: 1;
-      min-width: 280px;
-    }
-
-    .text-box h2 {
-      font-size: 32px;
-      color: #005caa;
-      margin-bottom: 20px;
-    }
-
-    .text-box p {
-      font-size: 16px;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    .text-box ul {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    .text-box li {
-      margin-bottom: 10px;
-      padding-left: 20px;
-      position: relative;
-    }
-
-    .text-box li::before {
-      content: "\2714";
-      color: #005caa;
-      position: absolute;
-      left: 0;
-    }
-
-    footer {
-      background: #003e73;
-      color: white;
-      padding: 30px 10%;
-      text-align: center;
-    }
-
-    footer p {
-      margin-bottom: 5px;
-    }
-
-    @media (max-width: 768px) {
-      .hero-content h1 {
-        font-size: 36px;
-      }
-
-      .flex-row,
-      .flex-row.reverse {
-        flex-direction: column !important;
-        text-align: center;
-      }
-    }
-  </style>
+  <link rel="stylesheet" type="text/css" href="Resources/CSS/home.css">
 </head>
 
 <body>
@@ -236,6 +20,7 @@
     <a href="#">Home</a>
     <a href="#about">About Us</a>
     <a href="#services">Services</a>
+    <a href="blogs">Community Blogs</a>
     <a href="#gallery">Gallery</a>
     <a href="#contact">Contact</a>
   </div>
@@ -306,6 +91,53 @@
         <li><a href="ticketPurchase.jsp" style="color: #005caa; font-weight: bold;">Ticket Purchase</a></li>
       </ul>
     </div>
+  </div>
+</div>
+
+<!-- Community Blog Section -->
+<div class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+  <div style="text-align: center; padding: 50px 20px;">
+    <h2 style="color: white; margin-bottom: 20px; font-size: 2.5em;">Join Our Swimming Community!</h2>
+    <p style="font-size: 1.2em; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+      Connect with fellow swimmers, share your experiences, read swimming tips, and learn from our community of pool enthusiasts.
+    </p>
+    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
+      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; min-width: 200px;">
+        <i class="fas fa-blog" style="font-size: 2em; margin-bottom: 10px;"></i>
+        <h4>Read & Share</h4>
+        <p>Browse swimming tips, techniques, and stories</p>
+      </div>
+      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; min-width: 200px;">
+        <i class="fas fa-users" style="font-size: 2em; margin-bottom: 10px;"></i>
+        <h4>Community</h4>
+        <p>Connect with swimmers of all skill levels</p>
+      </div>
+      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; min-width: 200px;">
+        <i class="fas fa-comments" style="font-size: 2em; margin-bottom: 10px;"></i>
+        <h4>Discuss</h4>
+        <p>Comment and engage in meaningful conversations</p>
+      </div>
+    </div>
+    <% if (user == null) { %>
+    <p style="font-size: 1.1em; margin-bottom: 20px;">
+      <strong>Browse as a guest</strong> or <strong>sign in to participate!</strong>
+    </p>
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+      <a href="blogs" style="background: rgba(255,255,255,0.9); color: #667eea; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;">
+        <i class="fas fa-eye"></i> Browse Blogs
+      </a>
+      <a href="login.jsp" style="background: white; color: #667eea; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;">
+        <i class="fas fa-sign-in-alt"></i> Sign In to Join
+      </a>
+    </div>
+    <% } else { %>
+    <p style="font-size: 1.1em; margin-bottom: 20px;">
+      <strong>Welcome back, <%= user.getFullName() %>!</strong> Ready to share your swimming knowledge?
+    </p>
+    <a href="blogs" style="background: white; color: #667eea; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;">
+      <i class="fas fa-blog"></i> Visit Community Blogs
+    </a>
+    <% } %>
   </div>
 </div>
 

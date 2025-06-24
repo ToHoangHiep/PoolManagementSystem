@@ -32,7 +32,7 @@
     alert("<%= alertMessage %>");
 
     if (<%= existPostAction %>) {
-        window.location.href = "<%= alertAction %>";
+        window.location.href = "${pageContext.request.contextPath}<%= alertAction %>";
     }
 </script>
 <%
@@ -66,19 +66,6 @@
                 <span class="toggle-label <%= showAll ? "active" : "" %>">
                     <i class="fas fa-users"></i> All Users
                 </span>
-            </div>
-            
-            <!-- Data Freshness Indicator -->
-            <div class="data-freshness">
-                <div class="freshness-info">
-                    <span id="dataFreshnessIndicator" class="freshness-indicator fresh" title="Data is up to date">
-                        <i class="fas fa-circle"></i>
-                    </span>
-                    <span id="lastUpdated" class="timestamp">Last updated: <%= new java.util.Date() %></span>
-                </div>
-                <button type="button" id="refreshBtn" class="btn-refresh" onclick="refreshAdminData()" title="Refresh data">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
             </div>
         </div>
         <% } %>
@@ -202,68 +189,22 @@
                     <!-- Table Body -->
                     <tbody id="feedbackTableBody">
                     <%
-                        // For admins, handle both datasets
+                        // Determine which feedback list to display based on admin status and toggle
+                        List<Feedback> feedbackToDisplay = null;
+
                         if (isAdmin) {
+                            // For admins: choose between personal and all feedback based on toggle
                             List<Feedback> personalFeedback = (List<Feedback>) request.getAttribute("personal_feedback_list");
                             List<Feedback> allFeedback = (List<Feedback>) request.getAttribute("all_feedback_list");
 
-                            // Store both datasets in JavaScript variables
-                    %>
-                    <script>
-                        window.personalFeedbackData = [
-                            <% if (personalFeedback != null) {
-                                for (int i = 0; i < personalFeedback.size(); i++) {
-                                    Feedback feedback = personalFeedback.get(i); %>
-                            {
-                                id: <%= feedback.getId() %>,
-                                userId: <%= feedback.getUserId() %>,
-                                userName: '<%= feedback.getUserName() != null ? feedback.getUserName().replace("'", "\\'") : "N/A" %>',
-                                userEmail: '<%= feedback.getUserEmail() != null ? feedback.getUserEmail().replace("'", "\\'") : "" %>',
-                                feedbackType: '<%= feedback.getFeedbackType() %>',
-                                rating: <%= feedback.getRating() %>,
-                                content: '<%= feedback.getContent().replace("'", "\\'").replace("\n", "\\n") %>',
-                                createdAt: '<%= feedback.getCreatedAt() %>'
-                            }<%= i < personalFeedback.size() - 1 ? "," : "" %>
+                            feedbackToDisplay = showAll ? allFeedback : personalFeedback;
+                        } else {
+                            // For non-admins: use the regular feedback list
+                            feedbackToDisplay = (List<Feedback>) request.getAttribute("feedback_list");
+                        }
 
-                            <%
-                                } 
-                            } 
-                            %>
-                        ];
-
-                        window.allFeedbackData = [
-                            <% if (allFeedback != null) {
-                                for (int i = 0; i < allFeedback.size(); i++) {
-                                    Feedback feedback = allFeedback.get(i); %>
-                            {
-                                id: <%= feedback.getId() %>,
-                                userId: <%= feedback.getUserId() %>,
-                                userName: '<%= feedback.getUserName() != null ? feedback.getUserName().replace("'", "\\'") : "N/A" %>',
-                                userEmail: '<%= feedback.getUserEmail() != null ? feedback.getUserEmail().replace("'", "\\'") : "" %>',
-                                feedbackType: '<%= feedback.getFeedbackType() %>',
-                                rating: <%= feedback.getRating() %>,
-                                content: '<%= feedback.getContent().replace("'", "\\'").replace("\n", "\\n") %>',
-                                createdAt: '<%= feedback.getCreatedAt() %>'
-                            }<%= i < allFeedback.size() - 1 ? "," : "" %>
-
-                            <% 
-                                } 
-                            } 
-                            %>
-                        ];
-
-                        window.currentUserId = <%= user.getId() %>;
-                        window.isAdmin = true;
-                    </script>
-
-                    <!-- Initial display will be populated by JavaScript -->
-
-                    <%
-                    } else {
-                        // For non-admins, display normally
-                        List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedback_list");
-                        if (feedbackList != null && !feedbackList.isEmpty()) {
-                            for (Feedback feedback : feedbackList) {
+                        if (feedbackToDisplay != null && !feedbackToDisplay.isEmpty()) {
+                            for (Feedback feedback : feedbackToDisplay) {
                     %>
                     <!-- Feedback Row -->
                     <tr>
@@ -350,13 +291,20 @@
                                                 type: '<%= feedback.getFeedbackType() %>',
                                                 rating: <%= feedback.getRating() %>,
                                                 date: '<%= feedback.getCreatedAt() %>',
-                                                content: '<%= feedback.getContent() %>',
-                                                userName: '<%= feedback.getUserName() != null ? feedback.getUserName() : "N/A" %>',
-                                                userEmail: '<%= feedback.getUserEmail() != null ? feedback.getUserEmail() : "" %>'
+                                                content: '<%= feedback.getContent().replace("'", "\\'").replace("\n", "\\n") %>',
+                                                userName: '<%= feedback.getUserName() != null ? feedback.getUserName().replace("'", "\\'") : "N/A" %>',
+                                                userEmail: '<%= feedback.getUserEmail() != null ? feedback.getUserEmail().replace("'", "\\'") : "" %>'
                                                 }, <%= feedback.getUserId() == user.getId() %>)"
                                         title="Preview">
                                     <i class="fas fa-eye"></i>
                                 </button>
+
+                                <!-- Reply Button -->
+                                <a href="feedback?action=chat&id=<%= feedback.getId() %>"
+                                   class="btn-icon btn-reply"
+                                   title="Chat/Reply">
+                                    <i class="fas fa-comment"></i>
+                                </a>
 
                                 <%
                                     User currentUser = (User) session.getAttribute("user");
@@ -396,7 +344,6 @@
                     </tr>
                     <%
                             }
-                        }
                     %>
                     </tbody>
                 </table>
@@ -461,6 +408,10 @@
 
             <!-- Modal Actions -->
             <div class="modal-actions">
+                <a href="#" id="modalReplyBtn" class="modal-btn modal-btn-reply">
+                    <i class="fas fa-comment"></i> Chat/Reply
+                </a>
+
                 <a href="#" id="modalEditBtn" class="modal-btn modal-btn-edit">
                     <i class="fas fa-edit"></i> Edit
                 </a>
