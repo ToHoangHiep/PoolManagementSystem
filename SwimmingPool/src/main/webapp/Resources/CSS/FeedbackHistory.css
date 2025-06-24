@@ -131,80 +131,6 @@ input:checked + .slider:hover {
     background-color: rgba(255, 255, 255, 0.95);
 }
 
-/* Data Freshness Styles */
-.data-freshness {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.freshness-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.freshness-indicator {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.freshness-indicator.fresh {
-    color: #4caf50;
-}
-
-.freshness-indicator.stale {
-    color: #ff9800;
-}
-
-.freshness-indicator i {
-    font-size: 8px;
-}
-
-.timestamp {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
-    font-style: italic;
-}
-
-.btn-refresh {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.btn-refresh:hover {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-1px);
-}
-
-.btn-refresh:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.btn-refresh i {
-    font-size: 10px;
-}
-
 /* Layout Components */
 .content {
     padding: 30px;
@@ -314,6 +240,10 @@ input:checked + .slider:hover {
 
 .btn-delete:hover {
     color: #dc3545;
+}
+
+.btn-reply:hover {
+    color: #17a2b8;
 }
 
 .btn-preview:hover {

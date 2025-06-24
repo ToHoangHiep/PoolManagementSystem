@@ -97,5 +97,13 @@
         <url-pattern>/inventory</url-pattern>
     </servlet-mapping>
 
-    <!-- TODO - ERROR HANDLER -->
+    <servlet>
+        <servlet-name>BlogServlet</servlet-name>
+        <servlet-class>controller.BlogsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>BlogServlet</servlet-name>
+        <url-pattern>/blogs</url-pattern>
+    </servlet-mapping>
 </web-app>

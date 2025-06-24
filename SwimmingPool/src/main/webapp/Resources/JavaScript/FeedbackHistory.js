@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDeleteFunctionality();
     initializeModalEvents();
     toggleFilterFields();
-    checkRefreshNeeded();
     
     // Initialize admin view if user is admin
     if (window.isAdmin) {
@@ -115,6 +114,7 @@ function previewFeedback(feedbackData, allowEdit = false) {
     const modalUserEmail = document.getElementById('modalUserEmail');
     const editBtn = document.getElementById('modalEditBtn');
     const deleteBtn = document.getElementById('modalDeleteBtn');
+    const replyBtn = document.getElementById('modalReplyBtn');
 
     // Populate modal with feedback data
     modalType.textContent = feedbackData.type;
@@ -130,6 +130,7 @@ function previewFeedback(feedbackData, allowEdit = false) {
     editBtn.href = `feedback?action=edit&feedback_id=${feedbackData.id}`;
     editBtn.style.display = allowEdit ? 'inline-block' : 'none';
     deleteBtn.onclick = () => confirmDeleteFromModal(feedbackData.id);
+    replyBtn.href = `feedback?action=chat&id=${feedbackData.id}`;
 
     // Show modal
     modal.style.display = 'block';
@@ -172,9 +173,6 @@ function initializeAdminView() {
     const urlParams = new URLSearchParams(window.location.search);
     const showAll = urlParams.get('show_all') === 'true';
     
-    // Render the appropriate dataset
-    renderFeedbackTable(showAll);
-    
     // Update toggle state
     const toggle = document.getElementById('viewToggle');
     if (toggle) {
@@ -183,42 +181,23 @@ function initializeAdminView() {
     }
 }
 
-// Optimized Toggle View Function (No Server Requests)
+// Simple Toggle View Function (Server-Side)
 function toggleView(showAll) {
-    if (window.isAdmin) {
-        // For admins: Use client-side data toggle
-        renderFeedbackTable(showAll);
-        updateToggleLabels(showAll);
-        
-        // Update URL without page reload (optional, for bookmarking)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (showAll) {
-            urlParams.set('show_all', 'true');
-        } else {
-            urlParams.delete('show_all');
-        }
-        urlParams.set('mode', 'list');
-        
-        // Update URL in browser without reload
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-        window.history.replaceState({}, '', newUrl);
-        
-        // Update hidden form field for filter form
-        const hiddenField = document.querySelector('input[name="show_all"]');
-        if (hiddenField) {
-            hiddenField.value = showAll ? 'true' : 'false';
-        }
+    // Get current URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Update or add the show_all parameter
+    if (showAll) {
+        urlParams.set('show_all', 'true');
     } else {
-        // For non-admins: Fall back to server request (shouldn't happen)
-        const urlParams = new URLSearchParams(window.location.search);
-        if (showAll) {
-            urlParams.set('show_all', 'true');
-        } else {
-            urlParams.delete('show_all');
-        }
-        urlParams.set('mode', 'list');
-        window.location.href = `feedback?${urlParams.toString()}`;
+        urlParams.delete('show_all');
     }
+    
+    // Keep the mode=list parameter
+    urlParams.set('mode', 'list');
+    
+    // Redirect to the new URL
+    window.location.href = `feedback?${urlParams.toString()}`;
 }
 
 function updateToggleLabels(showAll) {
@@ -229,119 +208,6 @@ function updateToggleLabels(showAll) {
         personalLabel.classList.toggle('active', !showAll);
         allLabel.classList.toggle('active', showAll);
     }
-}
-//endregion
-
-//region Table Rendering
-function renderFeedbackTable(showAll) {
-    const tableBody = document.getElementById('feedbackTableBody');
-    const feedbackData = showAll ? window.allFeedbackData : window.personalFeedbackData;
-    
-    if (!feedbackData || feedbackData.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" class="no-feedback">
-                    <i class="fas fa-comments"></i><br>
-                    No feedback records found<br>
-                    <small>Try adjusting your filters or submit some feedback!</small>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    tableBody.innerHTML = feedbackData.map(feedback => `
-        <tr>
-            <!-- Checkbox Column -->
-            <td>
-                <input type="checkbox" 
-                       name="selectedIds" 
-                       value="${feedback.id}" 
-                       class="feedback-checkbox">
-            </td>
-
-            <!-- User Information Column -->
-            <td>
-                <div class="user-info">
-                    <div class="user-name">
-                        <i class="fas fa-user"></i>
-                        ${feedback.userName}
-                    </div>
-                    <div class="user-email">
-                        ${feedback.userEmail}
-                    </div>
-                </div>
-            </td>
-
-            <!-- Feedback Type Column -->
-            <td>
-                <span class="badge badge-${feedback.feedbackType.toLowerCase()}">
-                    ${feedback.feedbackType}
-                </span>
-            </td>
-
-            <!-- Rating Column -->
-            <td>
-                <div class="star-rating">
-                    ${generateStarRating(feedback.rating)}
-                </div>
-            </td>
-
-            <!-- Content Preview Column -->
-            <td>
-                <div class="content-preview" title="${feedback.content}">
-                    ${feedback.content.length > 50 ? 
-                        feedback.content.substring(0, 47) + "..." : 
-                        feedback.content}
-                </div>
-            </td>
-
-            <!-- Date Column -->
-            <td>${feedback.createdAt}</td>
-
-            <!-- Actions Column -->
-            <td>
-                <div class="action-buttons">
-                    <!-- Preview Button -->
-                    <button type="button" 
-                            class="btn-icon btn-preview" 
-                            onclick="previewFeedback({
-                                id: ${feedback.id},
-                                type: '${feedback.feedbackType}',
-                                rating: ${feedback.rating},
-                                date: '${feedback.createdAt}',
-                                content: '${feedback.content.replace(/'/g, "\\'")}',
-                                userName: '${feedback.userName}',
-                                userEmail: '${feedback.userEmail}'
-                            }, ${feedback.userId === window.currentUserId})"
-                            title="Preview">
-                        <i class="fas fa-eye"></i>
-                    </button>
-
-                    ${feedback.userId === window.currentUserId ? `
-                    <!-- Edit Button -->
-                    <a href="feedback?action=edit&id=${feedback.id}" 
-                       class="btn-icon btn-edit" 
-                       title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    ` : ''}
-
-                    <!-- Delete Button -->
-                    <button type="button" 
-                            class="btn-icon btn-delete" 
-                            onclick="confirmDelete(${feedback.id})" 
-                            title="Delete">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
-    
-    // Reinitialize event listeners after table update
-    initializeSelectAll();
-    updateDeleteButton();
 }
 //endregion
 
@@ -362,86 +228,5 @@ function generateStarRating(rating) {
     }
 
     return `<div class="star-rating">${stars} <span style="margin-left: 8px; color: #6c757d;">(${rating}/10)</span></div>`;
-}
-//endregion
-
-//region Data Refresh Management
-let lastDataRefresh = new Date();
-let isDataStale = false;
-
-// Auto-refresh when user returns to tab
-document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && isDataStale && window.isAdmin) {
-        refreshAdminData();
-    }
-});
-
-// Refresh data manually
-function refreshAdminData() {
-    if (!window.isAdmin) return;
-    
-    const refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.disabled = true;
-        refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
-    }
-    
-    // Get current toggle state
-    const currentShowAll = document.getElementById('viewToggle').checked;
-    
-    // Reload page with current parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('mode', 'list');
-    urlParams.set('refresh', 'true');
-    
-    if (currentShowAll) {
-        urlParams.set('show_all', 'true');
-    } else {
-        urlParams.delete('show_all');
-    }
-    
-    window.location.href = `feedback?${urlParams.toString()}`;
-}
-
-// Mark data as potentially stale after user actions
-function markDataAsStale() {
-    isDataStale = true;
-    updateRefreshIndicator();
-}
-
-// Update refresh indicator
-function updateRefreshIndicator() {
-    const indicator = document.getElementById('dataFreshnessIndicator');
-    const timestamp = document.getElementById('lastUpdated');
-    
-    if (indicator && timestamp) {
-        if (isDataStale) {
-            indicator.className = 'freshness-indicator stale';
-            indicator.title = 'Data may be outdated. Click refresh to update.';
-        } else {
-            indicator.className = 'freshness-indicator fresh';
-            indicator.title = 'Data is up to date';
-            timestamp.textContent = `Last updated: ${lastDataRefresh.toLocaleTimeString()}`;
-        }
-    }
-}
-
-// Override delete functions to refresh data
-function confirmDeleteWithRefresh(feedbackId) {
-    if (confirm('Are you sure you want to delete this feedback?')) {
-        // Set flag to refresh after delete
-        sessionStorage.setItem('needsRefresh', 'true');
-        window.location.href = `feedback?action=delete&id=${feedbackId}`;
-    }
-}
-
-// Check if we need to refresh after page load
-function checkRefreshNeeded() {
-    if (sessionStorage.getItem('needsRefresh') === 'true') {
-        sessionStorage.removeItem('needsRefresh');
-        isDataStale = false;
-        lastDataRefresh = new Date();
-        updateRefreshIndicator();
-    }
 }
 //endregion
