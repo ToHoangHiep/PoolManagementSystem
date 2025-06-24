@@ -98,7 +98,6 @@
     </servlet-mapping>
 
     <servlet>
-<<<<<<< HEAD
         <servlet-name>BlogServlet</servlet-name>
         <servlet-class>controller.BlogsServlet</servlet-class>
     </servlet>
@@ -107,7 +106,7 @@
         <servlet-name>BlogServlet</servlet-name>
         <url-pattern>/blogs</url-pattern>
     </servlet-mapping>
-=======
+    <servlet>
         <servlet-name>SwimCourseServlet</servlet-name>
         <servlet-class>controller.SwimCourseServlet</servlet-class>
     </servlet>
@@ -128,5 +127,4 @@
         <url-pattern>/coachcourse</url-pattern>
     </servlet-mapping>
     <!-- TODO - ERROR HANDLER -->
->>>>>>> origin/ngocnthe176424
 </web-app>

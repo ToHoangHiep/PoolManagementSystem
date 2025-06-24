@@ -246,12 +246,12 @@
     <a href="equipment-rental">Equiqment Rental</a>
     <% } %>
 
-            <% if (user != null && user.getRole() != null) {
-            String roleName = user.getRole().getName();
-            if ("Admin".equalsIgnoreCase(roleName) ||
-                    "Manager".equalsIgnoreCase(roleName)
-                ) {
-        %>
+    <% if (user != null && user.getRole() != null) {
+    String roleName = user.getRole().getName();
+    if ("Admin".equalsIgnoreCase(roleName) ||
+            "Manager".equalsIgnoreCase(roleName)
+        ) {
+    %>
     <a href="maintenance">Maintenance</a>
     <% }
     } %>
@@ -349,6 +349,11 @@
     <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
     <div style="text-align:center;" class="hero-content">
         <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+    </div>
+
+    <h2 style="text-align:center; color:#005caa;">See your old feedback</h2>
+    <div style="text-align:center;" class="hero-content">
+        <button class="btn btn-primary" onclick="window.location.href='feedback?mode=list';">Feedback History</button>
     </div>
 </div>
 

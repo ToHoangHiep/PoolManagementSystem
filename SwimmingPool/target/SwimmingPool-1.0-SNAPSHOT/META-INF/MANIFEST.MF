@@ -1,10 +1,5 @@
 Manifest-Version: 1.0
 Created-By: IntelliJ IDEA
-<<<<<<< HEAD
 Built-By: LAPTOP
 Build-Jdk: Oracle OpenJDK 21.0.2
-=======
-Built-By: Admin
-Build-Jdk: Oracle OpenJDK 23
->>>>>>> origin/Huypqhe172172
 

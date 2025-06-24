@@ -6,12 +6,6 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<<<<<<< HEAD
-  <title>Swimming Pool - Home Page</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="Resources/CSS/home.css">
-=======
     <meta charset="UTF-8">
     <title>Swimming Pool - Home Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -232,23 +226,16 @@
             }
         }
     </style>
->>>>>>> origin/hiepthhe173531
 </head>
 
 <body>
 <!-- Navbar -->
 <div class="navbar">
-<<<<<<< HEAD
-  <div class="logo">SwimmingPool</div>
-  <div class="nav-links">
-    <a href="#">Home</a>
-    <a href="#about">About Us</a>
-    <a href="#services">Services</a>
-    <a href="blogs">Community Blogs</a>
-    <a href="#gallery">Gallery</a>
-    <a href="#contact">Contact</a>
-<<<<<<< HEAD
-=======
+    <div class="logo">SwimmingPool</div>
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#about">About Us</a>
+        <a href="#services">Services</a>
 
     <%-- Chỉ hiện "User List" nếu là Admin --%>
     <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
@@ -258,30 +245,18 @@
     <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
     <a href="equipment-rental">Equiqment Rental</a>
     <% } %>
->>>>>>> origin/Huypqhe172172
-  </div>
-  <div class="auth">
-    <% if (user == null) { %>
-    <a class="login-btn" href="login.jsp">Login</a>
-    <a class="register-btn" href="register.jsp">Register</a>
-    <% } else { %>
-    <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
-=======
-    <div class="logo">SwimmingPool</div>
-    <div class="nav-links">
-        <a href="#">Home</a>
-        <a href="#about">About Us</a>
-        <a href="#services">Services</a>
 
-        <% if (user != null && user.getRole() != null) {
-            String roleName = user.getRole().getName();
-            if ("Admin".equalsIgnoreCase(roleName) ||
-                    "Manager".equalsIgnoreCase(roleName)
-                   ) {
-        %>
-        <a href="maintenance">Maintenance</a>
-        <% }
-        } %>
+    <% if (user != null && user.getRole() != null) {
+    String roleName = user.getRole().getName();
+    if ("Admin".equalsIgnoreCase(roleName) ||
+            "Manager".equalsIgnoreCase(roleName)
+        ) {
+    %>
+    <a href="maintenance">Maintenance</a>
+    <% }
+    } %>
+  </div>
+
 
         <%-- Chỉ hiển thị "View My Maintenance" nếu người dùng có role = 5 (Staff) --%>
         <% if (user != null && user.getRole() != null && user.getRole().getId() == 5) { %>
@@ -302,7 +277,6 @@
         <a class="register-btn" href="register.jsp">Register</a>
         <% } else { %>
         <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
->>>>>>> origin/hiepthhe173531
             <%= user.getFullName() %>
         </a>!</span>
         <form action="logout" method="post" style="display:inline;">
@@ -368,74 +342,6 @@
             </ul>
         </div>
     </div>
-<<<<<<< HEAD
-    <div class="text-box">
-      <h2>Our Services</h2>
-      <p>Explore our offerings to enhance your swimming experience:</p>
-      <ul>
-        <li>Professional Swimming Training for all ages</li>
-        <li>Private Pool Booking for Events & Families</li>
-        <li>Water Aerobics & Therapy Sessions</li>
-        <li>Maintenance & Pool Cleaning Services</li>
-        <li><a href="ticketPurchase.jsp" style="color: #005caa; font-weight: bold;">Ticket Purchase</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- Community Blog Section -->
-<div class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-  <div style="text-align: center; padding: 50px 20px;">
-    <h2 style="color: white; margin-bottom: 20px; font-size: 2.5em;">Join Our Swimming Community!</h2>
-    <p style="font-size: 1.2em; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
-      Connect with fellow swimmers, share your experiences, read swimming tips, and learn from our community of pool enthusiasts.
-    </p>
-    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
-      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; min-width: 200px;">
-        <i class="fas fa-blog" style="font-size: 2em; margin-bottom: 10px;"></i>
-        <h4>Read & Share</h4>
-        <p>Browse swimming tips, techniques, and stories</p>
-      </div>
-      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; min-width: 200px;">
-        <i class="fas fa-users" style="font-size: 2em; margin-bottom: 10px;"></i>
-        <h4>Community</h4>
-        <p>Connect with swimmers of all skill levels</p>
-      </div>
-      <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; min-width: 200px;">
-        <i class="fas fa-comments" style="font-size: 2em; margin-bottom: 10px;"></i>
-        <h4>Discuss</h4>
-        <p>Comment and engage in meaningful conversations</p>
-      </div>
-    </div>
-    <% if (user == null) { %>
-    <p style="font-size: 1.1em; margin-bottom: 20px;">
-      <strong>Browse as a guest</strong> or <strong>sign in to participate!</strong>
-    </p>
-    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-      <a href="blogs" style="background: rgba(255,255,255,0.9); color: #667eea; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;">
-        <i class="fas fa-eye"></i> Browse Blogs
-      </a>
-      <a href="login.jsp" style="background: white; color: #667eea; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;">
-        <i class="fas fa-sign-in-alt"></i> Sign In to Join
-      </a>
-    </div>
-    <% } else { %>
-    <p style="font-size: 1.1em; margin-bottom: 20px;">
-      <strong>Welcome back, <%= user.getFullName() %>!</strong> Ready to share your swimming knowledge?
-    </p>
-    <a href="blogs" style="background: white; color: #667eea; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: all 0.3s ease;">
-      <i class="fas fa-blog"></i> Visit Community Blogs
-    </a>
-    <% } %>
-  </div>
-</div>
-
-<!-- Gallery -->
-<div class="section" id="gallery">
-  <h2 style="text-align:center; color:#005caa;">Gallery</h2>
-  <p style="text-align:center;">Coming soon...</p>
-=======
->>>>>>> origin/hiepthhe173531
 </div>
 
 <!-- Contact -->
@@ -443,6 +349,11 @@
     <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
     <div style="text-align:center;" class="hero-content">
         <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+    </div>
+
+    <h2 style="text-align:center; color:#005caa;">See your old feedback</h2>
+    <div style="text-align:center;" class="hero-content">
+        <button class="btn btn-primary" onclick="window.location.href='feedback?mode=list';">Feedback History</button>
     </div>
 </div>
 
