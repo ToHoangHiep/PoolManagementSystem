@@ -38,18 +38,14 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
+            // Lưu user vào session
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
             System.out.println(">>> Đăng nhập thành công! Vai trò: " + user.getRole().getName());
-            
-            // Check for return URL
-            String returnUrl = (String) session.getAttribute("returnUrl");
-            if (returnUrl != null) {
-                session.removeAttribute("returnUrl");
-                response.sendRedirect(returnUrl);
-            } else {
-                response.sendRedirect("home.jsp");
-            }
+
+
+            response.sendRedirect("home.jsp");
+
         } else {
             System.out.println(">>> Đăng nhập thất bại!");
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu.");

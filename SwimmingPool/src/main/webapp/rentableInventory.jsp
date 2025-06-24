@@ -5,120 +5,41 @@
 <html>
 <head>
   <title>Rentable Inventory</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-    }
-
-    .top-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-    }
-
-    .btn-edit {
-      background-color: #ffc107;
-      color: black;
-    }
-
-    .btn-delete {
-      background-color: #dc3545;
-    }
-
-    .green-btn {
-      background-color: #28a745;
-    }
-
-    .blue-btn {
-      background-color: #007bff;
-    }
-
-    .orange-btn {
-      background-color: #ff9800;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-      font-weight: bold;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    .pagination {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .pagination a {
-      margin: 0 4px;
-      padding: 6px 12px;
-      text-decoration: none;
-      border: 1px solid #ccc;
-      color: black;
-      background-color: white;
-      border-radius: 4px;
-    }
-
-    .pagination a.active {
-      background-color: #007bff;
-      color: white;
-      border: none;
-    }
-
-    .message {
-      text-align: center;
-      color: red;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="./Resources/CSS/inventory.css">
 </head>
 <body>
 
-<h2>Danh sách sản phẩm có thể cho thuê</h2>
-
-<div class="top-bar">
-  <a href="home.jsp" class="btn green-btn">🏠 Home</a>
-  <a href="inventory" class="btn blue-btn">🔙 Trở lại danh sách</a>
-  <a href="inventory?action=new" class="btn orange-btn">➕ Thêm sản phẩm</a>
+<h2 style="text-align: center;">Danh sách sản phẩm có thể cho thuê</h2>
+<div class="top-navbar" >
+<div class="nav-left">
+  <a href="home.jsp" class="btn btn-home"><i class="fa fa-home"></i> 🏠 Home</a>
+  <a href="inventory" class="btn btn-back"><i class="fa fa-arrow-left"></i> 🔙 Trở lại danh sách</a>
 </div>
+
+  <div class="nav-right">
+  <form action="inventory" method="get" style="display: flex; align-items: center; gap: 10px; margin: 20px 0;">
+    <input type="hidden" name="action" value="filter-rentable" />
+
+    <label for="status">Lọc theo trạng thái:</label>
+    <select name="status" id="status">
+      <option value="">-- Tất cả --</option>
+      <option value="Available" ${"Available".equals(selectedStatus) ? "selected" : ""}>Available</option>
+      <option value="In Use" ${"In Use".equals(selectedStatus) ? "selected" : ""}>In Use</option>
+      <option value="Broken" ${"Broken".equals(selectedStatus) ? "selected" : ""}>Broken</option>
+    </select>
+
+    <button type="submit">Lọc</button>
+  </form>
+
+  <form method="get" action="inventory" class="search-form">
+    <input type="hidden" name="action" value="search-rentable" />
+    <input type="text" name="keyword" placeholder="Tìm kiếm theo tên thiết bị..." value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>" />
+    <button type="submit" class="search-btn">Tìm kiếm</button>
+  </form>
+
+</div>
+</div>
+
 
 <%
   List<Inventory> list = (List<Inventory>) request.getAttribute("inventoryList");

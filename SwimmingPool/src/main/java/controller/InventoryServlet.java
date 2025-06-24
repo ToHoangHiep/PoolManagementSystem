@@ -32,11 +32,30 @@ public class InventoryServlet extends HttpServlet {
                 searchInventory(request, response);
                 break;
             case "filter":
-                filterByStatus(request, response);
+                filterInventory(request, response);
                 break;
             case "rentable":
                 listRentableItems(request, response);
                 break;
+            case "sellable":
+                listSellableItems(request, response);
+                break;
+            case "filter-rentable":
+                listFilteredRentableItems(request, response);
+                break;
+            case "filter-sellable":
+                listFilteredSellableItems(request, response);
+                break;
+            case "search-rentable":
+                searchRentableInventory(request, response);
+                break;
+            case "search-sellable":
+                searchSellableInventory(request, response);
+                break;
+
+
+
+
 
             default:
                 listInventory(request, response);
@@ -128,14 +147,56 @@ public class InventoryServlet extends HttpServlet {
         request.getRequestDispatcher("/inventory.jsp").forward(request, response);
     }
 
-    private void filterByStatus(HttpServletRequest request, HttpServletResponse response)
+    private void searchRentableInventory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String status = request.getParameter("status");
-        List<Inventory> inventoryList = InventoryDAO.filterInventoryByStatus(status);
+        String keyword = request.getParameter("keyword");
 
-        request.setAttribute("inventoryList", inventoryList);
-        request.getRequestDispatcher("/inventory.jsp").forward(request, response);
+        // Gọi DAO dùng usage = "item for rent"
+        List<Inventory> rentableItems = InventoryDAO.searchInventoryByUsage(keyword.trim(), "item for rent");
+
+        request.setAttribute("inventoryList", rentableItems);
+        request.setAttribute("keyword", keyword);
+
+        if (rentableItems.isEmpty()) {
+            request.setAttribute("message", "Không tìm thấy sản phẩm cho thuê phù hợp với từ khóa \"" + keyword + "\".");
+        }
+
+        request.getRequestDispatcher("/rentableInventory.jsp").forward(request, response);
     }
+
+    private void searchSellableInventory(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String keyword = request.getParameter("keyword");
+
+        // Gọi DAO dùng usage = "item for sold"
+        List<Inventory> sellableItems = InventoryDAO.searchInventoryByUsage(keyword.trim(), "item for sold");
+
+        request.setAttribute("inventoryList", sellableItems);
+        request.setAttribute("keyword", keyword);
+
+        if (sellableItems.isEmpty()) {
+            request.setAttribute("message", "Không tìm thấy sản phẩm cho bán phù hợp với từ khóa \"" + keyword + "\".");
+        }
+
+        request.getRequestDispatcher("/sellableInventory.jsp").forward(request, response);
+    }
+
+
+    private void filterInventory(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String status = request.getParameter("status");
+        String usage = request.getParameter("usage");
+
+        List<Inventory> filteredList = InventoryDAO.filterInventoryByStatusAndUsage(status, usage);
+
+        request.setAttribute("inventoryList", filteredList);
+        request.setAttribute("selectedStatus", status);
+        request.setAttribute("selectedUsage", usage);
+
+        request.getRequestDispatcher("inventory.jsp").forward(request, response);
+    }
+
 
     private Inventory getInventoryFromRequest(HttpServletRequest request) {
         Inventory inv = new Inventory();
@@ -146,8 +207,10 @@ public class InventoryServlet extends HttpServlet {
         inv.setUnit(request.getParameter("unit"));
         inv.setStatus(request.getParameter("status"));
         inv.setLastUpdated(new Date());
+        inv.setUsageId(Integer.parseInt(request.getParameter("usage_id"))); // ⬅️ thêm dòng này
         return inv;
     }
+
 
     private void listRentableItems(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -185,6 +248,107 @@ public class InventoryServlet extends HttpServlet {
 
         request.getRequestDispatcher("rentableInventory.jsp").forward(request, response);
     }
+
+    private void listSellableItems(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        int page = 1;
+        int recordsPerPage = 5;
+
+        if (request.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        // Lấy toàn bộ danh sách sản phẩm có thể bán
+        List<Inventory> allSellable = InventoryDAO.getSellableItems();
+
+        // Phân trang thủ công
+        int totalRecords = allSellable.size();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+
+        int start = (page - 1) * recordsPerPage;
+        int end = Math.min(start + recordsPerPage, totalRecords);
+
+        List<Inventory> pageList = allSellable.subList(start, end);
+
+        request.setAttribute("inventoryList", pageList);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+
+        if (pageList.isEmpty()) {
+            request.setAttribute("message", "Không có sản phẩm nào để bán.");
+        }
+
+        request.getRequestDispatcher("sellableInventory.jsp").forward(request, response);
+    }
+
+    private void listFilteredRentableItems(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String status = request.getParameter("status");
+
+        int page = 1;
+        int recordsPerPage = 5;
+
+        if (request.getParameter("page") != null) {
+            try {
+                page = Integer.parseInt(request.getParameter("page"));
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        // Gọi DAO để lấy danh sách lọc theo status + usage = "item for rent"
+        List<Inventory> filteredList = InventoryDAO.searchInventoryByUsageAndStatus("item for rent", status);
+
+        // Tính toán phân trang
+        int totalRecords = filteredList.size();
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+        int start = (page - 1) * recordsPerPage;
+        int end = Math.min(start + recordsPerPage, totalRecords);
+        List<Inventory> pageList = filteredList.subList(start, end);
+
+        request.setAttribute("inventoryList", pageList);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("selectedStatus", status); // Giữ dropdown chọn đúng
+
+        if (pageList.isEmpty()) {
+            request.setAttribute("message", "Không có sản phẩm nào với trạng thái \"" + status + "\".");
+        }
+
+        request.getRequestDispatcher("rentableInventory.jsp").forward(request, response);
+    }
+    private void listFilteredSellableItems(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String status = request.getParameter("status");
+
+        List<Inventory> filteredList = InventoryDAO.searchInventoryByUsageAndStatus("item for sold", status);
+
+        request.setAttribute("inventoryList", filteredList);
+        request.setAttribute("selectedStatus", status);
+
+        if (filteredList.isEmpty()) {
+            request.setAttribute("message", "Không có sản phẩm nào với trạng thái \"" + status + "\".");
+        }
+
+        request.getRequestDispatcher("sellableInventory.jsp").forward(request, response);
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 }
