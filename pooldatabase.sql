@@ -299,6 +299,37 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
+
+-- Maintenance Schedule table
+CREATE TABLE Maintenance_Schedule (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    frequency ENUM('Daily', 'Weekly', 'Monthly'),
+    assigned_staff_id INT,
+    scheduled_time TIME,
+    status ENUM('Scheduled', 'Completed', 'Missed') DEFAULT 'Scheduled',
+    created_by INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (assigned_staff_id) REFERENCES Users(id),
+    FOREIGN KEY (created_by) REFERENCES Users(id)
+);
+
+-- Maintenance Log table
+CREATE TABLE Maintenance_Log (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    schedule_id INT,
+    staff_id INT,
+    maintenance_date DATE,
+    note TEXT,
+    status ENUM('Done', 'Missed', 'Rescheduled'),
+    log_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (schedule_id) REFERENCES Maintenance_Schedule(id),
+    FOREIGN KEY (staff_id) REFERENCES Users(id)
+);
+
+
+
 INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
 VALUES
   (1, 'Chai Sting', 'Nước uống', 70, 'chai', 'Available', NOW(), 3),
@@ -435,3 +466,23 @@ VALUES
   (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
   (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1),
   (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1);
+
+-- Insert fake data for Complaints table
+INSERT INTO Complaints (user_id, staff_id, content, status) VALUES
+(7, 5, 'The water temperature was too cold during my last session.', 'Resolved'),
+(8, 5, 'The changing rooms need better ventilation.', 'In Progress'),
+(9, 5, 'One of the showers is not working properly.', 'New');
+
+-- Insert sample daily maintenance schedules
+INSERT INTO Maintenance_Schedule (title, description, frequency, assigned_staff_id, scheduled_time, created_by)
+VALUES
+('Check Bathroom Cleanliness', 'Ensure all toilets and sinks are clean', 'Daily', 5, '08:00:00', 1),
+('Clean Pool Trash', 'Remove debris from pool and surroundings', 'Daily', 5, '07:30:00', 2),
+('Check Locker Rooms', 'Inspect and clean locker rooms', 'Daily', 5, '09:00:00', 1);
+
+-- Insert sample maintenance logs
+INSERT INTO Maintenance_Log (schedule_id, staff_id, maintenance_date, note, status)
+VALUES
+(1, 5, '2025-06-22', 'All bathrooms clean', 'Done'),
+(2, 5, '2025-06-22', 'Removed leaves and plastic bottles', 'Done'),
+(3, 5, '2025-06-22', 'Locker room floor mopped and cleaned properly', 'Done');

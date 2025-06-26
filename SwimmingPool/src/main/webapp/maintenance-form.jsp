@@ -70,6 +70,14 @@
     </style>
 </head>
 <body>
+
+<% if (request.getAttribute("error") != null) { %>
+<div class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-circle"></i> <%= request.getAttribute("error") %>
+</div>
+<% } %>
+
+
 <div class="container">
     <div class="card">
         <div class="card-header">
@@ -88,18 +96,27 @@
                 </div>
                 <div class="mb-3">
                     <label for="frequency" class="form-label"><i class="fas fa-redo-alt"></i> Frequency:</label>
-                    <input type="text" class="form-control" id="frequency" name="frequency" required>
+                    <select class="form-select" id="frequency" name="frequency" required>
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
                 </div>
+
                 <div class="mb-3">
                     <label for="assignedStaffId" class="form-label"><i class="fas fa-user-tie"></i> Assigned Staff:</label>
                     <select class="form-select" id="assignedStaffId" name="assignedStaffId" required>
                         <option value="">Select staff</option>
                         <%
                             List<User> staffList = (List<User>) request.getAttribute("staffList");
-                            for (User staff : staffList) {
+                            if (staffList != null) {
+                                for (User staff : staffList) {
                         %>
                         <option value="<%= staff.getId() %>"><%= staff.getFullName() %></option>
-                        <% } %>
+                        <%
+                                }
+                            }
+                        %>
                     </select>
                 </div>
                 <div class="mb-3">

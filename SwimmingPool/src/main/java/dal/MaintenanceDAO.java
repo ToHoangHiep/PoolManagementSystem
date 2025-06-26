@@ -114,24 +114,6 @@ public class MaintenanceDAO {
         }
     }
 
-    public static void main(String[] args) {
-        // Tạo đối tượng MaintenanceSchedule và gán giá trị cho các trường
-        MaintenanceSchedule schedule = new MaintenanceSchedule();
-        schedule.setTitle("Bảo trì bể bơi");
-        schedule.setDescription("Bảo trì hàng tháng cho bể bơi chính");
-        schedule.setFrequency("Monthly");
-        schedule.setAssignedStaffId(2);  // Ví dụ nhân viên có id = 2
-        schedule.setScheduledTime(Time.valueOf("10:00:00"));  // Thời gian bảo trì là 10:00 AM
-        schedule.setStatus("Scheduled");
-        schedule.setCreatedBy(1);  // Ví dụ người tạo có id = 1 (Admin)
-
-        // Tạo đối tượng MaintenanceDAO và gọi phương thức insertSchedule
-        MaintenanceDAO maintenanceDAO = new MaintenanceDAO();
-        maintenanceDAO.insertSchedule(schedule);
-
-        System.out.println("Đã thêm lịch bảo trì mới vào cơ sở dữ liệu.");
-    }
-
     // Phương thức xóa lịch bảo trì
     public void deleteSchedule(int scheduleId) {
         String sql = "DELETE FROM Maintenance_Schedule WHERE id = ?";
@@ -370,6 +352,57 @@ public class MaintenanceDAO {
         }
         return false;
     }
+
+
+    public List<MaintenanceSchedule> getSchedulesForStaff(int staffId, int pageNo, int pageSize) {
+        List<MaintenanceSchedule> list = new ArrayList<>();
+        int offset = (pageNo - 1) * pageSize;
+
+        String sql = """
+            SELECT ms.*, 
+                   staff.full_name AS staff_name, 
+                   creator.full_name AS creator_name
+            FROM Maintenance_Schedule ms
+            LEFT JOIN Users staff ON ms.assigned_staff_id = staff.id
+            LEFT JOIN Users creator ON ms.created_by = creator.id
+            WHERE ms.assigned_staff_id = ?  -- Lọc theo staffId
+            ORDER BY ms.scheduled_time
+            LIMIT ? OFFSET ?
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, staffId);  // Lọc theo staffId
+            ps.setInt(2, pageSize); // Số bản ghi mỗi trang
+            ps.setInt(3, offset);   // Vị trí bắt đầu của trang (OFFSET)
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    MaintenanceSchedule m = new MaintenanceSchedule();
+                    m.setId(rs.getInt("id"));
+                    m.setTitle(rs.getString("title"));
+                    m.setDescription(rs.getString("description"));
+                    m.setFrequency(rs.getString("frequency"));
+                    m.setAssignedStaffId(rs.getInt("assigned_staff_id"));
+                    m.setScheduledTime(rs.getTime("scheduled_time"));
+                    m.setStatus(rs.getString("status"));
+                    m.setCreatedBy(rs.getInt("created_by"));
+                    m.setCreatedAt(rs.getTimestamp("created_at"));
+                    m.setAssignedStaffName(rs.getString("staff_name"));
+                    m.setCreatedByName(rs.getString("creator_name"));
+
+                    list.add(m);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 
 
 
