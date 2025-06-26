@@ -823,6 +823,7 @@
                 <div class="tab-buttons">
                     <button class="tab-btn active" onclick="showTab('equipment')">🏊 Equipment Shop</button>
                     <button class="tab-btn" onclick="showTab('rentals')">📋 Active Rentals</button>
+<%--                    <button class="tab-btn" onclick="showTab('sales')">💰 Equipment Saled</button>--%>
                 </div>
 
                 <!-- Equipment Tab -->
@@ -833,6 +834,7 @@
                             <input type="text" class="search-input" placeholder="Search equipment..." id="searchInput">
                             <button class="search-btn" onclick="searchEquipment()">🔍</button>
                         </div>
+
 
                         <select class="sort-select" onchange="sortEquipment(this.value)">
                             <option value="name">Sort by Name</option>
@@ -885,9 +887,9 @@
                                     </div>
 
                                     <div class="stock-info">
-                                        <span class="stock-text">Available: ${item.availableQuantity}</span>
-                                        <span class="stock-badge ${item.availableQuantity == 0 ? 'out-stock' : (item.availableQuantity <= 5 ? 'low-stock' : 'in-stock')}">
-                                                ${item.availableQuantity == 0 ? 'Out of Stock' : (item.availableQuantity <= 5 ? 'Low Stock' : 'In Stock')}
+                                        <span class="stock-text">Available: ${item.quantity}</span>
+                                        <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.aquantity <= 5 ? 'low-stock' : 'in-stock')}">
+                                                ${item.quantity == 0 ? 'Out of Stock' : (item.quantity <= 5 ? 'Low Stock' : 'In Stock')}
                                         </span>
                                     </div>
 
@@ -895,14 +897,14 @@
                                         <c:if test="${item.rentPrice > 0}">
                                             <button class="btn btn-primary"
                                                     onclick="openRentalModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.rentPrice}')"
-                                                ${item.availableQuantity == 0 ? 'disabled' : ''}>
+                                                ${item.quantity == 0 ? 'disabled' : ''}>
                                                 🔄 Rent
                                             </button>
                                         </c:if>
                                         <c:if test="${item.salePrice > 0}">
                                             <button class="btn btn-success"
                                                     onclick="openSaleModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}')"
-                                                ${item.availableQuantity == 0 ? 'disabled' : ''}>
+                                                ${item.quantity == 0 ? 'disabled' : ''}>
                                                 🛒 Buy
                                             </button>
                                         </c:if>
@@ -948,6 +950,48 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Equipment Saled Tab -->
+<%--                <div id="sales" class="tab-content">--%>
+<%--                    <div class="search-sort-bar">--%>
+<%--                        <div class="search-box">--%>
+<%--                            <input type="text" class="search-input" placeholder="Search sales..." id="searchSales">--%>
+<%--                            <button class="search-btn" onclick="searchSales()">🔍</button>--%>
+<%--                        </div>--%>
+<%--                        <div>--%>
+<%--                            <input type="date" id="saleDateFrom" class="form-input">--%>
+<%--                            <input type="date" id="saleDateTo" class="form-input">--%>
+<%--                            <button class="btn btn-primary" onclick="filterByDate()">Filter</button>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
+
+<%--                    <table class="table">--%>
+<%--                        <thead>--%>
+<%--                        <tr>--%>
+<%--                            <th>Sale ID</th>--%>
+<%--                            <th>Equipment</th>--%>
+<%--                            <th>Customer</th>--%>
+<%--                            <th>Quantity</th>--%>
+<%--                            <th>Unit Price</th>--%>
+<%--                            <th>Total</th>--%>
+<%--                            <th>Date</th>--%>
+<%--                        </tr>--%>
+<%--                        </thead>--%>
+<%--                        <tbody>--%>
+<%--                        <c:forEach var="sale" items="${saleHistory}">--%>
+<%--                            <tr>--%>
+<%--                                <td>#${sale.saleId}</td>--%>
+<%--                                <td>${sale.itemName}</td>--%>
+<%--                                <td>${sale.customerName}</td>--%>
+<%--                                <td>${sale.quantity}</td>--%>
+<%--                                <td><fmt:formatNumber value="${sale.salePrice}" type="currency" currencySymbol="$"/></td>--%>
+<%--                                <td><fmt:formatNumber value="${sale.totalAmount}" type="currency" currencySymbol="$"/></td>--%>
+<%--                                <td><fmt:formatDate value="${sale.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>--%>
+<%--                            </tr>--%>
+<%--                        </c:forEach>--%>
+<%--                        </tbody>--%>
+<%--                    </table>--%>
+<%--                </div>--%>
             </div>
         </div>
     </div>
@@ -1381,6 +1425,39 @@
         .catch(error => console.error("Error:", error));
         */
     }
+    // Tìm kiếm sales
+    <%--function searchSales() {--%>
+    <%--    const searchTerm = document.getElementById('searchSales').value.toLowerCase();--%>
+    <%--    const rows = document.querySelectorAll('#sales tbody tr');--%>
+
+    <%--    rows.forEach(row => {--%>
+    <%--        const text = row.textContent.toLowerCase();--%>
+    <%--        row.style.display = text.includes(searchTerm) ? '' : 'none';--%>
+    <%--    });--%>
+    <%--}--%>
+
+    <%--// Lọc theo ngày--%>
+    <%--function filterByDate() {--%>
+    <%--    const fromDate = new Date(document.getElementById('saleDateFrom').value);--%>
+    <%--    const toDate = new Date(document.getElementById('saleDateTo').value);--%>
+    <%--    const rows = document.querySelectorAll('#sales tbody tr');--%>
+
+    <%--    rows.forEach(row => {--%>
+    <%--        const dateStr = row.cells[6].textContent; // Giả sử cột ngày là cột thứ 7--%>
+    <%--        const saleDate = parseDate(dateStr);--%>
+
+    <%--        const showRow = (!fromDate || saleDate >= fromDate) &&--%>
+    <%--            (!toDate || saleDate <= toDate);--%>
+
+    <%--        row.style.display = showRow ? '' : 'none';--%>
+    <%--    });--%>
+    <%--}--%>
+
+    <%--function parseDate(dateStr) {--%>
+    <%--    const [datePart, timePart] = dateStr.split(' ');--%>
+    <%--    const [day, month, year] = datePart.split('/');--%>
+    <%--    return new Date(`${year}-${month}-${day}T${timePart || '00:00'}`);--%>
+    <%--}--%>
 </script>
 </body>
 </html>
