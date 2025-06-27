@@ -30,23 +30,20 @@ public class EquipmentRentalServlet extends HttpServlet {
             return;
         }
 
-//        // Kiểm tra role - chỉ cho phép Admin(1) và Staff(5)
-//        int roleId = user.getRole().getId();
-//        if (roleId != 1 && roleId != 5) {
-//            request.setAttribute("error", "Access denied. Only Admin and Staff can access this page.");
-//            request.getRequestDispatcher("error.jsp").forward(request, response);
-//            return;
-//        }
+        // Kiểm tra role - chỉ cho phép Admin(1) và Staff(5)
+        int roleId = user.getRole().getId();
+        if (roleId != 1 && roleId != 5) {
+            request.setAttribute("error", "Access denied. Only Admin and Staff can access this page.");
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
+        }
 
         try {
             EquipmentDAO equipmentDAO = new EquipmentDAO();
 
-            // Lấy danh sách thiết bị với filter
+            // Lấy tất cả dữ liệu - JavaScript sẽ xử lý filter
             List<Map<String, Object>> equipmentList = equipmentDAO.getEquipmentStatus();
-            System.out.println("equipmentList: " + equipmentList);
-            // Lấy active rentals
             List<EquipmentRental> activeRentals = equipmentDAO.getActiveRentals();
-
 
             // Set attributes
             request.setAttribute("equipmentList", equipmentList);
@@ -69,13 +66,13 @@ public class EquipmentRentalServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
-        if (user == null || user.getRole() == null || !(user.getRole().getId() == 2 || user.getRole().getId() == 5)) {
+        // Sửa role check - chỉ cho phép Admin(1) và Staff(5)
+        if (user == null || user.getRole() == null || !(user.getRole().getId() == 1 || user.getRole().getId() == 5)) {
             response.sendRedirect("login.jsp");
             return;
         }
 
         String action = request.getParameter("action");
-        String currentFilter = request.getParameter("currentFilter");
 
         try {
             EquipmentDAO equipmentDAO = new EquipmentDAO();
@@ -100,110 +97,173 @@ public class EquipmentRentalServlet extends HttpServlet {
             request.getSession().setAttribute("error", "Error processing request: " + e.getMessage());
         }
 
-        // Redirect back với filter
-        String redirectUrl = "equipment-rental";
-        if (currentFilter != null && !currentFilter.isEmpty()) {
-            redirectUrl += "?type=" + currentFilter;
-        }
-        response.sendRedirect(redirectUrl);
+        // Redirect back - loại bỏ filter logic
+        response.sendRedirect("equipment-rental");
     }
 
     private void handleRental(HttpServletRequest request, EquipmentDAO equipmentDAO, User user)
             throws SQLException {
 
-        int inventoryId = Integer.parseInt(request.getParameter("inventoryId"));
-        String customerName = request.getParameter("customerName");
-        String customerIdCard = request.getParameter("customerIdCard");
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        try {
+            int inventoryId = Integer.parseInt(request.getParameter("inventoryId"));
+            String customerName = request.getParameter("customerName");
+            String customerIdCard = request.getParameter("customerIdCard");
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
 
-        // Lấy thông tin thiết bị
-        Map<String, Object> equipment = equipmentDAO.getEquipmentById(inventoryId);
-        if (equipment == null) {
-            request.setAttribute("error", "Equipment not found");
-            return;
-        }
+            // Validate input
+            if (customerName == null || customerName.trim().isEmpty()) {
+                request.getSession().setAttribute("error", "Customer name is required");
+                return;
+            }
 
-        double rentPrice = (Double) equipment.get("rentPrice");
-        if (rentPrice <= 0) {
-            request.setAttribute("error", "This equipment is not available for rental");
-            return;
-        }
+            if (quantity <= 0) {
+                request.getSession().setAttribute("error", "Quantity must be greater than 0");
+                return;
+            }
 
-        double totalAmount = rentPrice * quantity;
+            // Lấy thông tin thiết bị
+            Map<String, Object> equipment = equipmentDAO.getEquipmentById(inventoryId);
+            if (equipment == null) {
+                request.getSession().setAttribute("error", "Equipment not found");
+                return;
+            }
 
-        // Tạo đối tượng rental
-        EquipmentRental rental = new EquipmentRental();
-        rental.setCustomerName(customerName);
-        rental.setCustomerIdCard(customerIdCard);
-        rental.setStaffId(user.getId());
-        rental.setInventoryId(inventoryId);
-        rental.setQuantity(quantity);
-        rental.setRentalDate(new java.sql.Date(System.currentTimeMillis()));
-        rental.setRentPrice(rentPrice);
-        rental.setTotalAmount(totalAmount);
-        rental.setStatus("active");
+            double rentPrice = (Double) equipment.get("rentPrice");
+            if (rentPrice <= 0) {
+                request.getSession().setAttribute("error", "This equipment is not available for rental");
+                return;
+            }
 
-        // Xử lý thuê
-        if (equipmentDAO.processRental(rental)) {
-            request.getSession().setAttribute("success",
-                    "Equipment rented successfully! Rental ID: #" + rental.getRentalId());
-        } else {
-            request.getSession().setAttribute("error",
-                    "Failed to process rental. Equipment may be out of stock.");
+            // Kiểm tra số lượng available
+            int availableQty = (Integer) equipment.get("quantity");
+            if (availableQty < quantity) {
+                request.getSession().setAttribute("error",
+                        String.format("Not enough stock! Available: %d, Requested: %d", availableQty, quantity));
+                return;
+            }
+
+            double totalAmount = rentPrice * quantity;
+
+            // Tạo đối tượng rental
+            EquipmentRental rental = new EquipmentRental();
+            rental.setCustomerName(customerName.trim());
+            rental.setCustomerIdCard(customerIdCard != null ? customerIdCard.trim() : "");
+            rental.setStaffId(user.getId());
+            rental.setInventoryId(inventoryId);
+            rental.setQuantity(quantity);
+            rental.setRentalDate(new java.sql.Date(System.currentTimeMillis()));
+            rental.setRentPrice(rentPrice);
+            rental.setTotalAmount(totalAmount);
+            rental.setStatus("active");
+
+            // Xử lý thuê
+            if (equipmentDAO.processRental(rental)) {
+                request.getSession().setAttribute("success",
+                        "Equipment rented successfully! Rental ID: #" + rental.getRentalId());
+            } else {
+                request.getSession().setAttribute("error",
+                        "Failed to process rental. Equipment may be out of stock.");
+            }
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "Invalid number format in input");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Error processing rental: " + e.getMessage());
         }
     }
 
     private void handleSale(HttpServletRequest request, EquipmentDAO equipmentDAO, User user)
             throws SQLException {
 
-        int inventoryId = Integer.parseInt(request.getParameter("inventoryId"));
-        String customerName = request.getParameter("customerName");
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        try {
+            int inventoryId = Integer.parseInt(request.getParameter("inventoryId"));
+            String customerName = request.getParameter("customerName");
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
 
-        // Lấy thông tin thiết bị
-        Map<String, Object> equipment = equipmentDAO.getEquipmentById(inventoryId);
-        if (equipment == null) {
-            request.getSession().setAttribute("error", "Equipment not found");
-            return;
-        }
+            // Validate input
+            if (customerName == null || customerName.trim().isEmpty()) {
+                request.getSession().setAttribute("error", "Customer name is required");
+                return;
+            }
 
-        double salePrice = (Double) equipment.get("salePrice");
-        if (salePrice <= 0) {
-            request.getSession().setAttribute("error", "This equipment is not available for sale");
-            return;
-        }
+            if (quantity <= 0) {
+                request.getSession().setAttribute("error", "Quantity must be greater than 0");
+                return;
+            }
 
-        double totalAmount = salePrice * quantity;
+            // Lấy thông tin thiết bị
+            Map<String, Object> equipment = equipmentDAO.getEquipmentById(inventoryId);
+            if (equipment == null) {
+                request.getSession().setAttribute("error", "Equipment not found");
+                return;
+            }
 
-        // Tạo đối tượng sale
-        EquipmentSale sale = new EquipmentSale();
-        sale.setCustomerName(customerName);
-        sale.setStaffId(user.getId());
-        sale.setInventoryId(inventoryId);
-        sale.setQuantity(quantity);
-        sale.setSalePrice(salePrice);
-        sale.setTotalAmount(totalAmount);
+            double salePrice = (Double) equipment.get("salePrice");
+            if (salePrice <= 0) {
+                request.getSession().setAttribute("error", "This equipment is not available for sale");
+                return;
+            }
 
-        // Xử lý bán
-        if (equipmentDAO.processSale(sale)) {
-            request.getSession().setAttribute("success",
-                    "Equipment sold successfully! Sale ID: #" + sale.getSaleId());
-        } else {
-            request.getSession().setAttribute("error",
-                    "Failed to process sale. Equipment may be out of stock.");
+            // Kiểm tra số lượng available
+            int availableQty = (Integer) equipment.get("quantity");
+            if (availableQty < quantity) {
+                request.getSession().setAttribute("error",
+                        String.format("Not enough stock! Available: %d, Requested: %d", availableQty, quantity));
+                return;
+            }
+
+            double totalAmount = salePrice * quantity;
+
+            // Tạo đối tượng sale
+            EquipmentSale sale = new EquipmentSale();
+            sale.setCustomerName(customerName.trim());
+            sale.setStaffId(user.getId());
+            sale.setInventoryId(inventoryId);
+            sale.setQuantity(quantity);
+            sale.setSalePrice(salePrice);
+            sale.setTotalAmount(totalAmount);
+
+            // Xử lý bán
+            if (equipmentDAO.processSale(sale)) {
+                request.getSession().setAttribute("success",
+                        "Equipment sold successfully! Sale ID: #" + sale.getSaleId());
+            } else {
+                request.getSession().setAttribute("error",
+                        "Failed to process sale. Equipment may be out of stock.");
+            }
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "Invalid number format in input");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Error processing sale: " + e.getMessage());
         }
     }
 
     private void handleReturn(HttpServletRequest request, EquipmentDAO equipmentDAO)
             throws SQLException {
 
-        int rentalId = Integer.parseInt(request.getParameter("rentalId"));
+        try {
+            int rentalId = Integer.parseInt(request.getParameter("rentalId"));
 
-        if (equipmentDAO.processReturn(rentalId)) {
-            request.getSession().setAttribute("success", "Equipment returned successfully!");
-        } else {
-            request.getSession().setAttribute("error",
-                    "Failed to process return. Rental may not exist or already returned.");
+            if (rentalId <= 0) {
+                request.getSession().setAttribute("error", "Invalid rental ID");
+                return;
+            }
+
+            if (equipmentDAO.processReturn(rentalId)) {
+                request.getSession().setAttribute("success", "Equipment returned successfully!");
+            } else {
+                request.getSession().setAttribute("error",
+                        "Failed to process return. Rental may not exist or already returned.");
+            }
+
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("error", "Invalid rental ID format");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("error", "Error processing return: " + e.getMessage());
         }
     }
 }
