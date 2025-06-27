@@ -117,19 +117,50 @@ CREATE TABLE Inventory_usage(
 
 -- Iventory
 CREATE TABLE Inventory (
-	inventory_id INT PRIMARY KEY AUTO_INCREMENT,
-    manager_id int,
-    item_name varchar(100),
-    category varchar(100),
-    quantity int,
-    unit varchar(100),
-    status enum('Available', 'In Use', 'Maintenance', 'Broken'),
-    last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    usage_id int,
-	foreign key (usage_id)   references Inventory_usage(usage_id),
-    foreign key (manager_id) references users(id)
+   inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+   manager_id INT,
+   item_name VARCHAR(100),
+   category VARCHAR(100),
+   quantity INT,
+   unit VARCHAR(100),
+   status ENUM('Available', 'In Use', 'Maintenance', 'Broken'),
+   rent_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá thuê 1 lần',
+   sale_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá bán',
+   last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   usage_id INT,
+   FOREIGN KEY (usage_id) REFERENCES Inventory_usage(usage_id),
+   FOREIGN KEY (manager_id) REFERENCES Users(id)
 );
 
+CREATE TABLE Equipment_Rentals (
+   rental_id INT PRIMARY KEY AUTO_INCREMENT,
+   customer_name VARCHAR(100) NOT NULL,          -- Tên khách hàng
+   customer_id_card VARCHAR(20) NOT NULL COMMENT 'CCCD thế chấp',
+   staff_id INT NOT NULL,
+   inventory_id INT NOT NULL,
+   quantity INT NOT NULL,
+   rental_date DATE NOT NULL,
+   rent_price DECIMAL(10,2) NOT NULL,
+   total_amount DECIMAL(10,2) NOT NULL,
+   status ENUM('active', 'returned') DEFAULT 'active',
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   return_time TIMESTAMP NULL COMMENT 'Thời gian trả thực tế',
+   FOREIGN KEY (staff_id) REFERENCES Users(id),
+   FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+
+CREATE TABLE Equipment_Sales (
+    sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,          -- Tên khách hàng
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    sale_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
 
 
 INSERT INTO Inventory_usage(usage_name)
@@ -227,6 +258,8 @@ CREATE TABLE Maintenance_Requests (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
+
+
 
 -- Payments
 CREATE TABLE Payments (
