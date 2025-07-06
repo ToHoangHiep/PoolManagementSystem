@@ -302,7 +302,7 @@ public class BlogsServlet extends HttpServlet {
         }
 
         String commentIdParam = request.getParameter("comment_id");
-        String blogIdParam = request.getParameter("blog_id");
+        String blogIdParam = request.getParameter("id");
 
         if (Utils.CheckIfEmpty(commentIdParam) || Utils.CheckIfEmpty(blogIdParam)) {
             request.setAttribute(alert_message, "Comment ID and Blog ID are required to delete the comment.");
@@ -453,7 +453,7 @@ public class BlogsServlet extends HttpServlet {
     }
 
     private void addComment(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String blogIdParam = request.getParameter("blog_id");
+        String blogIdParam = request.getParameter("id");
         String content = request.getParameter("content");
 
         if (Utils.CheckIfEmpty(blogIdParam) || Utils.CheckIfEmpty(content)) {
@@ -467,14 +467,20 @@ public class BlogsServlet extends HttpServlet {
             int blogId = Integer.parseInt(blogIdParam);
             User user = (User) request.getSession().getAttribute("user");
 
+            if (user == null) {
+                request.setAttribute(alert_message, "Please sign in to add comments.");
+                request.setAttribute(alert_action, login_link);
+                request.getRequestDispatcher("blog_list.jsp").forward(request, response);
+                return;
+            }
+
             BlogsComment comment = new BlogsComment();
             comment.setBlogId(blogId);
             comment.setUserId(user.getId());
             comment.setContent(content);
-            if (BlogsCommentDAO.addComment(comment)) {
-                request.setAttribute(alert_action, "blogs?action=view&id=" + blogId);
-            } else {
-                request.setAttribute(error, "Failed to add comment. Please try again.");
+            
+            if (!BlogsCommentDAO.addComment(comment)) {
+                request.setAttribute(alert_message, "Failed to add comment. Please try again.");
             }
 
             // Reload the blog view
@@ -488,7 +494,7 @@ public class BlogsServlet extends HttpServlet {
 
     private void editCommentAction(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String commentIdParam = request.getParameter("comment_id");
-        String blogIdParam = request.getParameter("blog_id");
+        String blogIdParam = request.getParameter("id");
         String content = request.getParameter("content");
 
         if (Utils.CheckIfEmpty(commentIdParam) || Utils.CheckIfEmpty(blogIdParam) || Utils.CheckIfEmpty(content)) {

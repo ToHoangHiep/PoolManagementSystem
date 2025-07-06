@@ -2,7 +2,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Blogs" %>
 <%@ page import="model.User" %>
-<%--<%@ page import="model.Course" %>--%>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="dal.BlogsCommentDAO" %>
@@ -13,8 +12,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swimming Pool Blog Community</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="Resources/CSS/BlogsList.css">
+    <!-- Bootstrap CSS -->
+    <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 30px;
+        }
+        .blog-card {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .tag-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin: 2px;
+            display: inline-block;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .guest-banner {
+            background: linear-gradient(45deg, #17a2b8, #20c997);
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .stat-info {
+            background-color: #f8f9fa;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+    </style>
 </head>
 <body>
 <%
@@ -46,256 +102,276 @@
     }
 %>
 
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <h1><i class="fas fa-blog"></i> Swimming Pool Blog Community</h1>
-        <p>Share knowledge, tips, and experiences with fellow swimmers</p>
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-swimming-pool me-3"></i>Swimming Pool Blog
+                </h1>
+                <p class="lead">Share your swimming knowledge and experiences</p>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- Authentication Notice for Guests -->
+<div class="container">
+    <!-- Guest Banner -->
     <% if (!isLoggedIn) { %>
-    <div class="auth-notice">
-        <h3><i class="fas fa-info-circle"></i> Welcome, Guest!</h3>
-        <p>You can browse and read all our amazing blog posts. To create posts, comment, or interact, please sign
-            in.</p>
-        <div class="auth-buttons">
-            <a href="login.jsp" class="btn-login">
-                <i class="fas fa-sign-in-alt"></i> Sign In
-            </a>
-            <a href="register.jsp" class="btn-register">
-                <i class="fas fa-user-plus"></i> Create Account
-            </a>
+    <div class="guest-banner">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4><i class="fas fa-info-circle me-2"></i>Welcome, Guest!</h4>
+                <p class="mb-0">Browse and read blog posts. Sign in to create posts and interact with the community.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="login.jsp" class="btn btn-light me-2">
+                    <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                </a>
+                <a href="register.jsp" class="btn btn-outline-light">
+                    <i class="fas fa-user-plus me-1"></i>Register
+                </a>
+            </div>
         </div>
     </div>
     <% } %>
 
-    <!-- Success/Error Messages -->
+    <!-- Alert Messages -->
     <% if (success != null) { %>
-    <div class="alert alert-success">
-        <i class="fas fa-check-circle"></i> <%= success %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i><%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <% } %>
 
     <% if (error != null) { %>
-    <div class="alert alert-error">
-        <i class="fas fa-exclamation-circle"></i> <%= error %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i><%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <% } %>
 
     <% if (message != null) { %>
-    <div class="alert alert-error">
-        <i class="fas fa-info-circle"></i> <%= message %>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="fas fa-info-circle me-2"></i><%= message %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     <% } %>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
+    <!-- Header Actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2>Community Blogs</h2>
+            <h2 class="mb-1">Community Blogs</h2>
             <% if (isLoggedIn) { %>
-            <small>Welcome, <%= currentUser.getFullName() %>!</small>
+            <small class="text-muted">Welcome back, <%= currentUser.getFullName() %>!</small>
             <% } else { %>
-            <small>Browsing as guest - Sign in to interact</small>
+            <small class="text-muted">Browsing as guest</small>
             <% } %>
         </div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div>
             <% if (isLoggedIn) { %>
-            <button class="btn btn-primary" onclick="window.location.href='blogs?action=create'">
-                <i class="fas fa-plus"></i> Create Blog
-            </button>
+            <a href="blogs?action=create" class="btn btn-primary me-2">
+                <i class="fas fa-plus me-1"></i>Create Blog
+            </a>
             <% } %>
             <a href="home.jsp" class="btn btn-outline-secondary">
-                <i class="fas fa-home"></i> Home
+                <i class="fas fa-home me-1"></i>Home
             </a>
         </div>
     </div>
 
     <!-- Filter Section -->
     <div class="filter-section">
-        <form action="blogs" method="get" class="filter-form">
-            <input type="hidden" name="action" value="sort">
-
-            <div class="form-group">
-                <label for="min_likes">Minimum Likes</label>
-                <input type="number" name="min_likes" id="min_likes" class="form-control"
-                       placeholder="0" min="0"
-                       value="<%= request.getAttribute("min_likes") != null ? request.getAttribute("min_likes") : "" %>">
+        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filter & Sort</h5>
+        <form action="blogs?action=sort" method="get">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <label for="min_likes" class="form-label">Min Likes</label>
+                    <input type="number" name="min_likes" id="min_likes" class="form-control" placeholder="0" min="0"
+                           value="<%= request.getAttribute("min_likes") != null ? request.getAttribute("min_likes") : "" %>">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="start_date" class="form-label">From Date</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control"
+                           value="<%= request.getAttribute("start_date") != null ? request.getAttribute("start_date") : "" %>">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="end_date" class="form-label">To Date</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control"
+                           value="<%= request.getAttribute("end_date") != null ? request.getAttribute("end_date") : "" %>">
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <label for="sort_by" class="form-label">Sort By</label>
+                    <select name="sort_by" id="sort_by" class="form-select">
+                        <option value="published_at" <%= "published_at".equals(request.getAttribute("sort_by")) ? "selected" : "" %>>Date</option>
+                        <option value="likes" <%= "likes".equals(request.getAttribute("sort_by")) ? "selected" : "" %>>Likes</option>
+                        <option value="title" <%= "title".equals(request.getAttribute("sort_by")) ? "selected" : "" %>>Title</option>
+                    </select>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="start_date">From Date</label>
-                <input type="date" name="start_date" id="start_date" class="form-control"
-                       value="<%= request.getAttribute("start_date") != null ? request.getAttribute("start_date") : "" %>">
-            </div>
-
-            <div class="form-group">
-                <label for="end_date">To Date</label>
-                <input type="date" name="end_date" id="end_date" class="form-control"
-                       value="<%= request.getAttribute("end_date") != null ? request.getAttribute("end_date") : "" %>">
-            </div>
-
-            <div class="form-group">
-                <label for="sort_by">Sort By</label>
-                <select name="sort_by" id="sort_by" class="form-control">
-                    <option value="published_at" <%= "published_at".equals(request.getAttribute("sort_by")) ? "selected" : "" %>>
-                        Published Date
-                    </option>
-                    <option value="likes" <%= "likes".equals(request.getAttribute("sort_by")) ? "selected" : "" %>>
-                        Likes
-                    </option>
-                    <option value="title" <%= "title".equals(request.getAttribute("sort_by")) ? "selected" : "" %>>
-                        Title
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="sort_order">Order</label>
-                <select name="sort_order" id="sort_order" class="form-control">
-                    <option value="desc" <%= "desc".equals(request.getAttribute("sort_order")) ? "selected" : "" %>>
-                        Descending
-                    </option>
-                    <option value="asc" <%= "asc".equals(request.getAttribute("sort_order")) ? "selected" : "" %>>
-                        Ascending
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-filter"></i> Apply Filters
-                </button>
+            <div class="row mt-3">
+                <div class="col-md-6 col-lg-3">
+                    <label for="sort_order" class="form-label">Order</label>
+                    <select name="sort_order" id="sort_order" class="form-select">
+                        <option value="desc" <%= "desc".equals(request.getAttribute("sort_order")) ? "selected" : "" %>>Newest First</option>
+                        <option value="asc" <%= "asc".equals(request.getAttribute("sort_order")) ? "selected" : "" %>>Oldest First</option>
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-1"></i>Apply Filters
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
-
-    <!-- Blogs Grid -->
-    <div class="blogs-grid">
+    <!-- Blog Posts Grid -->
+    <div class="row g-4">
         <% if (blogsList != null && !blogsList.isEmpty()) {
-            List<Blogs> sortedBlogs = blogsList.stream().filter(Blogs::isActive).toList();
+            // Temporarily show all blogs (remove .filter(Blogs::isActive) for testing)
+            List<Blogs> sortedBlogs = blogsList; // Show all blogs
             for (Blogs blog : sortedBlogs) { %>
-        <div class="blog-card <%= !isLoggedIn ? "guest-mode" : "" %>">
-            <div class="blog-header">
-                <h3 class="blog-title"><%= blog.getTitle() %>
-                </h3>
-                <div class="blog-meta">
-                    <div class="author-info">
-                        <i class="fas fa-user"></i>
-                        <span><%= blog.getAuthorName() %></span>
+        <div class="col-lg-4 col-md-6">
+            <div class="card blog-card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-2"><%= blog.getTitle() %></h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i><%= blog.getAuthorName() %>
+                        </small>
+                        <small class="text-muted"><%= dateFormat.format(blog.getPublishedAt()) %></small>
                     </div>
-                    <span><%= dateFormat.format(blog.getPublishedAt()) %></span>
                 </div>
-            </div>
 
-            <div class="blog-content">
-                <div class="blog-excerpt">
-                    <%= blog.getContent().length() > 150 ?
-                            blog.getContent().substring(0, 150) + "..." :
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        <%= blog.getContent().length() > 120 ? 
+                            blog.getContent().substring(0, 120) + "..." : 
                             blog.getContent() %>
-                </div>
+                    </p>
 
-                <% if (blog.getTags() != null && !blog.getTags().trim().isEmpty()) { %>
-                <div class="blog-tags">
-                    <% String[] tags = blog.getTags().split(",");
-                        for (String tag : tags) {
-                            if (!tag.trim().isEmpty()) { %>
-                    <span class="tag"><%= tag.trim() %></span>
-                    <% }
-                    } %>
-                </div>
-                <% } %>
-            </div>
-
-            <div class="blog-footer">
-                <div class="blog-stats">
-                    <div class="stat-item">
-                        <i class="fas fa-heart"></i>
-                        <span><%= blog.getLikes() %></span>
+                    <% if (blog.getTags() != null && !blog.getTags().trim().isEmpty()) { %>
+                    <div class="mb-3">
+                        <% String[] tags = blog.getTags().split(",");
+                            for (String tag : tags) {
+                                if (!tag.trim().isEmpty()) { %>
+                        <span class="tag-badge"><%= tag.trim() %></span>
+                        <% }
+                        } %>
                     </div>
-                    <div class="stat-item">
-                        <i class="fas fa-comments"></i>
-                        <span><%= BlogsCommentDAO.getCommentsCount(blog.getId()) %></span>
-                    </div>
-                </div>
-
-                <div class="blog-actions">
-                    <a href="${pageContext.request.contextPath}/blogs?action=view&id=<%= blog.getId() %>"
-                       class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-eye"></i> Read
-                    </a>
-
-                    <% if (isLoggedIn && (isAdmin || blog.getAuthorId() == currentUser.getId())) { %>
-                    <a href="blogs?action=edit&id=<%= blog.getId() %>"
-                       class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <button onclick="confirmDelete(<%= blog.getId() %>)"
-                            class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                    <% } else if (!isLoggedIn) { %>
-                    <button onclick="showInteractionModal('edit')"
-                            class="btn btn-sm btn-outline-secondary guest-action">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
                     <% } %>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex gap-2">
+                            <span class="stat-info">
+                                <i class="fas fa-heart text-danger me-1"></i><%= blog.getLikes() %>
+                            </span>
+                            <span class="stat-info">
+                                <i class="fas fa-comment text-primary me-1"></i><%= BlogsCommentDAO.getCommentsCount(blog.getId()) %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="${pageContext.request.contextPath}/blogs?action=view&id=<%= blog.getId() %>" 
+                           class="btn btn-outline-primary btn-action flex-fill">
+                            <i class="fas fa-eye me-1"></i>Read
+                        </a>
+
+                        <% if (isLoggedIn) {
+                            if (blog.getAuthorId() == currentUser.getId()) {
+                        %>
+                        <a href="blogs?action=edit&id=<%= blog.getId() %>" 
+                           class="btn btn-outline-secondary btn-action">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </a>
+                        <%
+                            }
+
+                            if ((isAdmin || blog.getAuthorId() == currentUser.getId())) {
+                        %>
+                        <button onclick="confirmDelete(<%= blog.getId() %>)" 
+                                class="btn btn-outline-danger btn-action">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                        <%
+                            }
+
+                        } else { %>
+                        <button onclick="showSignInPrompt()" 
+                                class="btn btn-outline-secondary btn-action">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                        <% } %>
+                    </div>
                 </div>
             </div>
         </div>
         <% }
         } else { %>
-        <div class="no-blogs">
-            <i class="fas fa-blog"></i>
-            <h3>No blogs found</h3>
-            <p>Be the first to share your swimming knowledge!</p>
-            <% if (isLoggedIn && isAdmin) { %>
-            <button class="btn btn-primary" onclick="toggleCreateForm()">
-                <i class="fas fa-plus"></i> Create First Blog
-            </button>
-            <% } else if (!isLoggedIn) { %>
-            <button class="btn btn-secondary" onclick="showInteractionModal('create')">
-                <i class="fas fa-plus"></i> Create First Blog
-            </button>
-            <% } %>
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-blog fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted">No blogs found</h3>
+                <p class="text-muted mb-4">Be the first to share your swimming knowledge!</p>
+                <% if (isLoggedIn && isAdmin) { %>
+                <a href="blogs?action=create" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Create First Blog
+                </a>
+                <% } else if (!isLoggedIn) { %>
+                <button class="btn btn-secondary btn-lg" onclick="showSignInPrompt()">
+                    <i class="fas fa-plus me-2"></i>Create First Blog
+                </button>
+                <% } %>
+            </div>
         </div>
         <% } %>
     </div>
 </div>
 
-<!-- Interaction Modal for Guests -->
-<div class="interaction-overlay" id="interactionModal">
-    <div class="interaction-modal">
-        <h3><i class="fas fa-lock"></i> Sign In Required</h3>
-        <p id="modalMessage">Please sign in to interact with blog posts.</p>
-        <div class="auth-buttons">
-            <a href="login.jsp" class="btn-login">
-                <i class="fas fa-sign-in-alt"></i> Sign In
-            </a>
-            <a href="register.jsp" class="btn-register">
-                <i class="fas fa-user-plus"></i> Create Account
-            </a>
+<!-- Sign In Modal -->
+<div class="modal fade" id="signInModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-lock me-2"></i>Sign In Required
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Please sign in to interact with blog posts.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="login.jsp" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-1"></i>Sign In
+                    </a>
+                    <a href="register.jsp" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-1"></i>Register
+                    </a>
+                </div>
+            </div>
         </div>
-        <br><br>
-        <button onclick="hideInteractionModal()" class="btn btn-outline-secondary">
-            <i class="fas fa-times"></i> Continue Browsing
-        </button>
     </div>
 </div>
 
-<script src="Resources/JavaScript/BlogsList.js"></script>
+<!-- Bootstrap JS -->
+<script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-    // JSP-specific initialization with server-side data
-    <% if (!isLoggedIn) { %>
-    // Prevent right-click context menu for guest users (optional)
-    document.addEventListener('contextmenu', function (e) {
-        if (e.target.closest('.blog-card')) {
-            e.preventDefault();
-            showInteractionModal('general');
+    function showSignInPrompt() {
+        const modal = new bootstrap.Modal(document.getElementById('signInModal'));
+        modal.show();
+    }
+
+    function confirmDelete(blogId) {
+        if (confirm('Are you sure you want to delete this blog post? This action cannot be undone.')) {
+            window.location.href = 'blogs?action=delete&id=' + blogId;
         }
-    });
-    <% } %>
+    }
 </script>
+
 </body>
 </html>

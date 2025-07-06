@@ -76,7 +76,7 @@
 <div class="section" id="contact">
     <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
     <div style="text-align:center;" class="hero-content">
-        <button class="btn btn-primary" onclick="window.location.href='feedback?mode=create';">Send us a feedback</button>
+        <button class="btn btn-primary" onclick="window.location.href='feedback?action=create';">Send us a feedback</button>
     </div>
 
     <h2 style="text-align:center; color:#005caa;">See your old feedback</h2>
