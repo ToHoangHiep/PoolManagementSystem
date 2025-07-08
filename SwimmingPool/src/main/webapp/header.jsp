@@ -20,6 +20,7 @@
       if ("Admin".equalsIgnoreCase(roleName) || "Manager".equalsIgnoreCase(roleName)) {
     %>
     <a href="maintenance">Maintenance</a>
+    <a href="inventory">InventorySetting</a>
     <% }} %>
 
     <%-- View My Maintenance nếu role = 5 (Staff) --%>
