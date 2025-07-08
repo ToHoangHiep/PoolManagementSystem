@@ -525,6 +525,75 @@
             background: #f57c00;
         }
 
+        /*.actions {*/
+        /*    white-space: nowrap;*/
+        /*    padding: 8px;*/
+        /*}*/
+
+        /*.actions button {*/
+        /*    margin: 2px;*/
+        /*    padding: 6px 12px;*/
+        /*    border: none;*/
+        /*    border-radius: 4px;*/
+        /*    cursor: pointer;*/
+        /*    font-size: 12px;*/
+        /*    font-weight: bold;*/
+        /*    transition: all 0.3s ease;*/
+        /*}*/
+
+        /*.btn-report {*/
+        /*    background-color: #ffc107;*/
+        /*    color: #212529;*/
+        /*}*/
+
+        /*.btn-report:hover {*/
+        /*    background-color: #e0a800;*/
+        /*    transform: translateY(-1px);*/
+        /*}*/
+
+        /*.btn-view {*/
+        /*    background-color: #17a2b8;*/
+        /*    color: white;*/
+        /*}*/
+
+        /*.btn-view:hover {*/
+        /*    background-color: #138496;*/
+        /*    transform: translateY(-1px);*/
+        /*}*/
+
+        /*!* Update existing btn-return for consistency *!*/
+        /*.btn-return {*/
+        /*    background: #28a745; !* Đổi màu *!*/
+        /*    color: white;*/
+        /*    padding: 6px 12px;*/
+        /*    border: none;*/
+        /*    border-radius: 4px;*/
+        /*    cursor: pointer;*/
+        /*    font-size: 12px;*/
+        /*    font-weight: 500;*/
+        /*    transition: all 0.3s ease;*/
+        /*    margin: 2px;*/
+        /*}*/
+
+        /*.btn-return:hover {*/
+        /*    background-color: #218838; !* Đổi màu hover *!*/
+        /*    transform: translateY(-1px);*/
+        /*}*/
+
+        /*!* Responsive design for mobile *!*/
+        /*@media (max-width: 768px) {*/
+        /*    .actions {*/
+        /*        display: flex;*/
+        /*        flex-direction: column;*/
+        /*        gap: 4px;*/
+        /*    }*/
+
+        /*    .actions button {*/
+        /*        width: 100%;*/
+        /*        margin: 1px 0;*/
+        /*    }*/
+        /*}*/
+
         /* Modal */
         .modal {
             display: none;
@@ -888,7 +957,7 @@
 
                                     <div class="stock-info">
                                         <span class="stock-text">Available: ${item.quantity}</span>
-                                        <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.aquantity <= 5 ? 'low-stock' : 'in-stock')}">
+                                        <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.quantity <= 5 ? 'low-stock' : 'in-stock')}">
                                                 ${item.quantity == 0 ? 'Out of Stock' : (item.quantity <= 5 ? 'Low Stock' : 'In Stock')}
                                         </span>
                                     </div>
@@ -940,10 +1009,21 @@
                                 <td><fmt:formatDate value="${rental.rentalDate}" pattern="dd/MM/yyyy"/></td>
                                 <td>${rental.customerIdCard}</td>
                                 <td><fmt:formatNumber value="${rental.totalAmount}" type="currency" currencySymbol="$"/></td>
-                                <td>
-                                    <button class="btn-return" onclick="processReturn(${rental.rentalId})">
-                                        Return
+                                <td class="actions">
+                                    <!-- Return Button -->
+                                    <button class="btn-return" onclick="processReturn(${rental.rentalId})" title="Mark as returned normally">
+                                        ✅ Return
                                     </button>
+
+                                                                            <!-- Report Issue Button -->
+                                                                            <button class="btn-report" onclick="reportIssue(${rental.rentalId})" title="Report damage, loss, or overdue">
+                                                                                ⚠️ Report Issue
+                                                                            </button>
+
+                                                                            <!-- Optional: View Details Button -->
+                                                                            <button class="btn-view" onclick="viewRentalDetails(${rental.rentalId})" title="View rental details">
+                                                                                👁️ View
+                                                                            </button>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -1458,6 +1538,88 @@
     <%--    const [day, month, year] = datePart.split('/');--%>
     <%--    return new Date(`${year}-${month}-${day}T${timePart || '00:00'}`);--%>
     <%--}--%>
+    <%--// Function mới cho Report Issue--%>
+    <%--function reportIssue(rentalId) {--%>
+    <%--    // Redirect đến compensation form với rentalId--%>
+    <%--    window.location.href = `/compensation?action=create&rentalId=${rentalId}`;--%>
+    <%--}--%>
+
+    <%--// Function optional cho modal (advanced)--%>
+    <%--function reportIssueWithModal(rentalId) {--%>
+    <%--    // Hiển thị modal chọn issue type: Damaged/Lost/Overdue--%>
+    <%--}--%>
+
+    /* ===== THÊM JAVASCRIPT MỚI Ở ĐÂY ===== */
+
+    // Fix reportIssue function với context path đúng
+    function reportIssue(rentalId) {
+        const action = confirm(
+            'Report an issue with this rental?\n\n' +
+            'Click OK to report damage/loss and create compensation record.\n' +
+            'Click Cancel to go back.'
+        );
+
+        if (action) {
+            // Redirect to compensation creation với context path đúng
+            window.location.href = `compensation?action=create&rentalId=${rentalId}`;
+        }
+    }
+
+    // Function cho View Rental Details
+    function viewRentalDetails(rentalId) {
+        // Option 1: Redirect to rental detail page
+        alert(`Viewing details for Rental #${rentalId}\n\nThis feature will be implemented soon.`);
+
+        // Option 2: Redirect (khi có trang detail)
+        // window.location.href = `rental-details?id=${rentalId}`;
+    }
+
+    // Enhanced Report Issue với modal selection
+    function reportIssueWithModal(rentalId) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">⚠️ Report Issue</h3>
+                    <button class="close" onclick="closeIssueModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>What type of issue do you want to report for Rental #${rentalId}?</p>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                        <button class="btn btn-warning" onclick="redirectToCompensation(${rentalId}, 'damaged')" style="width: 100%; padding: 15px;">
+                            🔧 Equipment Damaged
+                        </button>
+                        <button class="btn" onclick="redirectToCompensation(${rentalId}, 'lost')" style="width: 100%; padding: 15px; background: #dc3545; color: white;">
+                            ❌ Equipment Lost/Missing
+                        </button>
+                        <button class="btn" onclick="redirectToCompensation(${rentalId}, 'overdue_fee')" style="width: 100%; padding: 15px; background: #17a2b8; color: white;">
+                            ⏰ Overdue Fee
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-cancel" onclick="closeIssueModal()">Cancel</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    function redirectToCompensation(rentalId, type) {
+        closeIssueModal();
+        window.location.href = `compensation?action=create&rentalId=${rentalId}&type=${type}`;
+    }
+
+    function closeIssueModal() {
+        const modal = document.querySelector('.modal:last-child');
+        if (modal) {
+            document.body.removeChild(modal);
+        }
+    }
+
 </script>
 </body>
 </html>
