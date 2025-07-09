@@ -1,6 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="model.Inventory" %>
+<%@ page import="model.User" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    User user = (User) session.getAttribute("user");
+%>
 <%
     String keyword = request.getParameter("keyword");
 %>
@@ -8,6 +13,7 @@
 <head>
     <title>Inventory List</title>
     <link rel="stylesheet" href="./Resources/CSS/inventory.css">
+
 </head>
 <body>
 
@@ -19,8 +25,7 @@
         <a href="home.jsp" class="nav-btn">🏠 Home</a>
         <a href="inventory?action=default" class="nav-btn orange">🔙 Return To List</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
-        <a href="inventory?action=rentable" class="nav-btn green">🧾 Rentable Items</a>
-        <a href="inventory?action=sellable" class="nav-btn green">🛒 Sellable Items</a>
+
     </div>
 
     <div class="nav-right">
@@ -95,7 +100,7 @@
         <td><%= inv.getInventoryId() %></td>
         <td><%= inv.getManagerId() %></td>
         <td><%= inv.getItemName() %></td>
-        <td><%= inv.getCategory() %></td>
+        <td><%= inv.getCategoryName() %></td>
         <td><%= inv.getQuantity() %></td>
         <td><%= inv.getUnit() %></td>
         <td><%= inv.getStatus() %></td>
