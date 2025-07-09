@@ -34,24 +34,8 @@ public class InventoryServlet extends HttpServlet {
             case "filter":
                 filterInventory(request, response);
                 break;
-            case "rentable":
-                listRentableItems(request, response);
-                break;
-            case "sellable":
-                listSellableItems(request, response);
-                break;
-            case "filter-rentable":
-                listFilteredRentableItems(request, response);
-                break;
-            case "filter-sellable":
-                listFilteredSellableItems(request, response);
-                break;
-            case "search-rentable":
-                searchRentableInventory(request, response);
-                break;
-            case "search-sellable":
-                searchSellableInventory(request, response);
-                break;
+
+
 
 
 
@@ -202,7 +186,7 @@ public class InventoryServlet extends HttpServlet {
         Inventory inv = new Inventory();
         inv.setManagerId(Integer.parseInt(request.getParameter("manager_id")));
         inv.setItemName(request.getParameter("item_name"));
-        inv.setCategory(request.getParameter("category"));
+        inv.setCategoryName(request.getParameter("category_name"));
         inv.setQuantity(Integer.parseInt(request.getParameter("quantity")));
         inv.setUnit(request.getParameter("unit"));
         inv.setStatus(request.getParameter("status"));
@@ -212,117 +196,7 @@ public class InventoryServlet extends HttpServlet {
     }
 
 
-    private void listRentableItems(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
 
-        int page = 1;
-        int recordsPerPage = 5;
-
-        if (request.getParameter("page") != null) {
-            try {
-                page = Integer.parseInt(request.getParameter("page"));
-            } catch (NumberFormatException e) {
-                page = 1;
-            }
-        }
-
-        // Lấy toàn bộ danh sách sản phẩm cho thuê
-        List<Inventory> allRentable = InventoryDAO.getRentableItems();
-
-        // Phân trang thủ công
-        int totalRecords = allRentable.size();
-        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-
-        int start = (page - 1) * recordsPerPage;
-        int end = Math.min(start + recordsPerPage, totalRecords);
-
-        List<Inventory> pageList = allRentable.subList(start, end);
-
-        request.setAttribute("inventoryList", pageList);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-
-        if (pageList.isEmpty()) {
-            request.setAttribute("message", "Không có sản phẩm nào có thể cho thuê.");
-        }
-
-        request.getRequestDispatcher("rentableInventory.jsp").forward(request, response);
-    }
-
-    private void listSellableItems(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        int page = 1;
-        int recordsPerPage = 5;
-
-        if (request.getParameter("page") != null) {
-            try {
-                page = Integer.parseInt(request.getParameter("page"));
-            } catch (NumberFormatException e) {
-                page = 1;
-            }
-        }
-
-        // Lấy toàn bộ danh sách sản phẩm có thể bán
-        List<Inventory> allSellable = InventoryDAO.getSellableItems();
-
-        // Phân trang thủ công
-        int totalRecords = allSellable.size();
-        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-
-        int start = (page - 1) * recordsPerPage;
-        int end = Math.min(start + recordsPerPage, totalRecords);
-
-        List<Inventory> pageList = allSellable.subList(start, end);
-
-        request.setAttribute("inventoryList", pageList);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-
-        if (pageList.isEmpty()) {
-            request.setAttribute("message", "Không có sản phẩm nào để bán.");
-        }
-
-        request.getRequestDispatcher("sellableInventory.jsp").forward(request, response);
-    }
-
-    private void listFilteredRentableItems(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String status = request.getParameter("status");
-
-        int page = 1;
-        int recordsPerPage = 5;
-
-        if (request.getParameter("page") != null) {
-            try {
-                page = Integer.parseInt(request.getParameter("page"));
-            } catch (NumberFormatException e) {
-                page = 1;
-            }
-        }
-
-        // Gọi DAO để lấy danh sách lọc theo status + usage = "item for rent"
-        List<Inventory> filteredList = InventoryDAO.searchInventoryByUsageAndStatus("item for rent", status);
-
-        // Tính toán phân trang
-        int totalRecords = filteredList.size();
-        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-        int start = (page - 1) * recordsPerPage;
-        int end = Math.min(start + recordsPerPage, totalRecords);
-        List<Inventory> pageList = filteredList.subList(start, end);
-
-        request.setAttribute("inventoryList", pageList);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("selectedStatus", status); // Giữ dropdown chọn đúng
-
-        if (pageList.isEmpty()) {
-            request.setAttribute("message", "Không có sản phẩm nào với trạng thái \"" + status + "\".");
-        }
-
-        request.getRequestDispatcher("rentableInventory.jsp").forward(request, response);
-    }
     private void listFilteredSellableItems(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 

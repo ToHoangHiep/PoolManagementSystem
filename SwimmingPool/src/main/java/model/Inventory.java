@@ -12,11 +12,12 @@ public class Inventory {
     private String unit;
     private String status;
     private Date lastUpdated;
-    private int thresholdQuantity;
+    private int categoryQuantity;
     private int usageId;
     private String usageName;
     private String categoryName;
     private double importPrice;
+
 
 
     // Getters and Setters
@@ -84,9 +85,9 @@ public class Inventory {
         this.lastUpdated = lastUpdated;
     }
 
-    public int getThresholdQuantity() { return thresholdQuantity;}
+    public int getCategoryQuantity() { return categoryQuantity;}
 
-    public void setThresholdQuantity(int thresholdQuantity) { this.thresholdQuantity = thresholdQuantity;}
+    public void setCategoryQuantity(int categoryQuantity) { this.categoryQuantity = categoryQuantity;}
 
     public int getUsageId() {return usageId;}
     public void setUsageId(int usageId) { this.usageId = usageId;}
@@ -99,5 +100,7 @@ public class Inventory {
 
     public double getImportPrice() {return importPrice;}
     public void setImportPrice(double importPrice) {this.importPrice = importPrice;}
+
+
 
 }
