@@ -8,19 +8,9 @@ public class SwimCourse {
     private int duration;
     private String status;
     private int coachId;
-    private String coach;
+    private String coachName; // Dành cho hiển thị profile
 
-    public SwimCourse() {
-    }
-
-    public SwimCourse(int id, String name, String description, double price, int duration, String status) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.duration = duration;
-        this.status = status;
-    }
+    public SwimCourse() {}
 
     public int getId() {
         return id;
@@ -78,11 +68,12 @@ public class SwimCourse {
         this.coachId = coachId;
     }
 
-    public String getCoach() {
-        return coach;
+    public String getCoachName() {
+        return coachName;
     }
 
-    public void setCoach(String coach) {
-        this.coach = coach;
+    public void setCoachName(String coachName) {
+        this.coachName = coachName;
     }
 }
+

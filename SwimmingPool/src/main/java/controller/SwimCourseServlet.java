@@ -1,10 +1,11 @@
 package controller;
 
+import dal.CoachDAO;
 import dal.SwimCourseDAO;
+import model.SwimCourse;
+import model.Coach;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import model.SwimCourse;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
@@ -12,34 +13,47 @@ import java.util.List;
 public class SwimCourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         String action = request.getParameter("action");
-        String keyword = request.getParameter("keyword");
-        String status = request.getParameter("status");
-        if (keyword == null) keyword = "";
-        if (status == null) status = "";
-
         try (Connection conn = utils.DBConnect.getConnection()) {
-            SwimCourseDAO dao = new SwimCourseDAO(conn);
+            SwimCourseDAO courseDAO = new SwimCourseDAO(conn);
+            CoachDAO coachDAO = new CoachDAO(conn);
 
-            if ("delete".equals(action)) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                dao.deleteCourse(id);
-                response.sendRedirect("swimcourse");
-                return;
-
-            } else if ("toggleStatus".equals(action)) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                dao.toggleStatus(id);
-                response.sendRedirect("swimcourse");
+            if ("add".equals(action)) {
+                List<Coach> coaches = coachDAO.getAllCoaches();
+                request.setAttribute("coaches", coaches);
+                request.getRequestDispatcher("/swimcourse.jsp").forward(request, response);
                 return;
             }
 
-            // Load danh sách tất cả các khóa học (do coach yêu cầu tạo)
-            List<SwimCourse> courses = dao.getAllCoursesByCoachRequest(status, keyword);
+            List<SwimCourse> courses = courseDAO.getAllCoursesWithCoach();
             request.setAttribute("courses", courses);
             request.getRequestDispatcher("/swimcourse.jsp").forward(request, response);
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+    }
 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try (Connection conn = utils.DBConnect.getConnection()) {
+            SwimCourseDAO courseDAO = new SwimCourseDAO(conn);
+
+            String name = request.getParameter("name");
+            String description = request.getParameter("description");
+            double price = Double.parseDouble(request.getParameter("price"));
+            int duration = Integer.parseInt(request.getParameter("duration"));
+            int coachId = Integer.parseInt(request.getParameter("coachId"));
+
+            SwimCourse course = new SwimCourse();
+            course.setName(name);
+            course.setDescription(description);
+            course.setPrice(price);
+            course.setDuration(duration);
+            course.setCoachId(coachId);
+            course.setStatus("Inactive");
+
+            courseDAO.addCourse(course);
+            response.sendRedirect("swimcourse");
         } catch (Exception e) {
             throw new ServletException(e);
         }
