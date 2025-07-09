@@ -95,7 +95,7 @@ public class CompensationServlet extends HttpServlet {
         List<EquipmentCompensation> compensations = CompensationDAO.getAllCompensations();
 
         request.setAttribute("compensations", compensations);
-        request.getRequestDispatcher("/jsp/compensation/compensation-list.jsp").forward(request, response);
+        request.getRequestDispatcher("/compensation-list.jsp").forward(request, response);
     }
 
     /**
@@ -155,7 +155,7 @@ public class CompensationServlet extends HttpServlet {
             request.setAttribute("error", "Database error loading rentals: " + e.getMessage());
         }
 
-        request.getRequestDispatcher("/jsp/compensation/compensation-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/compensation-form.jsp").forward(request, response);
     }
 
     /**
@@ -205,7 +205,7 @@ public class CompensationServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/jsp/compensation/compensation-detail.jsp").forward(request, response);
+        request.getRequestDispatcher("/compensation-detail.jsp").forward(request, response);
     }
 
     /**
@@ -235,7 +235,7 @@ public class CompensationServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/jsp/compensation/payment-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/payment-form.jsp").forward(request, response);
     }
 
     /**
@@ -261,7 +261,7 @@ public class CompensationServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/jsp/compensation/damage-photos.jsp").forward(request, response);
+        request.getRequestDispatcher("/damage-photos.jsp").forward(request, response);
     }
 
     // ===================== POST HANDLERS =====================

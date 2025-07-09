@@ -25,6 +25,7 @@ public class EquipmentDAO {
                 i.quantity AS available_quantity,
                 i.rent_price,
                 i.sale_price,
+                i.import_price,
                 i.unit,
                 i.usage_id,
                 i.status,
@@ -52,6 +53,7 @@ public class EquipmentDAO {
                 item.put("quantity", availableQty); // Số lượng hiển thị trên màn hình
                 item.put("rentPrice", rs.getDouble("rent_price"));
                 item.put("salePrice", rs.getDouble("sale_price"));
+                item.put("importPrice", rs.getDouble("import_price")); // ← THÊM DÒNG NÀY
                 item.put("unit", rs.getString("unit"));
                 item.put("usageId", rs.getInt("usage_id"));
                 item.put("usageName", rs.getString("usage_name"));
@@ -85,6 +87,7 @@ public class EquipmentDAO {
                 i.quantity,
                 i.rent_price,
                 i.sale_price,
+                i.import_price,
                 i.unit,
                 i.usage_id,
                 i.status,
@@ -107,6 +110,7 @@ public class EquipmentDAO {
                     equipment.put("quantity", rs.getInt("quantity"));
                     equipment.put("rentPrice", rs.getDouble("rent_price"));
                     equipment.put("salePrice", rs.getDouble("sale_price"));
+                    equipment.put("importPrice", rs.getDouble("import_price")); // ← THÊM DÒNG NÀY
                     equipment.put("unit", rs.getString("unit"));
                     equipment.put("usageId", rs.getInt("usage_id"));
                     equipment.put("usageName", rs.getString("usage_name"));

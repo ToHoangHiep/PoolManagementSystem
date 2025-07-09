@@ -152,4 +152,18 @@ public class EquipmentCompensation {
     }
 
 
+    //    Tính toán số tiền còn lại cần thanh toán
+    public BigDecimal getRemainingAmount() {
+        // Kiểm tra null safety
+        if (totalAmount == null || paidAmount == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal remaining = totalAmount.subtract(paidAmount);
+
+        // Đảm bảo không trả về số âm (nếu có trả thừa)
+        return remaining.compareTo(BigDecimal.ZERO) > 0 ? remaining : BigDecimal.ZERO;
+    }
+
+
 }
