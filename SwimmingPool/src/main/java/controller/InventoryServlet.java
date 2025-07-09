@@ -87,15 +87,22 @@ public class InventoryServlet extends HttpServlet {
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("categoryList", InventoryDAO.getAllCategories());
+//        request.setAttribute("usageList", InventoryDAO.getAllUsages());
         request.getRequestDispatcher("form.jsp").forward(request, response);
     }
+
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Inventory inv = InventoryDAO.getInventoryById(id);
+
         request.setAttribute("inventory", inv);
+        request.setAttribute("categoryList", InventoryDAO.getAllCategories());
+//        request.setAttribute("usageList", InventoryDAO.getAllUsages());
         request.getRequestDispatcher("form.jsp").forward(request, response);
     }
+
 
     private void insertInventory(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Inventory inv = getInventoryFromRequest(request);
@@ -189,6 +196,7 @@ public class InventoryServlet extends HttpServlet {
         inv.setCategoryName(request.getParameter("category_name"));
         inv.setQuantity(Integer.parseInt(request.getParameter("quantity")));
         inv.setUnit(request.getParameter("unit"));
+        inv.setImportPrice(Double.parseDouble(request.getParameter("import_price")));
         inv.setStatus(request.getParameter("status"));
         inv.setLastUpdated(new Date());
         inv.setUsageId(Integer.parseInt(request.getParameter("usage_id"))); // ⬅️ thêm dòng này

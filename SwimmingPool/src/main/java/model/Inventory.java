@@ -50,7 +50,7 @@ public class Inventory {
     }
 
     public void setCategoryID(int categoryID) {
-        this.categoryID = this.categoryID;
+        this.categoryID = categoryID;
     }
 
     public int getQuantity() {
