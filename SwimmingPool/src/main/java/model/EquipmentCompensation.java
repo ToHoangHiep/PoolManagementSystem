@@ -3,41 +3,50 @@ package model;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-// Equipment Compensations Model
 public class EquipmentCompensation {
+
+    // ===================== KHAI BÁO BIẾN =====================
+
     private int compensationId;
     private int rentalId;
-    private String compensationType; // 'damaged', 'lost', 'overdue_fee'
+    private String compensationType;  // 'damaged', 'lost', 'overdue_fee'
     private String damageDescription;
-    private String damageLevel; // 'minor', 'major', 'total'
-    private BigDecimal originalPrice;
+    private String damageLevel;      // 'minor', 'major', 'total'
+    private BigDecimal importPriceTotal;  // tổng giá nhập
     private BigDecimal compensationRate;
     private BigDecimal totalAmount;
     private BigDecimal paidAmount;
-    private String paymentStatus; // 'pending', 'partial', 'paid', 'waived'
+    private String paymentStatus;    // 'pending', 'partial', 'paid', 'waived'
     private Boolean canRepair;
     private Timestamp createdAt;
     private Timestamp resolvedAt;
 
-    // Default constructor
+    // ===================== CONSTRUCTORS =====================
+
     public EquipmentCompensation() {
-        this.paidAmount = BigDecimal.ZERO;
-        this.paymentStatus = "pending";
-        this.createdAt = new Timestamp(System.currentTimeMillis());
     }
 
-    // Constructor with essential fields
-    public EquipmentCompensation(int rentalId, String compensationType, BigDecimal originalPrice,
-                                 BigDecimal compensationRate, BigDecimal totalAmount) {
-        this();
+    public EquipmentCompensation(int compensationId, int rentalId, String compensationType,
+                                 String damageDescription, String damageLevel, BigDecimal importPriceTotal,
+                                 BigDecimal compensationRate, BigDecimal totalAmount, BigDecimal paidAmount,
+                                 String paymentStatus, Boolean canRepair, Timestamp createdAt, Timestamp resolvedAt) {
+        this.compensationId = compensationId;
         this.rentalId = rentalId;
         this.compensationType = compensationType;
-        this.originalPrice = originalPrice;
+        this.damageDescription = damageDescription;
+        this.damageLevel = damageLevel;
+        this.importPriceTotal = importPriceTotal;
         this.compensationRate = compensationRate;
         this.totalAmount = totalAmount;
+        this.paidAmount = paidAmount;
+        this.paymentStatus = paymentStatus;
+        this.canRepair = canRepair;
+        this.createdAt = createdAt;
+        this.resolvedAt = resolvedAt;
     }
 
-    // Getters and Setters
+    // ===================== GETTERS & SETTERS =====================
+
     public int getCompensationId() {
         return compensationId;
     }
@@ -78,12 +87,12 @@ public class EquipmentCompensation {
         this.damageLevel = damageLevel;
     }
 
-    public BigDecimal getOriginalPrice() {
-        return originalPrice;
+    public BigDecimal getImportPriceTotal() {
+        return importPriceTotal;
     }
 
-    public void setOriginalPrice(BigDecimal originalPrice) {
-        this.originalPrice = originalPrice;
+    public void setImportPriceTotal(BigDecimal importPriceTotal) {
+        this.importPriceTotal = importPriceTotal;
     }
 
     public BigDecimal getCompensationRate() {
@@ -142,16 +151,5 @@ public class EquipmentCompensation {
         this.resolvedAt = resolvedAt;
     }
 
-    // Utility methods
-    public BigDecimal getRemainingAmount() {
-        return totalAmount.subtract(paidAmount);
-    }
 
-    public boolean isFullyPaid() {
-        return "paid".equals(paymentStatus);
-    }
-
-    public boolean isPending() {
-        return "pending".equals(paymentStatus);
-    }
 }

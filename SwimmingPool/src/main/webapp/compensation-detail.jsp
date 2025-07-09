@@ -454,8 +454,8 @@
                                     </div>
                                 </c:if>
                                 <div class="info-item">
-                                    <strong>Original Price</strong>
-                                    <span><fmt:formatNumber value="${compensation.originalPrice}" type="currency" currencyCode="VND"/></span>
+                                    <strong>Import price total</strong>
+                                    <span><fmt:formatNumber value="${compensation.importPriceTotal}" type="currency" currencyCode="VND"/></span>
                                 </div>
                                 <div class="info-item">
                                     <strong>Compensation Rate</strong>

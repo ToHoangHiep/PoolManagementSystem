@@ -430,25 +430,25 @@
           <!-- Server Calculation Result -->
           <c:if test="${not empty calculationResult}">
               <div class="calculation-box">
-                  <h4>💰 Compensation Calculation</h4>
+                  <h4>💰 Tính toán bồi thường</h4>
                   <div class="calc-row">
-                      <span>Equipment Price:</span>
-                      <span><fmt:formatNumber value="${calculationResult.salePrice}" type="currency" currencyCode="VND"/></span>
+                      <span>Giá nhập (đơn giá):</span>
+                      <span><fmt:formatNumber value="${calculationResult.importPrice}" type="currency" currencyCode="VND"/></span>
                   </div>
                   <div class="calc-row">
-                      <span>Quantity:</span>
+                      <span>Số lượng:</span>
                       <span>${calculationResult.quantity}</span>
                   </div>
                   <div class="calc-row">
-                      <span>Original Price:</span>
-                      <span><fmt:formatNumber value="${calculationResult.originalPrice}" type="currency" currencyCode="VND"/></span>
+                      <span>Tổng giá nhập:</span>
+                      <span><fmt:formatNumber value="${calculationResult.importPriceTotal}" type="currency" currencyCode="VND"/></span>
                   </div>
                   <div class="calc-row">
-                      <span>Compensation Rate:</span>
+                      <span>Tỷ lệ bồi thường:</span>
                       <span><fmt:formatNumber value="${calculationResult.rate}" type="percent"/></span>
                   </div>
                   <div class="calc-row total">
-                      <span>Total Compensation:</span>
+                      <span>Số tiền bồi thường:</span>
                       <span><fmt:formatNumber value="${calculationResult.totalAmount}" type="currency" currencyCode="VND"/></span>
                   </div>
               </div>
@@ -620,7 +620,7 @@
         // If we have calculation result, show success message
         <c:if test="${not empty calculationResult}">
         console.log('Calculation completed successfully!');
-        console.log('Original Price: ${calculationResult.originalPrice}');
+        console.log('Import Price Total: ${calculationResult.importPriceTotal}');
         console.log('Total Amount: ${calculationResult.totalAmount}');
         </c:if>
     });

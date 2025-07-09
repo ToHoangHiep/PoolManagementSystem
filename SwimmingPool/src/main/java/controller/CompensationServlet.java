@@ -61,7 +61,7 @@ public class CompensationServlet extends HttpServlet {
 
         try {
             switch (action != null ? action : "") {
-                case "calculate":  // ← THÊM CASE MỚI
+                case "calculate":
                     handleCalculation(request, response);
                     break;
                 case "create":
@@ -95,7 +95,7 @@ public class CompensationServlet extends HttpServlet {
         List<EquipmentCompensation> compensations = CompensationDAO.getAllCompensations();
 
         request.setAttribute("compensations", compensations);
-        request.getRequestDispatcher("/compensation-list.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/compensation/compensation-list.jsp").forward(request, response);
     }
 
     /**
@@ -155,7 +155,7 @@ public class CompensationServlet extends HttpServlet {
             request.setAttribute("error", "Database error loading rentals: " + e.getMessage());
         }
 
-        request.getRequestDispatcher("/compensation-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/compensation/compensation-form.jsp").forward(request, response);
     }
 
     /**
@@ -205,7 +205,7 @@ public class CompensationServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/compensation-detail.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/compensation/compensation-detail.jsp").forward(request, response);
     }
 
     /**
@@ -221,9 +221,11 @@ public class CompensationServlet extends HttpServlet {
                 int compensationId = Integer.parseInt(compensationIdParam);
                 EquipmentCompensation compensation = CompensationDAO.getCompensationById(compensationId);
 
-                if (compensation != null && !compensation.isFullyPaid()) {
+                if (compensation != null) {
+                    // Tính remaining amount
+                    BigDecimal remainingAmount = compensation.getTotalAmount().subtract(compensation.getPaidAmount());
                     request.setAttribute("compensation", compensation);
-                    request.setAttribute("remainingAmount", compensation.getRemainingAmount());
+                    request.setAttribute("remainingAmount", remainingAmount);
                 } else {
                     request.setAttribute("error", "Compensation not found or already paid");
                 }
@@ -233,7 +235,7 @@ public class CompensationServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/payment-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/compensation/payment-form.jsp").forward(request, response);
     }
 
     /**
@@ -259,13 +261,13 @@ public class CompensationServlet extends HttpServlet {
             }
         }
 
-        request.getRequestDispatcher("/damage-photos.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/compensation/damage-photos.jsp").forward(request, response);
     }
 
     // ===================== POST HANDLERS =====================
 
     /**
-     * Xử lý tính toán compensation - ← METHOD MỚI
+     * Xử lý tính toán compensation
      */
     private void handleCalculation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -306,22 +308,22 @@ public class CompensationServlet extends HttpServlet {
                         return;
                     }
 
-                    // Tính toán ở server
-                    double salePrice = (Double) equipment.get("salePrice");
-                    double originalPrice = salePrice * rental.getQuantity();
-                    double totalAmount = originalPrice * rate;
+                    // ← SỬA: Tính toán dựa trên import_price thay vì sale_price
+                    double importPrice = (Double) equipment.get("importPrice");
+                    double importPriceTotal = importPrice * rental.getQuantity();
+                    double totalAmount = importPriceTotal * rate;
 
-                    System.out.println("salePrice: " + salePrice);
+                    System.out.println("importPrice: " + importPrice);
                     System.out.println("quantity: " + rental.getQuantity());
-                    System.out.println("originalPrice: " + originalPrice);
+                    System.out.println("importPriceTotal: " + importPriceTotal);
                     System.out.println("totalAmount: " + totalAmount);
 
-                    // Tạo calculation result
+                    // ← SỬA: Tạo calculation result với import_price_total
                     Map<String, Object> calculationResult = new HashMap<>();
-                    calculationResult.put("originalPrice", originalPrice);
+                    calculationResult.put("importPriceTotal", importPriceTotal);
                     calculationResult.put("rate", rate);
                     calculationResult.put("totalAmount", totalAmount);
-                    calculationResult.put("salePrice", salePrice);
+                    calculationResult.put("importPrice", importPrice);
                     calculationResult.put("quantity", rental.getQuantity());
 
                     // Set attributes để hiển thị
@@ -389,7 +391,7 @@ public class CompensationServlet extends HttpServlet {
                 return;
             }
 
-            // Lấy equipment info để tính original price
+            // Lấy equipment info để tính import price total
             Map<String, Object> equipment = EquipmentDAO.getEquipmentById(rental.getInventoryId());
             if (equipment == null) {
                 request.setAttribute("error", "Equipment not found");
@@ -397,10 +399,10 @@ public class CompensationServlet extends HttpServlet {
                 return;
             }
 
-            // Tính amounts
-            double salePrice = (Double) equipment.get("salePrice");
-            BigDecimal originalPrice = BigDecimal.valueOf(salePrice * rental.getQuantity());
-            BigDecimal totalAmount = originalPrice.multiply(compensationRate);
+            // ← SỬA: Tính amounts dựa trên import_price
+            double importPrice = (Double) equipment.get("importPrice");
+            BigDecimal importPriceTotal = BigDecimal.valueOf(importPrice * rental.getQuantity());
+            BigDecimal totalAmount = importPriceTotal.multiply(compensationRate);
 
             // Tạo compensation object
             EquipmentCompensation compensation = new EquipmentCompensation();
@@ -408,7 +410,7 @@ public class CompensationServlet extends HttpServlet {
             compensation.setCompensationType(compensationType);
             compensation.setDamageDescription(damageDescription);
             compensation.setDamageLevel(damageLevel);
-            compensation.setOriginalPrice(originalPrice);
+            compensation.setImportPriceTotal(importPriceTotal); // ← SỬA: dùng setImportPriceTotal
             compensation.setCompensationRate(compensationRate);
             compensation.setTotalAmount(totalAmount);
             compensation.setPaidAmount(BigDecimal.ZERO);
@@ -465,7 +467,7 @@ public class CompensationServlet extends HttpServlet {
                 return;
             }
 
-            BigDecimal remainingAmount = compensation.getRemainingAmount();
+            BigDecimal remainingAmount = compensation.getTotalAmount().subtract(compensation.getPaidAmount());
             if (paymentAmount.compareTo(BigDecimal.ZERO) <= 0 ||
                     paymentAmount.compareTo(remainingAmount) > 0) {
                 request.setAttribute("error", "Invalid payment amount. Maximum: " + remainingAmount);

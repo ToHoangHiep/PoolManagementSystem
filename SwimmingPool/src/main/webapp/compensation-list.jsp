@@ -355,7 +355,7 @@
             <th>Rental ID</th>
             <th>Type</th>
             <th>Damage Level</th>
-            <th>Original Price</th>
+            <th>Import Price</th>
             <th>Total Amount</th>
             <th>Paid Amount</th>
             <th>Status</th>
@@ -387,7 +387,7 @@
                 </c:if>
               </td>
               <td>
-                <fmt:formatNumber value="${compensation.originalPrice}" type="currency" currencyCode="VND"/>
+                <fmt:formatNumber value="${compensation.importPriceTotal}" type="currency" currencyCode="VND"/>
               </td>
               <td>
                 <fmt:formatNumber value="${compensation.totalAmount}" type="currency" currencyCode="VND"/>
@@ -396,9 +396,7 @@
                 <fmt:formatNumber value="${compensation.paidAmount}" type="currency" currencyCode="VND"/>
               </td>
               <td>
-                                        <span class="status-badge status-${compensation.paymentStatus}">
-                                            ${compensation.paymentStatus}
-                                        </span>
+                <span class="status-badge status-${compensation.paymentStatus}">${compensation.paymentStatus}</span>
               </td>
               <td>
                 <fmt:formatDate value="${compensation.createdAt}" pattern="dd/MM/yyyy HH:mm"/>

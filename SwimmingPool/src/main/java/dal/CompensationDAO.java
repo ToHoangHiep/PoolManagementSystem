@@ -17,7 +17,7 @@ public class CompensationDAO {
      */
     public static boolean createCompensation(EquipmentCompensation compensation) {
         String sql = "INSERT INTO Equipment_Compensations (rental_id, compensation_type, damage_description, " +
-                "damage_level, original_price, compensation_rate, total_amount, paid_amount, " +
+                "damage_level, import_price_total, compensation_rate, total_amount, paid_amount, " +
                 "payment_status, can_repair) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnect.getConnection();
@@ -27,7 +27,7 @@ public class CompensationDAO {
             stmt.setString(2, compensation.getCompensationType());
             stmt.setString(3, compensation.getDamageDescription());
             stmt.setString(4, compensation.getDamageLevel());
-            stmt.setBigDecimal(5, compensation.getOriginalPrice());
+            stmt.setBigDecimal(5, compensation.getImportPriceTotal()); // ← SỬA: dùng import_price_total
             stmt.setBigDecimal(6, compensation.getCompensationRate());
             stmt.setBigDecimal(7, compensation.getTotalAmount());
             stmt.setBigDecimal(8, compensation.getPaidAmount());
@@ -133,7 +133,7 @@ public class CompensationDAO {
      */
     public static boolean updateCompensation(EquipmentCompensation compensation) {
         String sql = "UPDATE Equipment_Compensations SET damage_description = ?, damage_level = ?, " +
-                "original_price = ?, compensation_rate = ?, total_amount = ?, paid_amount = ?, " +
+                "import_price_total = ?, compensation_rate = ?, total_amount = ?, paid_amount = ?, " +
                 "payment_status = ?, can_repair = ?, resolved_at = ? WHERE compensation_id = ?";
 
         try (Connection conn = DBConnect.getConnection();
@@ -141,7 +141,7 @@ public class CompensationDAO {
 
             stmt.setString(1, compensation.getDamageDescription());
             stmt.setString(2, compensation.getDamageLevel());
-            stmt.setBigDecimal(3, compensation.getOriginalPrice());
+            stmt.setBigDecimal(3, compensation.getImportPriceTotal()); // ← SỬA: dùng import_price_total
             stmt.setBigDecimal(4, compensation.getCompensationRate());
             stmt.setBigDecimal(5, compensation.getTotalAmount());
             stmt.setBigDecimal(6, compensation.getPaidAmount());
@@ -476,7 +476,7 @@ public class CompensationDAO {
         compensation.setCompensationType(rs.getString("compensation_type"));
         compensation.setDamageDescription(rs.getString("damage_description"));
         compensation.setDamageLevel(rs.getString("damage_level"));
-        compensation.setOriginalPrice(rs.getBigDecimal("original_price"));
+        compensation.setImportPriceTotal(rs.getBigDecimal("import_price_total")); // ← SỬA: dùng import_price_total
         compensation.setCompensationRate(rs.getBigDecimal("compensation_rate"));
         compensation.setTotalAmount(rs.getBigDecimal("total_amount"));
         compensation.setPaidAmount(rs.getBigDecimal("paid_amount"));
