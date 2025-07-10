@@ -25,6 +25,8 @@
         <a href="home.jsp" class="nav-btn">🏠 Home</a>
         <a href="inventory?action=default" class="nav-btn orange">🔙 Return To List</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
+        <a href="inventory?action=lowstock" class="nav-btn blue" >Thiết bị sắp hết kho</a>
+
 
     </div>
 
@@ -122,14 +124,17 @@
     </tbody>
 </table>
 
-<% if (totalPages != null && currentPage != null && totalPages > 1) { %>
-<div class="pagination" style="margin-top: 20px;">
-    <% for (int i = 1; i <= totalPages; i++) { %>
-    <a href="inventory?page=<%= i %><%= keyword != null ? "&keyword=" + keyword : "" %>"
-       class="<%= (i == currentPage) ? "active" : "" %>"><%= i %></a>
-    <% } %>
-</div>
-<% } %>
+<c:if test="${not empty lowStockItems}">
+    <div style="margin-top: 20px; padding: 10px; background-color: #fff3cd; border-left: 5px solid #ffecb5;">
+        <strong>&#9888; Cảnh báo:</strong> Các mặt hàng sắp hết:
+        <ul>
+            <c:forEach var="item" items="${lowStockItems}">
+                <li>${item.itemName} (Còn: ${item.quantity}, Mức cảnh báo: ${item.categoryQuantity})</li>
+            </c:forEach>
+        </ul>
+    </div>
+</c:if>
+
 
 </body>
 </html>

@@ -34,6 +34,10 @@ public class InventoryServlet extends HttpServlet {
             case "filter":
                 filterInventory(request, response);
                 break;
+            case "lowstock":
+                showLowStockItems(request, response);
+                break;
+
 
 
 
@@ -69,20 +73,20 @@ public class InventoryServlet extends HttpServlet {
             page = Integer.parseInt(request.getParameter("page"));
         }
 
+        List<Inventory> lowStockItems = InventoryDAO.getLowStockItems();
+        if (!lowStockItems.isEmpty()) {
+            request.setAttribute("lowStockItems", lowStockItems);
+        }
+
+
         List<Inventory> list = InventoryDAO.getInventoriesByPage((page - 1) * recordsPerPage, recordsPerPage);
         int totalRecords = InventoryDAO.getTotalInventoryCount();
         int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
-        System.out.println("Total Records: " + totalRecords);
-        System.out.println("Total Pages: " + totalPages);
-
-        for (Inventory inventory : list) {
-            System.out.println(inventory.getItemName());
-        }
-
         request.setAttribute("inventoryList", list);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
+
         request.getRequestDispatcher("inventory.jsp").forward(request, response);
     }
 
@@ -173,6 +177,7 @@ public class InventoryServlet extends HttpServlet {
     }
 
 
+
     private void filterInventory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -202,6 +207,18 @@ public class InventoryServlet extends HttpServlet {
         inv.setUsageId(Integer.parseInt(request.getParameter("usage_id"))); // ⬅️ thêm dòng này
         return inv;
     }
+
+    private void showLowStockItems(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        List<Inventory> lowStockList = InventoryDAO.getLowStockItems();
+
+        request.setAttribute("inventoryList", lowStockList);
+        request.setAttribute("message", "Danh sách thiết bị sắp hết kho");
+
+        request.getRequestDispatcher("lowstock.jsp").forward(request, response);
+    }
+
 
 
 
