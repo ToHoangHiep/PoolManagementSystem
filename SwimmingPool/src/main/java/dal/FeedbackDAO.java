@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mysql.cj.x.protobuf.MysqlxResultset.FetchDone;
 public class FeedbackDAO {
     public static boolean createFeedback(int userId, String feedbackType, Integer coachId, Integer courseId, String generalFeedbackType, String content, int rating) {
         String sql = "INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -54,7 +53,7 @@ public class FeedbackDAO {
     }
 
     public static Feedback getSpecificFeedback(int postId) {
-        String sql = "SELECT * FROM Feedbacks WHERE id = ?";
+        String sql = "SELECT f.*, u.full_name, u.email FROM Feedbacks f INNER JOIN Users u ON f.user_id = u.id WHERE f.id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -73,6 +72,8 @@ public class FeedbackDAO {
                 fb.setRating(rs.getInt("rating"));
                 fb.setCreatedAt(rs.getTimestamp("created_at"));
                 fb.setUpdatedAt(rs.getTimestamp("updated_at"));
+                fb.setUserName(rs.getString("full_name"));
+                fb.setUserEmail(rs.getString("email"));
                 return fb;
             }
         } catch (SQLException e) {
@@ -116,19 +117,37 @@ public class FeedbackDAO {
         return false;
     }
 
-    public static boolean deleteFeedback(int postId) {
-        String sql = "DELETE FROM Feedbacks WHERE id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, postId);
+    public static boolean deleteFeedback(int feedbackId) {
+        Connection conn = null;
+        PreparedStatement deleteRepliesStmt = null;
+        PreparedStatement deleteFeedbackStmt = null;
+        try {
+            conn = DBConnect.getConnection();
+            conn.setAutoCommit(false);
 
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
+            // Delete replies first
+            String deleteRepliesSql = "DELETE FROM FeedbackReplies WHERE feedback_id = ?";
+            deleteRepliesStmt = conn.prepareStatement(deleteRepliesSql);
+            deleteRepliesStmt.setInt(1, feedbackId);
+            deleteRepliesStmt.executeUpdate();
+
+            // Delete feedback
+            String deleteFeedbackSql = "DELETE FROM Feedbacks WHERE id = ?";
+            deleteFeedbackStmt = conn.prepareStatement(deleteFeedbackSql);
+            deleteFeedbackStmt.setInt(1, feedbackId);
+            int affectedRows = deleteFeedbackStmt.executeUpdate();
+
+            conn.commit();
+            return affectedRows > 0;
+        } catch (Exception e) {
+            if (conn != null) try { conn.rollback(); } catch (Exception ex) {}
             e.printStackTrace();
+            return false;
+        } finally {
+            try { if (deleteRepliesStmt != null) deleteRepliesStmt.close(); } catch (Exception e) {}
+            try { if (deleteFeedbackStmt != null) deleteFeedbackStmt.close(); } catch (Exception e) {}
+            try { if (conn != null) conn.close(); } catch (Exception e) {}
         }
-
-        return false;
     }
 
     public static List<Feedback> getAllFeedbacks() {

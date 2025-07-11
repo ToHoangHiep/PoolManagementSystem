@@ -1,17 +1,23 @@
+
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
 <%@ page import="model.User" %>
 <%
   User user = (User) session.getAttribute("user");
 %>
 <!-- Navbar -->
+
 <meta charset="UTF-8">
+
 <div class="navbar">
   <div class="logo">SwimmingPool</div>
   <div class="nav-links">
     <a href="home.jsp">Home</a>
     <a href="#about">About Us</a>
     <a href="#services">Services</a>
+
     <a href="courses">Khóa học</a>
+
     <%-- Chỉ hiện nếu là Staff --%>
     <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
     <a href="equipment-rental">Equipment Rental</a>
