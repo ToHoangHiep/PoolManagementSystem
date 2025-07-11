@@ -354,7 +354,6 @@
             <th>ID</th>
             <th>Rental ID</th>
             <th>Type</th>
-            <th>Damage Level</th>
             <th>Import Price</th>
             <th>Total Amount</th>
             <th>Paid Amount</th>
@@ -375,16 +374,6 @@
                   <c:when test="${compensation.compensationType == 'overdue_fee'}">⏰ Overdue</c:when>
                   <c:otherwise>${compensation.compensationType}</c:otherwise>
                 </c:choose>
-              </td>
-              <td>
-                <c:if test="${compensation.damageLevel != null}">
-                  <c:choose>
-                    <c:when test="${compensation.damageLevel == 'minor'}">🟡 Minor</c:when>
-                    <c:when test="${compensation.damageLevel == 'major'}">🟠 Major</c:when>
-                    <c:when test="${compensation.damageLevel == 'total'}">🔴 Total</c:when>
-                    <c:otherwise>${compensation.damageLevel}</c:otherwise>
-                  </c:choose>
-                </c:if>
               </td>
               <td>
                 <fmt:formatNumber value="${compensation.importPriceTotal}" type="currency" currencyCode="VND"/>

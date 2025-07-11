@@ -398,16 +398,19 @@
                   </select>
               </div>
 
-              <div class="form-group" id="damageLevelGroup" style="display: ${compensationType == 'damaged' ? 'block' : 'none'};">
-                  <label for="damageLevel">Damage Level</label>
-                  <select id="damageLevel" name="damageLevel" onchange="updateCompensationRate()">
-                      <option value="">-- Select level --</option>
-                      <option value="minor">🟡 Minor (10-30%)</option>
-                      <option value="major">🟠 Major (40-70%)</option>
-                      <option value="total">🔴 Total Loss (80-100%)</option>
+              <div class="form-group">
+                  <label for="compensationRate">Compensation Rate (0.0 - 1.0) <span style="color: red;">*</span></label>
+                  <select id="compensationRate" name="compensationRate" required onchange="triggerCalculation()">
+                      <option value="">-- Select rate --</option>
+                      <option value="0.1">Overdue Fee (10%)</option>
+                      <option value="0.2">Minor Damage (20%)</option>
+                      <option value="0.4">Moderate Damage (40%)</option>
+                      <option value="0.6">Major Damage (60%)</option>
+                      <option value="0.8">Severe Damage (80%)</option>
+                      <option value="1.0">Total Loss (100%)</option>
                   </select>
+                  <small style="color: #666;">Select appropriate compensation rate based on damage severity</small>
               </div>
-          </div>
 
           <!-- Description -->
           <div class="form-group">
@@ -416,16 +419,16 @@
                         placeholder="Describe the damage, loss circumstances, or overdue details...">${param.damageDescription}</textarea>
           </div>
 
-          <!-- Compensation Rate -->
-          <div class="form-group">
-              <label for="compensationRate">Compensation Rate (0.0 - 1.0) <span style="color: red;">*</span></label>
-              <input type="number" id="compensationRate" name="compensationRate"
-                     step="0.01" min="0" max="1" required
-                     placeholder="e.g., 0.8 for 80%"
-                     value="${compensationRate != null ? compensationRate : ''}"
-                     onchange="triggerCalculation()">
-              <small style="color: #666;">Enter decimal value (e.g., 0.5 = 50%, 1.0 = 100%)</small>
-          </div>
+<%--          <!-- Compensation Rate -->--%>
+<%--          <div class="form-group">--%>
+<%--              <label for="compensationRate">Compensation Rate (0.0 - 1.0) <span style="color: red;">*</span></label>--%>
+<%--              <input type="number" id="compensationRate" name="compensationRate"--%>
+<%--                     step="0.01" min="0" max="1" required--%>
+<%--                     placeholder="e.g., 0.8 for 80%"--%>
+<%--                     value="${compensationRate != null ? compensationRate : ''}"--%>
+<%--                     onchange="triggerCalculation()">--%>
+<%--              <small style="color: #666;">Enter decimal value (e.g., 0.5 = 50%, 1.0 = 100%)</small>--%>
+<%--          </div>--%>
 
           <!-- Server Calculation Result -->
           <c:if test="${not empty calculationResult}">
@@ -497,44 +500,17 @@
 
     function updateForm() {
         const compensationType = document.getElementById('compensationType').value;
-        const damageLevelGroup = document.getElementById('damageLevelGroup');
-        const damageLevel = document.getElementById('damageLevel');
         const compensationRate = document.getElementById('compensationRate');
 
-        if (compensationType === 'damaged') {
-            damageLevelGroup.style.display = 'block';
-            damageLevel.required = true;
-        } else {
-            damageLevelGroup.style.display = 'none';
-            damageLevel.required = false;
-            damageLevel.value = '';
-
-            // Auto-set compensation rate for non-damaged items
-            if (compensationType === 'lost') {
-                compensationRate.value = '1.0';
-            } else if (compensationType === 'overdue_fee') {
-                compensationRate.value = '0.1';
-            }
+        // Auto-suggest rates based on type
+        if (compensationType === 'lost') {
+            compensationRate.value = '1.0'; // Auto select 100% for lost items
+        } else if (compensationType === 'overdue_fee') {
+            compensationRate.value = '0.1'; // Auto select 10% for overdue
+        } else if (compensationType === 'damaged') {
+            // Let user choose for damaged items
+            compensationRate.value = '';
         }
-    }
-
-    function updateCompensationRate() {
-        const damageLevel = document.getElementById('damageLevel').value;
-        const compensationRate = document.getElementById('compensationRate');
-
-        // Suggest compensation rates based on damage level
-        switch(damageLevel) {
-            case 'minor':
-                compensationRate.value = '0.2';
-                break;
-            case 'major':
-                compensationRate.value = '0.6';
-                break;
-            case 'total':
-                compensationRate.value = '1.0';
-                break;
-        }
-    }
 
     function triggerCalculation() {
         const rentalId = document.getElementById('rentalId').value;
@@ -555,63 +531,57 @@
     }
 
     // Form validation
-    document.getElementById('compensationForm').addEventListener('submit', function(e) {
-        const action = document.querySelector('input[name="action"]').value;
-        const rentalId = document.getElementById('rentalId').value;
-        const compensationType = document.getElementById('compensationType').value;
-        const compensationRate = parseFloat(document.getElementById('compensationRate').value);
-        const damageDescription = document.getElementById('damageDescription').value;
+        document.getElementById('compensationForm').addEventListener('submit', function(e) {
+            const action = document.querySelector('input[name="action"]').value;
+            const rentalId = document.getElementById('rentalId').value;
+            const compensationType = document.getElementById('compensationType').value;
+            const compensationRate = parseFloat(document.getElementById('compensationRate').value);
+            const damageDescription = document.getElementById('damageDescription').value;
 
-        if (!rentalId) {
-            alert('Please select a rental.');
-            e.preventDefault();
-            return;
-        }
-
-        if (!compensationType) {
-            alert('Please select compensation type.');
-            e.preventDefault();
-            return;
-        }
-
-        if (compensationType === 'damaged' && !document.getElementById('damageLevel').value) {
-            alert('Please select damage level for damaged equipment.');
-            e.preventDefault();
-            return;
-        }
-
-        if (isNaN(compensationRate) || compensationRate < 0 || compensationRate > 1) {
-            alert('Compensation rate must be between 0.0 and 1.0');
-            e.preventDefault();
-            return;
-        }
-
-        // For create action, check description
-        if (action === 'create') {
-            if (!damageDescription.trim()) {
-                alert('Please enter a description.');
+            if (!rentalId) {
+                alert('Please select a rental.');
                 e.preventDefault();
                 return;
             }
 
-            // Confirm creation
-            if (!confirm('Are you sure you want to create this compensation?')) {
+            if (!compensationType) {
+                alert('Please select compensation type.');
                 e.preventDefault();
                 return;
             }
-        }
 
-        // Show loading state
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            if (action === 'calculate') {
-                submitBtn.textContent = '🔄 Calculating...';
-            } else {
-                submitBtn.textContent = '⏳ Creating...';
+            if (isNaN(compensationRate) || compensationRate < 0 || compensationRate > 1) {
+                alert('Please select a valid compensation rate');
+                e.preventDefault();
+                return;
             }
-        }
-    });
+
+            // For create action, check description
+            if (action === 'create') {
+                if (!damageDescription.trim()) {
+                    alert('Please enter a description.');
+                    e.preventDefault();
+                    return;
+                }
+
+                // Confirm creation
+                if (!confirm('Are you sure you want to create this compensation?')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                if (action === 'calculate') {
+                    submitBtn.textContent = '🔄 Calculating...';
+                } else {
+                    submitBtn.textContent = '⏳ Creating...';
+                }
+            }
+        });
 
     // Initialize form state when page loads
     document.addEventListener('DOMContentLoaded', function() {

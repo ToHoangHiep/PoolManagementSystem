@@ -11,7 +11,6 @@ public class EquipmentCompensation {
     private int rentalId;
     private String compensationType;  // 'damaged', 'lost', 'overdue_fee'
     private String damageDescription;
-    private String damageLevel;      // 'minor', 'major', 'total'
     private BigDecimal importPriceTotal;  // tổng giá nhập
     private BigDecimal compensationRate;
     private BigDecimal totalAmount;
@@ -27,14 +26,13 @@ public class EquipmentCompensation {
     }
 
     public EquipmentCompensation(int compensationId, int rentalId, String compensationType,
-                                 String damageDescription, String damageLevel, BigDecimal importPriceTotal,
+                                 String damageDescription, BigDecimal importPriceTotal,
                                  BigDecimal compensationRate, BigDecimal totalAmount, BigDecimal paidAmount,
                                  String paymentStatus, Boolean canRepair, Timestamp createdAt, Timestamp resolvedAt) {
         this.compensationId = compensationId;
         this.rentalId = rentalId;
         this.compensationType = compensationType;
         this.damageDescription = damageDescription;
-        this.damageLevel = damageLevel;
         this.importPriceTotal = importPriceTotal;
         this.compensationRate = compensationRate;
         this.totalAmount = totalAmount;
@@ -77,14 +75,6 @@ public class EquipmentCompensation {
 
     public void setDamageDescription(String damageDescription) {
         this.damageDescription = damageDescription;
-    }
-
-    public String getDamageLevel() {
-        return damageLevel;
-    }
-
-    public void setDamageLevel(String damageLevel) {
-        this.damageLevel = damageLevel;
     }
 
     public BigDecimal getImportPriceTotal() {
@@ -163,6 +153,18 @@ public class EquipmentCompensation {
 
         // Đảm bảo không trả về số âm (nếu có trả thừa)
         return remaining.compareTo(BigDecimal.ZERO) > 0 ? remaining : BigDecimal.ZERO;
+    }
+
+
+//     Kiểm tra xem compensation đã được thanh toán đầy đủ chưa
+    public boolean isFullyPaid() {
+        // Kiểm tra null safety
+        if (totalAmount == null || paidAmount == null) {
+            return false;
+        }
+
+        // So sánh paidAmount với totalAmount
+        return paidAmount.compareTo(totalAmount) >= 0;
     }
 
 

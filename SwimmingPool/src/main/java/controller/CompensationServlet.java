@@ -308,7 +308,7 @@ public class CompensationServlet extends HttpServlet {
                         return;
                     }
 
-                    // ← SỬA: Tính toán dựa trên import_price thay vì sale_price
+                    // Tính toán dựa trên import_price
                     double importPrice = (Double) equipment.get("importPrice");
                     double importPriceTotal = importPrice * rental.getQuantity();
                     double totalAmount = importPriceTotal * rate;
@@ -318,7 +318,7 @@ public class CompensationServlet extends HttpServlet {
                     System.out.println("importPriceTotal: " + importPriceTotal);
                     System.out.println("totalAmount: " + totalAmount);
 
-                    // ← SỬA: Tạo calculation result với import_price_total
+                    // Tạo calculation result
                     Map<String, Object> calculationResult = new HashMap<>();
                     calculationResult.put("importPriceTotal", importPriceTotal);
                     calculationResult.put("rate", rate);
@@ -365,7 +365,6 @@ public class CompensationServlet extends HttpServlet {
             int rentalId = Integer.parseInt(request.getParameter("rentalId"));
             String compensationType = request.getParameter("compensationType");
             String damageDescription = request.getParameter("damageDescription");
-            String damageLevel = request.getParameter("damageLevel");
             BigDecimal compensationRate = new BigDecimal(request.getParameter("compensationRate"));
 
             // Validation cơ bản
@@ -399,7 +398,7 @@ public class CompensationServlet extends HttpServlet {
                 return;
             }
 
-            // ← SỬA: Tính amounts dựa trên import_price
+            // Tính amounts dựa trên import_price
             double importPrice = (Double) equipment.get("importPrice");
             BigDecimal importPriceTotal = BigDecimal.valueOf(importPrice * rental.getQuantity());
             BigDecimal totalAmount = importPriceTotal.multiply(compensationRate);
@@ -409,16 +408,16 @@ public class CompensationServlet extends HttpServlet {
             compensation.setRentalId(rentalId);
             compensation.setCompensationType(compensationType);
             compensation.setDamageDescription(damageDescription);
-            compensation.setDamageLevel(damageLevel);
-            compensation.setImportPriceTotal(importPriceTotal); // ← SỬA: dùng setImportPriceTotal
+            compensation.setImportPriceTotal(importPriceTotal);
             compensation.setCompensationRate(compensationRate);
             compensation.setTotalAmount(totalAmount);
             compensation.setPaidAmount(BigDecimal.ZERO);
             compensation.setPaymentStatus("pending");
 
-            // Set can_repair logic
+            // Set can_repair logic - simplified without damage level
             if ("damaged".equals(compensationType)) {
-                compensation.setCanRepair(!"total".equals(damageLevel));
+                // For damaged items, assume repairable unless compensation rate is 100%
+                compensation.setCanRepair(compensationRate.compareTo(BigDecimal.ONE) < 0);
             } else {
                 compensation.setCanRepair(false);
             }
@@ -427,9 +426,9 @@ public class CompensationServlet extends HttpServlet {
             boolean success = CompensationDAO.createCompensation(compensation);
 
             if (success) {
-                // Nếu severity cao, auto add to blacklist
-                if (shouldAddToBlacklist(compensationType, damageLevel, totalAmount)) {
-                    addCustomerToBlacklist(rental, compensationType, damageLevel);
+                // Nếu severity cao, auto add to blacklist (based on amount instead of damage level)
+                if (shouldAddToBlacklist(compensationType, totalAmount)) {
+                    addCustomerToBlacklist(rental, compensationType, totalAmount);
                 }
 
                 response.sendRedirect("compensation?action=view&id=" + compensation.getCompensationId());
@@ -515,23 +514,19 @@ public class CompensationServlet extends HttpServlet {
     // ===================== HELPER METHODS =====================
 
     /**
-     * Logic kiểm tra có nên add customer vào blacklist không
+     * Logic kiểm tra có nên add customer vào blacklist không (without damage level)
      */
-    private boolean shouldAddToBlacklist(String compensationType, String damageLevel, BigDecimal totalAmount) {
-        // Logic:
+    private boolean shouldAddToBlacklist(String compensationType, BigDecimal totalAmount) {
+        // Logic dựa trên type và amount:
         // - Lost items: auto blacklist
-        // - Total damage với amount > 500k: auto blacklist
-        // - Major damage với amount > 1M: auto blacklist
+        // - High amount compensation: auto blacklist
 
         if ("lost".equals(compensationType)) {
             return true;
         }
 
-        if ("total".equals(damageLevel) && totalAmount.compareTo(new BigDecimal("500000")) > 0) {
-            return true;
-        }
-
-        if ("major".equals(damageLevel) && totalAmount.compareTo(new BigDecimal("1000000")) > 0) {
+        // Damaged items với amount cao
+        if ("damaged".equals(compensationType) && totalAmount.compareTo(new BigDecimal("500000")) > 0) {
             return true;
         }
 
@@ -539,9 +534,9 @@ public class CompensationServlet extends HttpServlet {
     }
 
     /**
-     * Add customer vào blacklist
+     * Add customer vào blacklist (without damage level)
      */
-    private void addCustomerToBlacklist(EquipmentRental rental, String compensationType, String damageLevel) {
+    private void addCustomerToBlacklist(EquipmentRental rental, String compensationType, BigDecimal totalAmount) {
         try {
             CustomerBlacklist blacklist = new CustomerBlacklist();
             blacklist.setCustomerIdCard(rental.getCustomerIdCard());
@@ -550,15 +545,16 @@ public class CompensationServlet extends HttpServlet {
             if ("lost".equals(compensationType)) {
                 blacklist.setReason("lost_items");
                 blacklist.setSeverity("restricted");
-            } else if ("total".equals(damageLevel)) {
-                blacklist.setReason("frequent_damage");
+            } else if (totalAmount.compareTo(new BigDecimal("1000000")) > 0) {
+                blacklist.setReason("high_damage_cost");
                 blacklist.setSeverity("warning");
             } else {
                 blacklist.setReason("frequent_damage");
                 blacklist.setSeverity("warning");
             }
 
-            blacklist.setDescription("Auto-added due to compensation: " + compensationType + " - " + damageLevel);
+            blacklist.setDescription("Auto-added due to compensation: " + compensationType +
+                    " - Amount: " + totalAmount);
 
             BlacklistDAO.addToBlacklist(blacklist);
 

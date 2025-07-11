@@ -440,19 +440,7 @@
                                             </c:choose>
                                         </span>
                                 </div>
-                                <c:if test="${not empty compensation.damageLevel}">
-                                    <div class="info-item">
-                                        <strong>Damage Level</strong>
-                                        <span>
-                                                <c:choose>
-                                                    <c:when test="${compensation.damageLevel == 'minor'}">🟡 Minor</c:when>
-                                                    <c:when test="${compensation.damageLevel == 'major'}">🟠 Major</c:when>
-                                                    <c:when test="${compensation.damageLevel == 'total'}">🔴 Total</c:when>
-                                                    <c:otherwise>${compensation.damageLevel}</c:otherwise>
-                                                </c:choose>
-                                            </span>
-                                    </div>
-                                </c:if>
+
                                 <div class="info-item">
                                     <strong>Import price total</strong>
                                     <span><fmt:formatNumber value="${compensation.importPriceTotal}" type="currency" currencyCode="VND"/></span>
@@ -733,18 +721,7 @@
                                     </span>
                             </div>
 
-                            <c:if test="${not empty compensation.damageLevel}">
-                                <div class="info-item" style="margin-bottom: 10px;">
-                                    <strong>Severity</strong>
-                                    <span>
-                                            <c:choose>
-                                                <c:when test="${compensation.damageLevel == 'minor'}">🟡 Minor Damage</c:when>
-                                                <c:when test="${compensation.damageLevel == 'major'}">🟠 Major Damage</c:when>
-                                                <c:when test="${compensation.damageLevel == 'total'}">🔴 Total Loss</c:when>
-                                            </c:choose>
-                                        </span>
-                                </div>
-                            </c:if>
+
 
                             <div class="info-item">
                                 <strong>Actions Available</strong>

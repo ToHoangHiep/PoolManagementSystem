@@ -17,8 +17,8 @@ public class CompensationDAO {
      */
     public static boolean createCompensation(EquipmentCompensation compensation) {
         String sql = "INSERT INTO Equipment_Compensations (rental_id, compensation_type, damage_description, " +
-                "damage_level, import_price_total, compensation_rate, total_amount, paid_amount, " +
-                "payment_status, can_repair) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "import_price_total, compensation_rate, total_amount, paid_amount, " +
+                "payment_status, can_repair) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -26,17 +26,16 @@ public class CompensationDAO {
             stmt.setInt(1, compensation.getRentalId());
             stmt.setString(2, compensation.getCompensationType());
             stmt.setString(3, compensation.getDamageDescription());
-            stmt.setString(4, compensation.getDamageLevel());
-            stmt.setBigDecimal(5, compensation.getImportPriceTotal()); // ← SỬA: dùng import_price_total
-            stmt.setBigDecimal(6, compensation.getCompensationRate());
-            stmt.setBigDecimal(7, compensation.getTotalAmount());
-            stmt.setBigDecimal(8, compensation.getPaidAmount());
-            stmt.setString(9, compensation.getPaymentStatus());
+            stmt.setBigDecimal(4, compensation.getImportPriceTotal());  // ← Index từ 5 → 4
+            stmt.setBigDecimal(5, compensation.getCompensationRate());  // ← Index từ 6 → 5
+            stmt.setBigDecimal(6, compensation.getTotalAmount());       // ← Index từ 7 → 6
+            stmt.setBigDecimal(7, compensation.getPaidAmount());       // ← Index từ 8 → 7
+            stmt.setString(8, compensation.getPaymentStatus());        // ← Index từ 9 → 8
 
             if (compensation.getCanRepair() != null) {
-                stmt.setBoolean(10, compensation.getCanRepair());
+                stmt.setBoolean(9, compensation.getCanRepair());
             } else {
-                stmt.setNull(10, Types.BOOLEAN);
+                stmt.setNull(9, Types.BOOLEAN);
             }
 
             int affectedRows = stmt.executeUpdate();
@@ -132,7 +131,7 @@ public class CompensationDAO {
      * Update compensation
      */
     public static boolean updateCompensation(EquipmentCompensation compensation) {
-        String sql = "UPDATE Equipment_Compensations SET damage_description = ?, damage_level = ?, " +
+        String sql = "UPDATE Equipment_Compensations SET damage_description = ? " +
                 "import_price_total = ?, compensation_rate = ?, total_amount = ?, paid_amount = ?, " +
                 "payment_status = ?, can_repair = ?, resolved_at = ? WHERE compensation_id = ?";
 
@@ -140,21 +139,20 @@ public class CompensationDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, compensation.getDamageDescription());
-            stmt.setString(2, compensation.getDamageLevel());
-            stmt.setBigDecimal(3, compensation.getImportPriceTotal()); // ← SỬA: dùng import_price_total
-            stmt.setBigDecimal(4, compensation.getCompensationRate());
-            stmt.setBigDecimal(5, compensation.getTotalAmount());
-            stmt.setBigDecimal(6, compensation.getPaidAmount());
-            stmt.setString(7, compensation.getPaymentStatus());
+            stmt.setBigDecimal(2, compensation.getImportPriceTotal()); // ← SỬA: dùng import_price_total
+            stmt.setBigDecimal(3, compensation.getCompensationRate());
+            stmt.setBigDecimal(4, compensation.getTotalAmount());
+            stmt.setBigDecimal(5, compensation.getPaidAmount());
+            stmt.setString(6, compensation.getPaymentStatus());
 
             if (compensation.getCanRepair() != null) {
-                stmt.setBoolean(8, compensation.getCanRepair());
+                stmt.setBoolean(7, compensation.getCanRepair());
             } else {
-                stmt.setNull(8, Types.BOOLEAN);
+                stmt.setNull(7, Types.BOOLEAN);
             }
 
-            stmt.setTimestamp(9, compensation.getResolvedAt());
-            stmt.setInt(10, compensation.getCompensationId());
+            stmt.setTimestamp(8, compensation.getResolvedAt());
+            stmt.setInt(9, compensation.getCompensationId());
 
             return stmt.executeUpdate() > 0;
 
@@ -475,7 +473,6 @@ public class CompensationDAO {
         compensation.setRentalId(rs.getInt("rental_id"));
         compensation.setCompensationType(rs.getString("compensation_type"));
         compensation.setDamageDescription(rs.getString("damage_description"));
-        compensation.setDamageLevel(rs.getString("damage_level"));
         compensation.setImportPriceTotal(rs.getBigDecimal("import_price_total")); // ← SỬA: dùng import_price_total
         compensation.setCompensationRate(rs.getBigDecimal("compensation_rate"));
         compensation.setTotalAmount(rs.getBigDecimal("total_amount"));
