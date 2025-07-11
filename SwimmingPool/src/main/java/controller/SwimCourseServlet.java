@@ -21,7 +21,20 @@ public class SwimCourseServlet extends HttpServlet {
             if ("add".equals(action)) {
                 List<Coach> coaches = coachDAO.getAllCoaches();
                 request.setAttribute("coaches", coaches);
-                request.getRequestDispatcher("/swimcourse.jsp").forward(request, response);
+                request.getRequestDispatcher("/add_course.jsp").forward(request, response);
+                return;
+            } else if ("edit".equals(action)) {
+                int courseId = Integer.parseInt(request.getParameter("id"));
+                SwimCourse course = courseDAO.getCourseById(courseId);
+                List<Coach> coaches = coachDAO.getAllCoaches();
+                request.setAttribute("course", course);
+                request.setAttribute("coaches", coaches);
+                request.getRequestDispatcher("/edit_course.jsp").forward(request, response);
+                return;
+            } else if ("delete".equals(action)) {
+                int courseId = Integer.parseInt(request.getParameter("id"));
+                courseDAO.deleteCourse(courseId);
+                response.sendRedirect("swimcourse");
                 return;
             }
 
@@ -38,6 +51,7 @@ public class SwimCourseServlet extends HttpServlet {
         try (Connection conn = utils.DBConnect.getConnection()) {
             SwimCourseDAO courseDAO = new SwimCourseDAO(conn);
 
+            int id = request.getParameter("id") != null ? Integer.parseInt(request.getParameter("id")) : 0;
             String name = request.getParameter("name");
             String description = request.getParameter("description");
             double price = Double.parseDouble(request.getParameter("price"));
@@ -52,7 +66,13 @@ public class SwimCourseServlet extends HttpServlet {
             course.setCoachId(coachId);
             course.setStatus("Inactive");
 
-            courseDAO.addCourse(course);
+            if (id > 0) {
+                course.setId(id);
+                courseDAO.updateCourse(course);
+            } else {
+                courseDAO.addCourse(course);
+            }
+
             response.sendRedirect("swimcourse");
         } catch (Exception e) {
             throw new ServletException(e);

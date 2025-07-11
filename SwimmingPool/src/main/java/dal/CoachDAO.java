@@ -31,4 +31,3 @@ public class CoachDAO {
         return list;
     }
 }
-
