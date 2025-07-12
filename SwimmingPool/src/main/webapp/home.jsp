@@ -9,38 +9,35 @@
     <meta charset="UTF-8">
     <title>Swimming Pool - Home Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="Resources/CSS/home.css">
 </head>
 
 <body>
-<!-- Navbar -->
+
+<!-- Navbar (Header.jsp nội tuyến) -->
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-        <a href="#">Home</a>
+        <a href="home.jsp">Home</a>
         <a href="#about">About Us</a>
         <a href="#services">Services</a>
 
-
-        <%-- Chỉ hiện "User List" nếu là Admin --%>
+        <%-- Chỉ hiện nếu là Staff --%>
         <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
-        <a href="equipment-rental">Equiqment Rental</a>
+        <a href="equipment-rental">Equipment Rental</a>
         <% } %>
 
+        <%-- Bảo trì và bể bơi--%>
         <% if (user != null && user.getRole() != null) {
-        String roleName = user.getRole().getName();
-        if ("Admin".equalsIgnoreCase(roleName) ||
-                "Manager".equalsIgnoreCase(roleName)
-            ) {
+            String roleName = user.getRole().getName();
+            if ("Admin".equalsIgnoreCase(roleName) || "Manager".equalsIgnoreCase(roleName)) {
         %>
         <a href="maintenance">Maintenance</a>
-        <% }
-        } %>
+        <a href="pool-area">Pool Area</a>
+        <% } } %>
 
-
-        <%-- Chỉ hiển thị "View My Maintenance" nếu người dùng có role = 5 (Staff) --%>
+        <%-- View My Maintenance nếu role = 5 (Staff) --%>
         <% if (user != null && user.getRole() != null && user.getRole().getId() == 5) { %>
         <a href="viewMyMaintenance">View My Maintenance</a>
         <% } %>
@@ -48,7 +45,7 @@
         <a href="#contact">Contact</a>
         <a href="blogs">Blogs</a>
 
-        <%-- Chỉ hiện "User List" nếu là Admin --%>
+        <%-- Admin có quyền xem danh sách người dùng --%>
         <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
         <a href="admin-user">User List</a>
         <% } %>
@@ -60,8 +57,7 @@
         <a class="register-btn" href="register.jsp">Register</a>
         <% } else { %>
         <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
-            <%= user.getFullName() %>
-        </a>!</span>
+            <%= user.getFullName() %></a>!</span>
         <form action="logout" method="post" style="display:inline;">
             <input type="submit" value="Logout">
         </form>
@@ -69,8 +65,7 @@
     </div>
 </div>
 
-
-<!-- Spacer tránh bị che -->
+<!-- Spacer tránh bị che bởi navbar cố định -->
 <div style="height: 70px;"></div>
 
 <!-- Hero Section -->
@@ -83,7 +78,6 @@
         <button class="btn btn-outline">CONTACT US</button>
     </div>
 </div>
-
 
 <!-- About Us -->
 <div class="section" id="about">
@@ -148,4 +142,3 @@
 
 </body>
 </html>
-
