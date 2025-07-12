@@ -15,8 +15,63 @@
 </head>
 
 <body>
-<jsp:include page="header.jsp" />
+<!-- Navbar -->
+<div class="navbar">
+    <div class="logo">SwimmingPool</div>
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#about">About Us</a>
+        <a href="#services">Services</a>
 
+
+        <%-- Chỉ hiện "User List" nếu là Admin --%>
+        <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="equipment-rental">Equiqment Rental</a>
+        <% } %>
+
+        <% if (user != null && user.getRole() != null) {
+        String roleName = user.getRole().getName();
+        if ("Admin".equalsIgnoreCase(roleName) ||
+                "Manager".equalsIgnoreCase(roleName)
+            ) {
+        %>
+        <a href="maintenance">Maintenance</a>
+        <% }
+        } %>
+
+
+        <%-- Chỉ hiển thị "View My Maintenance" nếu người dùng có role = 5 (Staff) --%>
+        <% if (user != null && user.getRole() != null && user.getRole().getId() == 5) { %>
+        <a href="viewMyMaintenance">View My Maintenance</a>
+        <% } %>
+
+        <a href="#contact">Contact</a>
+        <a href="blogs">Blogs</a>
+
+        <%-- Chỉ hiện "User List" nếu là Admin --%>
+        <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="admin-user">User List</a>
+        <% } %>
+    </div>
+
+    <div class="auth">
+        <% if (user == null) { %>
+        <a class="login-btn" href="login.jsp">Login</a>
+        <a class="register-btn" href="register.jsp">Register</a>
+        <% } else { %>
+        <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
+            <%= user.getFullName() %>
+        </a>!</span>
+        <form action="logout" method="post" style="display:inline;">
+            <input type="submit" value="Logout">
+        </form>
+        <% } %>
+    </div>
+</div>
+
+
+<!-- Spacer tránh bị che -->
+<div style="height: 70px;"></div>
 
 <!-- Hero Section -->
 <div class="hero">
