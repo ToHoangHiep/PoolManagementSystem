@@ -1,31 +1,26 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="model.SwimCourse, model.Coach, java.util.List" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page import="model.SwimCourse" %>
 <%
   SwimCourse course = (SwimCourse) request.getAttribute("course");
-  List<Coach> coaches = (List<Coach>) request.getAttribute("coaches");
 %>
 <html>
-<head><title>Chỉnh sửa khóa học</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Sửa khóa học</title>
+</head>
 <body>
-<h2>Chỉnh sửa thông tin khóa học</h2>
-<form action="swimcourse" method="post">
+<h2>Sửa khóa học</h2>
+<form method="post" action="swimcourse">
   <input type="hidden" name="id" value="<%= course.getId() %>">
-
-  Tên khóa học: <input type="text" name="name" value="<%= course.getName() %>"><br><br>
-  Mô tả: <textarea name="description"><%= course.getDescription() %></textarea><br><br>
-  Giá: <input type="number" name="price" value="<%= course.getPrice() %>"><br><br>
-  Thời lượng (giờ): <input type="number" name="duration" value="<%= course.getDuration() %>"><br><br>
-
-  Huấn luyện viên:
-  <select name="coachId">
-    <% for (Coach coach : coaches) { %>
-    <option value="<%= coach.getId() %>" <%= coach.getId() == course.getCoachId() ? "selected" : "" %>>
-      <%= coach.getFullName() %>
-    </option>
-    <% } %>
-  </select><br><br>
-
-  <input type="submit" value="Cập nhật khóa học">
+  <label>Tên khóa học: <input type="text" name="name" value="<%= course.getName() %>" required></label><br><br>
+  <label>Mô tả: <textarea name="description" required><%= course.getDescription() %></textarea></label><br><br>
+  <label>Giá tiền: <input type="number" name="price" value="<%= course.getPrice() %>" required></label><br><br>
+  <label>Thời gian dự kiến hoàn thành: <input type="number" name="duration" value="<%= course.getDuration() %>" required></label><br><br>
+  <label>Thời lượng học: <input type="text" name="estimatedSessionTime" value="<%= course.getEstimatedSessionTime() %>" required></label><br><br>
+  <label>Số lượng học viên: <input type="text" name="studentDescription" value="<%= course.getStudentDescription() %>" required></label><br><br>
+  <label>Lịch học: <input type="text" name="scheduleDescription" value="<%= course.getScheduleDescription() %>" required></label><br><br>
+  <button type="submit">Cập nhật</button>
+  <a href="swimcourse">Hủy</a>
 </form>
 </body>
 </html>

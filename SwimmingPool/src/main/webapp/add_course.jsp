@@ -1,24 +1,21 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.util.List, model.Coach" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <html>
-<head><title>Thêm khóa học</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm khóa học</title>
+</head>
 <body>
-<h2>Thêm khóa học mới</h2>
-<form action="admincourse" method="post">
-    Tên khóa học: <input type="text" name="name" required><br>
-    Mô tả: <textarea name="description" required></textarea><br>
-    Giá: <input type="number" name="price" step="0.01" required><br>
-    Thời lượng (phút): <input type="number" name="duration" required><br>
-    Huấn luyện viên:
-    <select name="coachId">
-        <%
-            List<Coach> list = (List<Coach>) request.getAttribute("coaches");
-            for (Coach c : list) {
-        %>
-        <option value="<%= c.getId() %>"><%= c.getFullName() %></option>
-        <% } %>
-    </select><br>
-    <button type="submit">Tạo khóa học</button>
+<h2>Thêm khóa học</h2>
+<form method="post" action="swimcourse">
+    <label>Tên khóa học: <input type="text" name="name" required></label><br><br>
+    <label>Mô tả: <textarea name="description" required></textarea></label><br><br>
+    <label>Giá tiền: <input type="number" name="price" required></label><br><br>
+    <label>Thời gian dự kiến hoàn thành: <input type="number" name="duration" required></label><br><br>
+    <label>Thời lượng học: <input type="text" name="estimatedSessionTime" required></label><br><br>
+    <label>Số lượng học viên: <input type="text" name="studentDescription" required></label><br><br>
+    <label>Lịch học: <input type="text" name="scheduleDescription" required></label><br><br>
+    <button type="submit">Lưu</button>
+    <a href="swimcourse">Hủy</a>
 </form>
 </body>
 </html>
