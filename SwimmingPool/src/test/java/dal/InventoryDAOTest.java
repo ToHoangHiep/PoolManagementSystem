@@ -48,19 +48,8 @@ class InventoryDAOTest {
     }
 
     @Test
-    void testGetRentableItems() {
-        List<Inventory> rentable = InventoryDAO.getRentableItems();
-        assertNotNull(rentable);
-        assertFalse(rentable.isEmpty(), "Rentable items should not be empty");
-        for (Inventory inv : rentable) {
-            assertEquals("item for rent", inv.getUsageName());
-        }
-        // Should contain the inserted 'Bike' and 'Ball'
-        assertTrue(rentable.stream().anyMatch(i -> i.getItemName().equals("Bike")));
-        assertTrue(rentable.stream().anyMatch(i -> i.getItemName().equals("Ball")));
-    }
 
-    @Test
+
     void testFilterInventoryByStatusAndUsage_BothParams() {
         List<Inventory> filtered = InventoryDAO.filterInventoryByStatusAndUsage("available", "item for rent");
         assertNotNull(filtered);

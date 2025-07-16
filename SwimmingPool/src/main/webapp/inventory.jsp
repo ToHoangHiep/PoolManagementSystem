@@ -1,6 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="model.Inventory" %>
+<%@ page import="model.User" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    User user = (User) session.getAttribute("user");
+%>
 <%
     String keyword = request.getParameter("keyword");
 %>
@@ -8,6 +13,7 @@
 <head>
     <title>Inventory List</title>
     <link rel="stylesheet" href="./Resources/CSS/inventory.css">
+
 </head>
 <body>
 
@@ -19,8 +25,9 @@
         <a href="home.jsp" class="nav-btn">🏠 Home</a>
         <a href="inventory?action=default" class="nav-btn orange">🔙 Return To List</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
-        <a href="inventory?action=rentable" class="nav-btn green">🧾 Rentable Items</a>
-        <a href="inventory?action=sellable" class="nav-btn green">🛒 Sellable Items</a>
+        <a href="inventory?action=lowstock" class="nav-btn blue" >Thiết bị sắp hết kho</a>
+
+
     </div>
 
     <div class="nav-right">
@@ -95,7 +102,7 @@
         <td><%= inv.getInventoryId() %></td>
         <td><%= inv.getManagerId() %></td>
         <td><%= inv.getItemName() %></td>
-        <td><%= inv.getCategory() %></td>
+        <td><%= inv.getCategoryName() %></td>
         <td><%= inv.getQuantity() %></td>
         <td><%= inv.getUnit() %></td>
         <td><%= inv.getStatus() %></td>
@@ -117,14 +124,17 @@
     </tbody>
 </table>
 
-<% if (totalPages != null && currentPage != null && totalPages > 1) { %>
-<div class="pagination" style="margin-top: 20px;">
-    <% for (int i = 1; i <= totalPages; i++) { %>
-    <a href="inventory?page=<%= i %><%= keyword != null ? "&keyword=" + keyword : "" %>"
-       class="<%= (i == currentPage) ? "active" : "" %>"><%= i %></a>
-    <% } %>
-</div>
-<% } %>
+<c:if test="${not empty lowStockItems}">
+    <div style="margin-top: 20px; padding: 10px; background-color: #fff3cd; border-left: 5px solid #ffecb5;">
+        <strong>&#9888; Cảnh báo:</strong> Các mặt hàng sắp hết:
+        <ul>
+            <c:forEach var="item" items="${lowStockItems}">
+                <li>${item.itemName} (Còn: ${item.quantity}, Mức cảnh báo: ${item.categoryQuantity})</li>
+            </c:forEach>
+        </ul>
+    </div>
+</c:if>
+
 
 </body>
 </html>
