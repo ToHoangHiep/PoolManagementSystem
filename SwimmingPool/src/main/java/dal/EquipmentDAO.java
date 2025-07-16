@@ -16,7 +16,7 @@ public class EquipmentDAO {
      * Lấy danh sách thiết bị cho shop - chỉ usage_id: 1, 3, 5
      * Logic đơn giản: quantity trong Inventory = số lượng available
      */
-    public List<Map<String, Object>> getEquipmentStatus() throws SQLException {
+    public static List<Map<String, Object>> getEquipmentStatus() throws SQLException {
         String sql = """
             SELECT 
                 i.inventory_id,
@@ -25,6 +25,7 @@ public class EquipmentDAO {
                 i.quantity AS available_quantity,
                 i.rent_price,
                 i.sale_price,
+                i.import_price,
                 i.unit,
                 i.usage_id,
                 i.status,
@@ -52,6 +53,7 @@ public class EquipmentDAO {
                 item.put("quantity", availableQty); // Số lượng hiển thị trên màn hình
                 item.put("rentPrice", rs.getDouble("rent_price"));
                 item.put("salePrice", rs.getDouble("sale_price"));
+                item.put("importPrice", rs.getDouble("import_price")); // ← THÊM DÒNG NÀY
                 item.put("unit", rs.getString("unit"));
                 item.put("usageId", rs.getInt("usage_id"));
                 item.put("usageName", rs.getString("usage_name"));
@@ -76,7 +78,7 @@ public class EquipmentDAO {
     /**
      * Lấy thông tin chi tiết của một thiết bị theo ID
      */
-    public Map<String, Object> getEquipmentById(int inventoryId) throws SQLException {
+    public static Map<String, Object> getEquipmentById(int inventoryId) throws SQLException {
         String sql = """
             SELECT 
                 i.inventory_id,
@@ -85,6 +87,7 @@ public class EquipmentDAO {
                 i.quantity,
                 i.rent_price,
                 i.sale_price,
+                i.import_price,
                 i.unit,
                 i.usage_id,
                 i.status,
@@ -107,6 +110,7 @@ public class EquipmentDAO {
                     equipment.put("quantity", rs.getInt("quantity"));
                     equipment.put("rentPrice", rs.getDouble("rent_price"));
                     equipment.put("salePrice", rs.getDouble("sale_price"));
+                    equipment.put("importPrice", rs.getDouble("import_price")); // ← THÊM DÒNG NÀY
                     equipment.put("unit", rs.getString("unit"));
                     equipment.put("usageId", rs.getInt("usage_id"));
                     equipment.put("usageName", rs.getString("usage_name"));
@@ -123,7 +127,7 @@ public class EquipmentDAO {
      * 1. Tạo rental record
      * 2. TRỪ số lượng trong inventory
      */
-    public boolean processRental(EquipmentRental rental) throws SQLException {
+    public static boolean processRental(EquipmentRental rental) throws SQLException {
         Connection conn = null;
         try {
             conn = DBConnect.getConnection();
@@ -201,7 +205,7 @@ public class EquipmentDAO {
      * 1. Tạo sale record
      * 2. TRỪ số lượng trong inventory (permanent)
      */
-    public boolean processSale(EquipmentSale sale) throws SQLException {
+    public static boolean processSale(EquipmentSale sale) throws SQLException {
         Connection conn = null;
         try {
             conn = DBConnect.getConnection();
@@ -277,7 +281,7 @@ public class EquipmentDAO {
      * 1. Update rental status thành 'returned'
      * 2. CỘNG lại số lượng vào inventory
      */
-    public boolean processReturn(int rentalId) throws SQLException {
+    public static boolean processReturn(int rentalId) throws SQLException {
         Connection conn = null;
         try {
             conn = DBConnect.getConnection();
@@ -354,7 +358,7 @@ public class EquipmentDAO {
     /**
      * Lấy danh sách rental đang active (chưa trả)
      */
-    public List<EquipmentRental> getActiveRentals() throws SQLException {
+    public static List<EquipmentRental> getActiveRentals() throws SQLException {
         String sql = """
             SELECT 
                 er.rental_id, er.customer_name, er.customer_id_card, er.staff_id, 
@@ -396,12 +400,199 @@ public class EquipmentDAO {
         return rentals;
     }
 
+    // ===================== NEW METHODS FOR COMPENSATION SUPPORT =====================
+
+    /**
+     * Lấy rental theo ID (bao gồm cả active và returned)
+     * Cần thiết cho CompensationServlet
+     */
+    public static EquipmentRental getRentalById(int rentalId) throws SQLException {
+        String sql = """
+            SELECT 
+                er.rental_id, er.customer_name, er.customer_id_card, er.staff_id, 
+                er.inventory_id, i.item_name, er.quantity, er.rental_date, 
+                er.rent_price, er.total_amount, er.status, er.created_at, er.return_time
+            FROM Equipment_Rentals er
+            JOIN Inventory i ON er.inventory_id = i.inventory_id
+            WHERE er.rental_id = ?
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, rentalId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    EquipmentRental rental = new EquipmentRental();
+                    rental.setRentalId(rs.getInt("rental_id"));
+                    rental.setCustomerName(rs.getString("customer_name"));
+                    rental.setCustomerIdCard(rs.getString("customer_id_card"));
+                    rental.setStaffId(rs.getInt("staff_id"));
+                    rental.setInventoryId(rs.getInt("inventory_id"));
+                    rental.setQuantity(rs.getInt("quantity"));
+                    rental.setRentalDate(rs.getDate("rental_date"));
+                    rental.setRentPrice(rs.getDouble("rent_price"));
+                    rental.setTotalAmount(rs.getDouble("total_amount"));
+                    rental.setStatus(rs.getString("status"));
+                    rental.setCreatedAt(rs.getTimestamp("created_at"));
+                    rental.setReturnTime(rs.getTimestamp("return_time"));
+                    rental.setItemName(rs.getString("item_name"));
+
+                    return rental;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Lấy tất cả rentals (active + returned) với pagination
+     * Hữu ích cho compensation management
+     */
+    public static List<EquipmentRental> getAllRentals(int offset, int limit) throws SQLException {
+        String sql = """
+            SELECT 
+                er.rental_id, er.customer_name, er.customer_id_card, er.staff_id, 
+                er.inventory_id, i.item_name, er.quantity, er.rental_date, 
+                er.rent_price, er.total_amount, er.status, er.created_at, er.return_time
+            FROM Equipment_Rentals er
+            JOIN Inventory i ON er.inventory_id = i.inventory_id
+            ORDER BY er.rental_date DESC
+            LIMIT ? OFFSET ?
+            """;
+
+        List<EquipmentRental> rentals = new ArrayList<>();
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, limit);
+            stmt.setInt(2, offset);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    EquipmentRental rental = mapResultSetToRental(rs);
+                    rentals.add(rental);
+                }
+            }
+        }
+
+        return rentals;
+    }
+
+    /**
+     * Tìm rentals theo customer ID card
+     * Cần thiết để xem lịch sử của customer
+     */
+    public static List<EquipmentRental> getRentalsByCustomerIdCard(String customerIdCard) throws SQLException {
+        String sql = """
+            SELECT 
+                er.rental_id, er.customer_name, er.customer_id_card, er.staff_id, 
+                er.inventory_id, i.item_name, er.quantity, er.rental_date, 
+                er.rent_price, er.total_amount, er.status, er.created_at, er.return_time
+            FROM Equipment_Rentals er
+            JOIN Inventory i ON er.inventory_id = i.inventory_id
+            WHERE er.customer_id_card = ?
+            ORDER BY er.rental_date DESC
+            """;
+
+        List<EquipmentRental> rentals = new ArrayList<>();
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, customerIdCard);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    EquipmentRental rental = mapResultSetToRental(rs);
+                    rentals.add(rental);
+                }
+            }
+        }
+
+        return rentals;
+    }
+
+    /**
+     * Đếm tổng số rentals của customer (để kiểm tra frequent offender)
+     */
+    public static int getRentalCountByCustomer(String customerIdCard) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Equipment_Rentals WHERE customer_id_card = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, customerIdCard);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Lấy rentals có thể tạo compensation (active rentals)
+     * Để hiển thị trong dropdown compensation form
+     */
+    public static List<EquipmentRental> getRentalsForCompensation() throws SQLException {
+        String sql = """
+            SELECT 
+                er.rental_id, er.customer_name, er.customer_id_card, er.staff_id, 
+                er.inventory_id, i.item_name, er.quantity, er.rental_date, 
+                er.rent_price, er.total_amount, er.status, er.created_at, er.return_time
+            FROM Equipment_Rentals er
+            JOIN Inventory i ON er.inventory_id = i.inventory_id
+            WHERE er.status = 'active'
+            AND er.rental_id NOT IN (
+                SELECT DISTINCT rental_id FROM Equipment_Compensations
+            )
+            ORDER BY er.rental_date DESC
+            """;
+
+        List<EquipmentRental> rentals = new ArrayList<>();
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                EquipmentRental rental = mapResultSetToRental(rs);
+                rentals.add(rental);
+            }
+        }
+
+        return rentals;
+    }
+
+    /**
+     * Update rental status (cho compensation workflow)
+     */
+    public static boolean updateRentalStatus(int rentalId, String status) throws SQLException {
+        String sql = "UPDATE Equipment_Rentals SET status = ? WHERE rental_id = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status);
+            stmt.setInt(2, rentalId);
+
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     // ============= HELPER METHODS =============
 
     /**
      * Kiểm tra số lượng trong kho có đủ không
      */
-    private boolean checkInventoryStock(Connection conn, int inventoryId, int requestedQty) throws SQLException {
+    private static boolean checkInventoryStock(Connection conn, int inventoryId, int requestedQty) throws SQLException {
         String sql = "SELECT quantity FROM Inventory WHERE inventory_id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -420,7 +611,7 @@ public class EquipmentDAO {
      * Cập nhật số lượng trong inventory
      * @param changeAmount: số lượng thay đổi (âm = trừ, dương = cộng)
      */
-    private boolean updateInventoryQuantity(Connection conn, int inventoryId, int changeAmount) throws SQLException {
+    private static boolean updateInventoryQuantity(Connection conn, int inventoryId, int changeAmount) throws SQLException {
         String sql = "UPDATE Inventory SET quantity = quantity + ? WHERE inventory_id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -433,7 +624,7 @@ public class EquipmentDAO {
     /**
      * Lấy số lượng hiện tại trong inventory (public method)
      */
-    public int getCurrentQuantity(int inventoryId) throws SQLException {
+    public static int getCurrentQuantity(int inventoryId) throws SQLException {
         String sql = "SELECT quantity FROM Inventory WHERE inventory_id = ?";
 
         try (Connection conn = DBConnect.getConnection();
@@ -452,135 +643,28 @@ public class EquipmentDAO {
     /**
      * Kiểm tra thiết bị có available không
      */
-    public boolean checkAvailability(int inventoryId, int requestedQty) throws SQLException {
+    public static boolean checkAvailability(int inventoryId, int requestedQty) throws SQLException {
         return getCurrentQuantity(inventoryId) >= requestedQty;
     }
-}
 
-//    // Hàm lấy toàn bộ lịch sử bán hàng
-//    public List<EquipmentSale> getAllSales() throws SQLException {
-//        List<EquipmentSale> sales = new ArrayList<>();
-//        String sql = "SELECT es.*, i.item_name, u.full_name as staff_name " +
-//                "FROM Equipment_Sales es " +
-//                "JOIN Inventory i ON es.inventory_id = i.inventory_id " +
-//                "JOIN Users u ON es.staff_id = u.id " +
-//                "ORDER BY es.created_at DESC";
-//
-//        try (Connection conn = DBConnect.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(sql);
-//             ResultSet rs = stmt.executeQuery()) {
-//
-//            while (rs.next()) {
-//                sales.add(mapRowToEquipmentSale(rs));
-//            }
-//        }
-//        return sales;
-//    }
-//
-//    // Hàm lấy đơn hàng theo khoảng thời gian
-//    public List<EquipmentSale> getSalesByDateRange(Date startDate, Date endDate) throws SQLException {
-//        List<EquipmentSale> sales = new ArrayList<>();
-//        String sql = "SELECT es.*, i.item_name, u.full_name as staff_name " +
-//                "FROM Equipment_Sales es " +
-//                "JOIN Inventory i ON es.inventory_id = i.inventory_id " +
-//                "JOIN Users u ON es.staff_id = u.id " +
-//                "WHERE es.created_at BETWEEN ? AND ? " +
-//                "ORDER BY es.created_at DESC";
-//
-//        try (Connection conn = DBConnect.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(sql)) {
-//
-//            stmt.setDate(1, new java.sql.Date(startDate.getTime()));
-//            stmt.setDate(2, new java.sql.Date(endDate.getTime()));
-//
-//            try (ResultSet rs = stmt.executeQuery()) {
-//                while (rs.next()) {
-//                    sales.add(mapRowToEquipmentSale(rs));
-//                }
-//            }
-//        }
-//        return sales;
-//    }
-//
-//    // Hàm lấy đơn hàng theo tên khách hàng (tìm kiếm gần đúng)
-//    public List<EquipmentSale> getSalesByCustomerName(String customerName) throws SQLException {
-//        List<EquipmentSale> sales = new ArrayList<>();
-//        String sql = "SELECT es.*, i.item_name, u.full_name as staff_name " +
-//                "FROM Equipment_Sales es " +
-//                "JOIN Inventory i ON es.inventory_id = i.inventory_id " +
-//                "JOIN Users u ON es.staff_id = u.id " +
-//                "WHERE es.customer_name LIKE ? " +
-//                "ORDER BY es.created_at DESC";
-//
-//        try (Connection conn = DBConnect.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(sql)) {
-//
-//            stmt.setString(1, "%" + customerName + "%");
-//
-//            try (ResultSet rs = stmt.executeQuery()) {
-//                while (rs.next()) {
-//                    sales.add(mapRowToEquipmentSale(rs));
-//                }
-//            }
-//        }
-//        return sales;
-//    }
-//
-//    // Hàm lấy đơn hàng theo ID thiết bị
-//    public List<EquipmentSale> getSalesByInventoryId(int inventoryId) throws SQLException {
-//        List<EquipmentSale> sales = new ArrayList<>();
-//        String sql = "SELECT es.*, i.item_name, u.full_name as staff_name " +
-//                "FROM Equipment_Sales es " +
-//                "JOIN Inventory i ON es.inventory_id = i.inventory_id " +
-//                "JOIN Users u ON es.staff_id = u.id " +
-//                "WHERE es.inventory_id = ? " +
-//                "ORDER BY es.created_at DESC";
-//
-//        try (Connection conn = DBConnect.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(sql)) {
-//
-//            stmt.setInt(1, inventoryId);
-//
-//            try (ResultSet rs = stmt.executeQuery()) {
-//                while (rs.next()) {
-//                    sales.add(mapRowToEquipmentSale(rs));
-//                }
-//            }
-//        }
-//        return sales;
-//    }
-//
-//    // Hàm hỗ trợ ánh xạ ResultSet thành đối tượng EquipmentSale
-//    private EquipmentSale mapRowToEquipmentSale(ResultSet rs) throws SQLException {
-//        EquipmentSale sale = new EquipmentSale();
-//        sale.setSaleId(rs.getInt("sale_id"));
-//        sale.setCustomerName(rs.getString("customer_name"));
-//        sale.setStaffId(rs.getInt("staff_id"));
-//        sale.setInventoryId(rs.getInt("inventory_id"));
-//        sale.setQuantity(rs.getInt("quantity"));
-//        sale.setSalePrice(rs.getDouble("sale_price"));
-//        sale.setTotalAmount(rs.getDouble("total_amount"));
-//        sale.setCreatedAt(rs.getTimestamp("created_at"));
-//        return sale;
-//    }
-//
-//    // Hàm thống kê doanh thu theo khoảng thời gian
-//    public double getRevenueByDateRange(Date startDate, Date endDate) throws SQLException {
-//        String sql = "SELECT SUM(total_amount) as total_revenue " +
-//                "FROM Equipment_Sales " +
-//                "WHERE created_at BETWEEN ? AND ?";
-//
-//        try (Connection conn = DBConnect.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(sql)) {
-//
-//            stmt.setDate(1, new java.sql.Date(startDate.getTime()));
-//            stmt.setDate(2, new java.sql.Date(endDate.getTime()));
-//
-//            try (ResultSet rs = stmt.executeQuery()) {
-//                if (rs.next()) {
-//                    return rs.getDouble("total_revenue");
-//                }
-//            }
-//        }
-//        return 0;
-//    }
+    /**
+     * Helper method: Map ResultSet to EquipmentRental
+     */
+    private static EquipmentRental mapResultSetToRental(ResultSet rs) throws SQLException {
+        EquipmentRental rental = new EquipmentRental();
+        rental.setRentalId(rs.getInt("rental_id"));
+        rental.setCustomerName(rs.getString("customer_name"));
+        rental.setCustomerIdCard(rs.getString("customer_id_card"));
+        rental.setStaffId(rs.getInt("staff_id"));
+        rental.setInventoryId(rs.getInt("inventory_id"));
+        rental.setQuantity(rs.getInt("quantity"));
+        rental.setRentalDate(rs.getDate("rental_date"));
+        rental.setRentPrice(rs.getDouble("rent_price"));
+        rental.setTotalAmount(rs.getDouble("total_amount"));
+        rental.setStatus(rs.getString("status"));
+        rental.setCreatedAt(rs.getTimestamp("created_at"));
+        rental.setReturnTime(rs.getTimestamp("return_time"));
+        rental.setItemName(rs.getString("item_name"));
+        return rental;
+    }
+}
