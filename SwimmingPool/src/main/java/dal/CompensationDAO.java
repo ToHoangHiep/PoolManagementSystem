@@ -26,11 +26,11 @@ public class CompensationDAO {
             stmt.setInt(1, compensation.getRentalId());
             stmt.setString(2, compensation.getCompensationType());
             stmt.setString(3, compensation.getDamageDescription());
-            stmt.setBigDecimal(4, compensation.getImportPriceTotal());  // ← Index từ 5 → 4
-            stmt.setBigDecimal(5, compensation.getCompensationRate());  // ← Index từ 6 → 5
-            stmt.setBigDecimal(6, compensation.getTotalAmount());       // ← Index từ 7 → 6
-            stmt.setBigDecimal(7, compensation.getPaidAmount());       // ← Index từ 8 → 7
-            stmt.setString(8, compensation.getPaymentStatus());        // ← Index từ 9 → 8
+            stmt.setBigDecimal(4, compensation.getImportPriceTotal());
+            stmt.setBigDecimal(5, compensation.getCompensationRate());
+            stmt.setBigDecimal(6, compensation.getTotalAmount());
+            stmt.setBigDecimal(7, compensation.getPaidAmount());
+            stmt.setString(8, compensation.getPaymentStatus());
 
             if (compensation.getCanRepair() != null) {
                 stmt.setBoolean(9, compensation.getCanRepair());
@@ -131,7 +131,7 @@ public class CompensationDAO {
      * Update compensation
      */
     public static boolean updateCompensation(EquipmentCompensation compensation) {
-        String sql = "UPDATE Equipment_Compensations SET damage_description = ? " +
+        String sql = "UPDATE Equipment_Compensations SET damage_description = ?, " +
                 "import_price_total = ?, compensation_rate = ?, total_amount = ?, paid_amount = ?, " +
                 "payment_status = ?, can_repair = ?, resolved_at = ? WHERE compensation_id = ?";
 
@@ -139,7 +139,7 @@ public class CompensationDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, compensation.getDamageDescription());
-            stmt.setBigDecimal(2, compensation.getImportPriceTotal()); // ← SỬA: dùng import_price_total
+            stmt.setBigDecimal(2, compensation.getImportPriceTotal());
             stmt.setBigDecimal(3, compensation.getCompensationRate());
             stmt.setBigDecimal(4, compensation.getTotalAmount());
             stmt.setBigDecimal(5, compensation.getPaidAmount());
@@ -163,42 +163,31 @@ public class CompensationDAO {
         return false;
     }
 
-    // ===================== COMPENSATION PAYMENT METHODS =====================
+    // ===================== PAYMENT METHODS (SỬA LẠI) =====================
 
     /**
-     * Thêm payment và tự động update compensation status
+     * Thêm payment cho compensation (sử dụng PaymentDAO)
      */
-    public static boolean addPayment(CompensationPayment payment) {
+    public static boolean addCompensationPayment(Payment payment) {
         Connection conn = null;
 
         try {
             conn = DBConnect.getConnection();
             conn.setAutoCommit(false); // Bắt đầu transaction
 
-            // 1. Insert payment
-            String insertPaymentSql = "INSERT INTO Compensation_Payments (compensation_id, payment_amount, notes) VALUES (?, ?, ?)";
+            // 1. Thêm payment vào bảng Payments chung
+            payment.setPaymentFor("compensation");
+            payment.setStatus("completed"); // Giả sử payment luôn completed
 
-            try (PreparedStatement stmt = conn.prepareStatement(insertPaymentSql, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setInt(1, payment.getCompensationId());
-                stmt.setBigDecimal(2, payment.getPaymentAmount());
-                stmt.setString(3, payment.getNotes());
+            boolean paymentAdded = PaymentDAO.addPayment(payment);
 
-                int affectedRows = stmt.executeUpdate();
-
-                if (affectedRows > 0) {
-                    try (ResultSet rs = stmt.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            payment.setPaymentId(rs.getInt(1));
-                        }
-                    }
-                } else {
-                    conn.rollback();
-                    return false;
-                }
+            if (!paymentAdded) {
+                conn.rollback();
+                return false;
             }
 
             // 2. Update compensation payment status
-            updateCompensationPaymentStatus(conn, payment.getCompensationId(), payment.getPaymentAmount());
+            updateCompensationPaymentStatus(conn, payment.getReferenceId());
 
             conn.commit();
             return true;
@@ -227,28 +216,43 @@ public class CompensationDAO {
     }
 
     /**
-     * Lấy payments theo compensation ID
+     * Helper method: Update compensation payment status sau khi có payment mới
      */
-    public static List<CompensationPayment> getPaymentsByCompensationId(int compensationId) {
-        String sql = "SELECT * FROM Compensation_Payments WHERE compensation_id = ? ORDER BY payment_date DESC";
-        List<CompensationPayment> payments = new ArrayList<>();
+    private static void updateCompensationPaymentStatus(Connection conn, int compensationId) throws SQLException {
+        // Lấy tổng tiền đã thanh toán từ bảng Payments
+        BigDecimal totalPaid = PaymentDAO.getTotalPaidAmount("compensation", compensationId);
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // Lấy thông tin compensation hiện tại
+        String selectSql = "SELECT total_amount FROM Equipment_Compensations WHERE compensation_id = ?";
 
-            stmt.setInt(1, compensationId);
+        try (PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+            selectStmt.setInt(1, compensationId);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    payments.add(mapResultSetToPayment(rs));
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal totalAmount = rs.getBigDecimal("total_amount");
+
+                    // Tính payment status
+                    String status;
+                    if (totalPaid.compareTo(totalAmount) >= 0) {
+                        status = "paid";
+                    } else if (totalPaid.compareTo(BigDecimal.ZERO) > 0) {
+                        status = "partial";
+                    } else {
+                        status = "pending";
+                    }
+
+                    // Update compensation
+                    String updateSql = "UPDATE Equipment_Compensations SET paid_amount = ?, payment_status = ? WHERE compensation_id = ?";
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        updateStmt.setBigDecimal(1, totalPaid);
+                        updateStmt.setString(2, status);
+                        updateStmt.setInt(3, compensationId);
+                        updateStmt.executeUpdate();
+                    }
                 }
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return payments;
     }
 
     // ===================== DAMAGE PHOTO METHODS =====================
@@ -424,46 +428,6 @@ public class CompensationDAO {
     // ===================== HELPER METHODS =====================
 
     /**
-     * Helper method: Update compensation payment status
-     */
-    private static void updateCompensationPaymentStatus(Connection conn, int compensationId, BigDecimal paymentAmount) throws SQLException {
-        // Lấy thông tin compensation hiện tại
-        String selectSql = "SELECT paid_amount, total_amount FROM Equipment_Compensations WHERE compensation_id = ?";
-
-        try (PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
-            selectStmt.setInt(1, compensationId);
-
-            try (ResultSet rs = selectStmt.executeQuery()) {
-                if (rs.next()) {
-                    BigDecimal currentPaid = rs.getBigDecimal("paid_amount");
-                    BigDecimal totalAmount = rs.getBigDecimal("total_amount");
-                    BigDecimal newPaidAmount = currentPaid.add(paymentAmount);
-
-                    // Tính payment status
-                    String status;
-                    if (newPaidAmount.compareTo(totalAmount) >= 0) {
-                        status = "paid";
-                        newPaidAmount = totalAmount; // Cap at total amount
-                    } else if (newPaidAmount.compareTo(BigDecimal.ZERO) > 0) {
-                        status = "partial";
-                    } else {
-                        status = "pending";
-                    }
-
-                    // Update compensation
-                    String updateSql = "UPDATE Equipment_Compensations SET paid_amount = ?, payment_status = ? WHERE compensation_id = ?";
-                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                        updateStmt.setBigDecimal(1, newPaidAmount);
-                        updateStmt.setString(2, status);
-                        updateStmt.setInt(3, compensationId);
-                        updateStmt.executeUpdate();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Helper method: Map ResultSet to EquipmentCompensation
      */
     private static EquipmentCompensation mapResultSetToCompensation(ResultSet rs) throws SQLException {
@@ -473,7 +437,7 @@ public class CompensationDAO {
         compensation.setRentalId(rs.getInt("rental_id"));
         compensation.setCompensationType(rs.getString("compensation_type"));
         compensation.setDamageDescription(rs.getString("damage_description"));
-        compensation.setImportPriceTotal(rs.getBigDecimal("import_price_total")); // ← SỬA: dùng import_price_total
+        compensation.setImportPriceTotal(rs.getBigDecimal("import_price_total"));
         compensation.setCompensationRate(rs.getBigDecimal("compensation_rate"));
         compensation.setTotalAmount(rs.getBigDecimal("total_amount"));
         compensation.setPaidAmount(rs.getBigDecimal("paid_amount"));
@@ -486,21 +450,6 @@ public class CompensationDAO {
         compensation.setResolvedAt(rs.getTimestamp("resolved_at"));
 
         return compensation;
-    }
-
-    /**
-     * Helper method: Map ResultSet to CompensationPayment
-     */
-    private static CompensationPayment mapResultSetToPayment(ResultSet rs) throws SQLException {
-        CompensationPayment payment = new CompensationPayment();
-
-        payment.setPaymentId(rs.getInt("payment_id"));
-        payment.setCompensationId(rs.getInt("compensation_id"));
-        payment.setPaymentAmount(rs.getBigDecimal("payment_amount"));
-        payment.setPaymentDate(rs.getTimestamp("payment_date"));
-        payment.setNotes(rs.getString("notes"));
-
-        return payment;
     }
 
     /**
