@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class MaintenanceLog {
     private int id;
+    private int scheduleId;               // ← thêm field này
     private Date maintenanceDate;
     private String status;
     private String note;
@@ -12,9 +13,10 @@ public class MaintenanceLog {
 
     public MaintenanceLog() { }
 
-    public MaintenanceLog(int id, Date maintenanceDate, String status,
+    public MaintenanceLog(int id, int scheduleId, Date maintenanceDate, String status,
                           String note, String areaName, String scheduleTitle) {
         this.id = id;
+        this.scheduleId = scheduleId;
         this.maintenanceDate = maintenanceDate;
         this.status = status;
         this.note = note;
@@ -26,6 +28,9 @@ public class MaintenanceLog {
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public int getScheduleId() { return scheduleId; }
+    public void setScheduleId(int scheduleId) { this.scheduleId = scheduleId; }
 
     public Date getMaintenanceDate() { return maintenanceDate; }
     public void setMaintenanceDate(Date maintenanceDate) { this.maintenanceDate = maintenanceDate; }
@@ -46,6 +51,7 @@ public class MaintenanceLog {
     public String toString() {
         return "MaintenanceLog{" +
                 "id=" + id +
+                ", scheduleId=" + scheduleId +
                 ", maintenanceDate=" + maintenanceDate +
                 ", status='" + status + '\'' +
                 ", note='" + note + '\'' +
