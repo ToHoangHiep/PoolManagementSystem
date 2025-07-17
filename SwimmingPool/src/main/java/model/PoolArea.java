@@ -5,6 +5,9 @@ public class PoolArea {
     private String name;
     private String description;
 
+    // Default constructor bắt buộc
+    public PoolArea() { }
+
     public PoolArea(int id, String name, String description) {
         this.id = id;
         this.name = name;
@@ -25,4 +28,13 @@ public class PoolArea {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    @Override
+    public String toString() {
+        return "PoolArea{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

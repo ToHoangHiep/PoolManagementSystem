@@ -1,107 +1,56 @@
 package model;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.util.Date;
 
 public class MaintenanceLog {
     private int id;
-    private int scheduleId;
-    private int staffId;
     private Date maintenanceDate;
+    private String status;
     private String note;
-    private String status; // Done, Missed, Rescheduled
-    private Timestamp logTime;
-
-    // Thêm tên lịch và tên nhân viên (khi cần JOIN)
+    private String areaName;
     private String scheduleTitle;
-    private String staffName;
 
-    // Constructors
-    public MaintenanceLog() {}
+    public MaintenanceLog() { }
 
-    public MaintenanceLog(int id, int scheduleId, int staffId, Date maintenanceDate, String note,
-                          String status, Timestamp logTime, String scheduleTitle, String staffName) {
+    public MaintenanceLog(int id, Date maintenanceDate, String status,
+                          String note, String areaName, String scheduleTitle) {
         this.id = id;
-        this.scheduleId = scheduleId;
-        this.staffId = staffId;
         this.maintenanceDate = maintenanceDate;
-        this.note = note;
         this.status = status;
-        this.logTime = logTime;
+        this.note = note;
+        this.areaName = areaName;
         this.scheduleTitle = scheduleTitle;
-        this.staffName = staffName;
     }
 
     // Getters & Setters
-    public int getId() {
-        return id;
-    }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public int getScheduleId() {
-        return scheduleId;
-    }
+    public Date getMaintenanceDate() { return maintenanceDate; }
+    public void setMaintenanceDate(Date maintenanceDate) { this.maintenanceDate = maintenanceDate; }
 
-    public void setScheduleId(int scheduleId) {
-        this.scheduleId = scheduleId;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public int getStaffId() {
-        return staffId;
-    }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
-    public void setStaffId(int staffId) {
-        this.staffId = staffId;
-    }
+    public String getAreaName() { return areaName; }
+    public void setAreaName(String areaName) { this.areaName = areaName; }
 
-    public Date getMaintenanceDate() {
-        return maintenanceDate;
-    }
+    public String getScheduleTitle() { return scheduleTitle; }
+    public void setScheduleTitle(String scheduleTitle) { this.scheduleTitle = scheduleTitle; }
 
-    public void setMaintenanceDate(Date maintenanceDate) {
-        this.maintenanceDate = maintenanceDate;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Timestamp getLogTime() {
-        return logTime;
-    }
-
-    public void setLogTime(Timestamp logTime) {
-        this.logTime = logTime;
-    }
-
-    public String getScheduleTitle() {
-        return scheduleTitle;
-    }
-
-    public void setScheduleTitle(String scheduleTitle) {
-        this.scheduleTitle = scheduleTitle;
-    }
-
-    public String getStaffName() {
-        return staffName;
-    }
-
-    public void setStaffName(String staffName) {
-        this.staffName = staffName;
+    @Override
+    public String toString() {
+        return "MaintenanceLog{" +
+                "id=" + id +
+                ", maintenanceDate=" + maintenanceDate +
+                ", status='" + status + '\'' +
+                ", note='" + note + '\'' +
+                ", areaName='" + areaName + '\'' +
+                ", scheduleTitle='" + scheduleTitle + '\'' +
+                '}';
     }
 }

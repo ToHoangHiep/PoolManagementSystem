@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="Resources/CSS/home.css">
 </head>
-
 <body>
 
 <!-- Navbar (Header.jsp nội tuyến) -->
@@ -23,29 +22,29 @@
         <a href="#about">About Us</a>
         <a href="#services">Services</a>
 
-        <%-- Chỉ hiện nếu là Staff --%>
-        <% if (user != null && user.getRole() != null && "staff".equalsIgnoreCase(user.getRole().getName())) { %>
+        <%-- Equipment Rental chỉ cho Staff --%>
+        <% if (user != null && user.getRole() != null && "Staff".equalsIgnoreCase(user.getRole().getName())) { %>
         <a href="equipment-rental">Equipment Rental</a>
         <% } %>
 
-        <%-- Bảo trì và bể bơi--%>
+        <%-- Maintenance cho Admin & Manager --%>
         <% if (user != null && user.getRole() != null) {
             String roleName = user.getRole().getName();
             if ("Admin".equalsIgnoreCase(roleName) || "Manager".equalsIgnoreCase(roleName)) {
         %>
-        <a href="maintenance">Maintenance</a>
+        <a href="MaintenanceServlet?action=list">Maintenance</a>
         <a href="pool-area">Pool Area</a>
         <% } } %>
 
-        <%-- View My Maintenance nếu role = 5 (Staff) --%>
-        <% if (user != null && user.getRole() != null && user.getRole().getId() == 5) { %>
-        <a href="viewMyMaintenance">View My Maintenance</a>
+        <%-- View My Maintenance cho Staff --%>
+        <% if (user != null && user.getRole() != null && "Staff".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="MaintenanceServlet?action=staffView">My Maintenance</a>
         <% } %>
 
         <a href="#contact">Contact</a>
         <a href="blogs">Blogs</a>
 
-        <%-- Admin có quyền xem danh sách người dùng --%>
+        <%-- User List cho Admin --%>
         <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
         <a href="admin-user">User List</a>
         <% } %>
@@ -56,8 +55,7 @@
         <a class="login-btn" href="login.jsp">Login</a>
         <a class="register-btn" href="register.jsp">Register</a>
         <% } else { %>
-        <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
-            <%= user.getFullName() %></a>!</span>
+        <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;"><%= user.getFullName() %></a>!</span>
         <form action="logout" method="post" style="display:inline;">
             <input type="submit" value="Logout">
         </form>
@@ -87,10 +85,8 @@
         </div>
         <div class="text-box">
             <h2>About Our Swimming Pool</h2>
-            <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and
-                families.</p>
-            <p>Our pool is designed to offer both recreation and training, with safety and cleanliness as top
-                priorities.</p>
+            <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and families.</p>
+            <p>Our pool is designed to offer both recreation and training, with safety and cleanliness as top priorities.</p>
             <ul>
                 <li>Certified lifeguards on duty</li>
                 <li>Weekly water quality checks</li>
