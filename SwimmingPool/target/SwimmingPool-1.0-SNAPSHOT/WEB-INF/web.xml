@@ -116,6 +116,15 @@
         <url-pattern>/swimcourse</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>CoachServlet</servlet-name>
+        <servlet-class>controller.CoachServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CoachServlet</servlet-name>
+        <url-pattern>/coach-list</url-pattern>
+    </servlet-mapping>
 
     <!-- TODO - ERROR HANDLER -->
 </web-app>
