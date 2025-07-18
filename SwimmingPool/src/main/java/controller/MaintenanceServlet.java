@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.*;
 
 import java.time.DayOfWeek;
@@ -64,42 +63,44 @@ public class MaintenanceServlet extends HttpServlet {
                 break;
 
             case "staffDetail":
-                // scheduleId truyền qua URL hoặc doPost gán attribute
-                int scheduleId = -1;
-                try {
-                    scheduleId = Integer.parseInt(req.getParameter("scheduleId"));
-                } catch (Exception e) {
-                    Object attr = req.getAttribute("scheduleId");
-                    if (attr != null) {
-                        scheduleId = (Integer) attr;
-                    } else {
-                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing scheduleId");
-                        return;
-                    }
-                }
-
-                LocalDate today = LocalDate.now();
+                int scheduleId = Integer.parseInt(req.getParameter("scheduleId"));
+                LocalDate today       = LocalDate.now();
                 LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
-                LocalDate endOfWeek = today.with(DayOfWeek.SUNDAY);
+                LocalDate endOfWeek   = today.with(DayOfWeek.SUNDAY);
 
                 MaintenanceSchedule sch = dao.getTemplateById(scheduleId);
                 req.setAttribute("schedule", sch);
 
-                List<LocalDate> doneDays = new MaintenanceLogDAO()
-                        .getCompletedDays(user.getId(), scheduleId, startOfWeek);
+                // Lấy tuần logs
+                List<MaintenanceLog> weekLogs = dao.getLogsForWeek(scheduleId, user.getId());
+                req.setAttribute("weekLogs", weekLogs);
 
+                // Build dailyStatus map
                 Map<String, Boolean> dailyStatus = new LinkedHashMap<>();
                 for (int i = 0; i < 7; i++) {
                     LocalDate d = startOfWeek.plusDays(i);
-                    dailyStatus.put(d.getDayOfWeek().toString(), doneDays.contains(d));
+                    boolean done = weekLogs.stream().anyMatch(log -> {
+                        // Chuyển java.sql.Date về LocalDate
+                        LocalDate logDate = ((java.sql.Date) log.getMaintenanceDate()).toLocalDate();
+                        return logDate.equals(d) && "Done".equals(log.getStatus());
+                    });
+                    dailyStatus.put(d.getDayOfWeek().toString(), done);
                 }
                 req.setAttribute("dailyStatus", dailyStatus);
 
-                String weekStatus = today.isBefore(endOfWeek) ? "Doing"
-                        : (doneDays.size() == 7 ? "Done" : "Missed");
+                // Tính weekStatus
+                String weekStatus = today.isBefore(endOfWeek)
+                        ? "Doing"
+                        : (dailyStatus.values().stream().allMatch(v -> v) ? "Done" : "Missed");
                 req.setAttribute("weekStatus", weekStatus);
 
-                req.getRequestDispatcher("maintenance_week.jsp").forward(req, resp);
+                // Lấy areaId để form post
+                int areaId = weekLogs.isEmpty()
+                        ? sch.getPoolAreaId()
+                        : weekLogs.get(0).getPoolAreaId();
+                req.setAttribute("areaId", areaId);
+
+                req.getRequestDispatcher("maintenance-week.jsp").forward(req, resp);
                 return;
 
             case "showForm":
@@ -203,36 +204,36 @@ public class MaintenanceServlet extends HttpServlet {
             case "request":
                 int areaReq = Integer.parseInt(req.getParameter("areaId"));
                 String reqDesc = req.getParameter("description");
-                dao.insertRequest(new MaintenanceRequest(user.getId(), reqDesc));
+                // Sửa lại dòng này để truyền cả areaId
+                dao.insertRequest(new MaintenanceRequest(user.getId(), reqDesc, areaReq));
                 break;
 
             case "submitWeekStatus":
                 int scheduleId1 = Integer.parseInt(req.getParameter("scheduleId"));
                 int areaId1     = Integer.parseInt(req.getParameter("areaId"));
-                String[] checkedDays = req.getParameterValues("completedDays");
+                String[] days   = req.getParameterValues("dates");
 
                 LocalDate today = LocalDate.now();
-                String todayName = today.getDayOfWeek().toString();
-
-                if (checkedDays == null || !Arrays.asList(checkedDays).contains(todayName)) {
-                    req.setAttribute("error", "Bạn phải tick chọn ngày hôm nay trước khi submit.");
-                    req.setAttribute("scheduleId", scheduleId1); // 👈 Gán lại cho doGet dùng
-                    doGet(req, resp); // 👈 Gọi lại staffDetail
+                if (days == null || !Arrays.asList(days).contains(today.toString())) {
+                    req.setAttribute("error", "Bạn phải tick ngày hôm nay trước khi submit.");
+                    req.setAttribute("scheduleId", scheduleId1);
+                    doGet(req, resp);
                     return;
                 }
 
-                LocalDate weekStart = today.with(DayOfWeek.MONDAY);
                 MaintenanceLogDAO logDao = new MaintenanceLogDAO();
-                for (String dayName : checkedDays) {
-                    DayOfWeek dayOfWeek = DayOfWeek.valueOf(dayName.toUpperCase());
-                    LocalDate date = weekStart.plusDays(dayOfWeek.getValue() - 1);
-                    if (!logDao.checkLogExists(scheduleId1, user.getId(), date)) {
-                        logDao.insertLog(scheduleId1, user.getId(), areaId1, date, "Done");
+                for (String d : days) {
+                    java.sql.Date sqlDate   = java.sql.Date.valueOf(d);
+                    LocalDate localDate     = sqlDate.toLocalDate();
+                    if (!logDao.checkLogExists(scheduleId1, user.getId(), localDate)) {
+                        logDao.insertLog(scheduleId1, user.getId(), areaId1, localDate, "Done");
                     }
                 }
 
-                resp.sendRedirect("MaintenanceServlet?action=staffDetail&scheduleId=" + scheduleId1);
+                // Thay vì gửi về staffDetail, ta redirect về staffView:
+                resp.sendRedirect("MaintenanceServlet?action=staffView");
                 return;
+
         }
 
         if (role.equalsIgnoreCase("Staff")) {

@@ -39,10 +39,11 @@ public class MaintenanceDAO {
     /** Lấy log công việc của staff trong tuần hiện tại */
     public List<MaintenanceLog> getLogsForWeek(int scheduleId, int staffId) {
         String sql =
-                "SELECT ml.id, ml.schedule_id, ml.maintenance_date, ml.status, ml.note, pa.name AS area, ms.title " +
+                "SELECT ml.id, ml.schedule_id, ml.pool_area_id, ml.maintenance_date, ml.status, ml.note, " +
+                        "       pa.name AS area, ms.title " +
                         "FROM Maintenance_Log ml " +
-                        "JOIN Maintenance_Schedule ms ON ml.schedule_id=ms.id " +
-                        "JOIN Pool_Area pa ON ml.pool_area_id=pa.id " +
+                        " JOIN Maintenance_Schedule ms ON ml.schedule_id=ms.id " +
+                        " JOIN Pool_Area pa ON ml.pool_area_id=pa.id " +
                         "WHERE ml.schedule_id=? AND ml.staff_id=? " +
                         "  AND ml.maintenance_date BETWEEN " +
                         "      DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) " +
@@ -55,7 +56,8 @@ public class MaintenanceDAO {
                 while (rs.next()) {
                     MaintenanceLog log = new MaintenanceLog();
                     log.setId(rs.getInt("id"));
-                    log.setScheduleId(rs.getInt("schedule_id"));                  // set scheduleId
+                    log.setScheduleId(rs.getInt("schedule_id"));
+                    log.setPoolAreaId(rs.getInt("pool_area_id"));
                     log.setMaintenanceDate(rs.getDate("maintenance_date"));
                     log.setStatus(rs.getString("status"));
                     log.setNote(rs.getString("note"));
@@ -73,10 +75,11 @@ public class MaintenanceDAO {
     /** Lấy log đã gán cho staff (xem chung) */
     public List<MaintenanceLog> getLogsByStaff(int staffId) {
         String sql =
-                "SELECT ml.id, ml.schedule_id, ml.maintenance_date, ml.status, ml.note, pa.name AS area, ms.title " +
+                "SELECT ml.id, ml.schedule_id, ml.pool_area_id, ml.maintenance_date, ml.status, ml.note, " +
+                        "       pa.name AS area, ms.title " +
                         "FROM Maintenance_Log ml " +
-                        "JOIN Maintenance_Schedule ms ON ml.schedule_id=ms.id " +
-                        "JOIN Pool_Area pa ON ml.pool_area_id=pa.id " +
+                        " JOIN Maintenance_Schedule ms ON ml.schedule_id=ms.id " +
+                        " JOIN Pool_Area pa ON ml.pool_area_id=pa.id " +
                         "WHERE ml.staff_id = ?";
         List<MaintenanceLog> list = new ArrayList<>();
         try (PreparedStatement p = conn.prepareStatement(sql)) {
@@ -85,7 +88,8 @@ public class MaintenanceDAO {
                 while (rs.next()) {
                     MaintenanceLog log = new MaintenanceLog();
                     log.setId(rs.getInt("id"));
-                    log.setScheduleId(rs.getInt("schedule_id"));                  // set scheduleId
+                    log.setScheduleId(rs.getInt("schedule_id"));
+                    log.setPoolAreaId(rs.getInt("pool_area_id"));      // ← set poolAreaId
                     log.setMaintenanceDate(rs.getDate("maintenance_date"));
                     log.setStatus(rs.getString("status"));
                     log.setNote(rs.getString("note"));
@@ -99,7 +103,6 @@ public class MaintenanceDAO {
         }
         return list;
     }
-
     /** Lấy tất cả PoolArea */
     public List<PoolArea> getAllPoolAreas() {
         String sql = "SELECT id, name, description FROM Pool_Area";
@@ -223,12 +226,14 @@ public class MaintenanceDAO {
     }
 
     /** Tạo maintenance request */
-    public void insertRequest(MaintenanceRequest r) {
-        String sql = "INSERT INTO Maintenance_Requests(description, status, created_by) VALUES(?, 'Open', ?)";
-        try (PreparedStatement p = conn.prepareStatement(sql)) {
-            p.setString(1, r.getDescription());
-            p.setInt(2, r.getCreatedBy());
-            p.executeUpdate();
+    public void insertRequest(MaintenanceRequest request) {
+        // Sửa lại câu SQL để thêm pool_area_id
+        String sql = "INSERT INTO Maintenance_Requests (description, status, created_by, created_at, pool_area_id) VALUES (?, 'Open', ?, NOW(), ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, request.getDescription());
+            ps.setInt(2, request.getCreatedBy());
+            ps.setInt(3, request.getPoolAreaId()); // <-- Thêm tham số này
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

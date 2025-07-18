@@ -1,58 +1,85 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.util.List" %>
-<%@ page import="model.MaintenanceLog" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<%
-    // Nhận danh sách logs đã gán cho staff
-    List<MaintenanceLog> logs = (List<MaintenanceLog>) request.getAttribute("logs");
-%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <title>Nhiệm vụ Bảo trì</title>
     <meta charset="UTF-8">
-    <title>My Maintenance Tasks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
-        th { background-color: #f4f4f4; }
-        a.button { display: inline-block; padding: 6px 12px; margin: 4px 2px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; }
-        a.button:hover { background-color: #0056b3; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 20px; background-color: #f8f9fa; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th { background-color: #e9ecef; }
+        .btn { padding: 10px 15px; border: none; color: white; cursor: pointer; text-decoration: none; display: inline-block; border-radius: 5px; font-size: 14px; text-align: center; }
+        .btn-complete { background-color: #28a745; /* Green */ }
+        .btn-complete:hover { background-color: #218838; }
+        .btn-request { background-color: #dc3545; /* Red */ font-size: 16px; margin-bottom: 20px; }
+        .btn-request:hover { background-color: #c82333; }
+        .status-done { color: #28a745; font-weight: bold; }
+        .status-pending { color: #ffc107; font-weight: bold; }
+        .done-row { background-color: #f0fff0; }
+        .no-tasks { text-align: center; color: #6c757d; padding: 20px; }
     </style>
 </head>
 <body>
-<h2 style="text-align:center;">My Maintenance Tasks</h2>
-<div style="text-align:center; margin-bottom: 20px;">
-    <a href="MaintenanceServlet?action=showRequestForm" class="button">Request Repair</a>
+
+<div class="container">
+    <h1>Danh sách công việc của tôi</h1>
+
+    <a href="MaintenanceServlet?action=showRequestForm" class="btn btn-request">➕ Tạo Yêu Cầu Bảo Trì Mới</a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Tên công việc</th>
+            <th>Khu vực</th>
+            <th>Ngày thực hiện</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:choose>
+            <c:when test="${not empty logs}">
+                <c:forEach var="log" items="${logs}">
+                    <tr class="${log.status == 'Done' ? 'done-row' : ''}">
+                        <td>${log.scheduleTitle}</td>
+                        <td>${log.areaName}</td>
+                        <td><fmt:formatDate value="${log.maintenanceDate}" pattern="dd-MM-yyyy"/></td>
+                        <td>
+                            <c:if test="${log.status == 'Done'}">
+                                <span class="status-done">✔ Đã hoàn thành</span>
+                            </c:if>
+                            <c:if test="${log.status != 'Done'}">
+                                <span class="status-pending">❗ Chưa hoàn thành</span>
+                            </c:if>
+                        </td>
+                        <td>
+                            <c:if test="${log.status != 'Done'}">
+                                <form action="MaintenanceServlet" method="post" style="margin:0;">
+                                    <input type="hidden" name="action" value="complete"/>
+                                    <input type="hidden" name="logId" value="${log.id}"/>
+                                    <button type="submit" class="btn btn-complete">Xác nhận hoàn thành</button>
+                                </form>
+                            </c:if>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </c:when>
+            <c:otherwise>
+                <tr>
+                    <td colspan="5" class="no-tasks">🎉 Bạn không có nhiệm vụ nào. Hãy tận hưởng ngày làm việc!</td>
+                </tr>
+            </c:otherwise>
+        </c:choose>
+        </tbody>
+    </table>
 </div>
 
-<c:choose>
-    <c:when test="${empty logs}">
-        <p style="text-align:center;">No tasks assigned.</p>
-    </c:when>
-    <c:otherwise>
-        <table>
-            <tr>
-                <th>Date</th>
-                <th>Task</th>
-                <th>Area</th>
-                <th>Status</th>
-                <th>Detail</th>
-            </tr>
-            <c:forEach var="l" items="${logs}">
-                <tr>
-                    <td>${l.maintenanceDate}</td>
-                    <td>${l.scheduleTitle}</td>
-                    <td>${l.areaName}</td>
-                    <td>${l.status}</td>
-                    <td>
-                        <!-- Chuyển sang detail tuần với đúng scheduleId -->
-                        <a href="MaintenanceServlet?action=staffDetail&amp;scheduleId=${l.scheduleId}" class="button">View Week</a>
-                    </td>
-                </tr>
-            </c:forEach>
-        </table>
-    </c:otherwise>
-</c:choose>
 </body>
 </html>
