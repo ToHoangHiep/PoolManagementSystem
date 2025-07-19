@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Time;
+import java.sql.Timestamp; // Thêm import này
 
 public class MaintenanceSchedule {
     private int id;
@@ -10,6 +11,7 @@ public class MaintenanceSchedule {
     private Time scheduledTime;
     private int createdBy;
     private String createdByName;
+    private Timestamp createdAt; // THÊM DÒNG NÀY
 
     // Khi tạo log:
     private int staffId;
@@ -17,7 +19,7 @@ public class MaintenanceSchedule {
 
     public MaintenanceSchedule() { }
 
-    // Dùng để hiển thị template
+    // Dùng để hiển thị template (có thể bổ sung createdBy nếu cần)
     public MaintenanceSchedule(int id, String title, String description, String frequency) {
         this.id = id;
         this.title = title;
@@ -25,13 +27,26 @@ public class MaintenanceSchedule {
         this.frequency = frequency;
     }
 
-    // Dùng để lấy lịch chi tiết
+    // Dùng để lấy lịch chi tiết (có thể bổ sung createdBy nếu cần)
     public MaintenanceSchedule(int id, String title, String description, String frequency,
                                Time scheduledTime, String createdByName) {
         this(id, title, description, frequency);
         this.scheduledTime = scheduledTime;
         this.createdByName = createdByName;
     }
+
+    // Constructor mới nếu bạn muốn tạo đối tượng với createdAt ban đầu
+    public MaintenanceSchedule(int id, String title, String description, String frequency, Time scheduledTime, int createdBy, String createdByName, Timestamp createdAt) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.frequency = frequency;
+        this.scheduledTime = scheduledTime;
+        this.createdBy = createdBy;
+        this.createdByName = createdByName;
+        this.createdAt = createdAt;
+    }
+
 
     // Getters & Setters
 
@@ -62,6 +77,15 @@ public class MaintenanceSchedule {
     public int getPoolAreaId() { return poolAreaId; }
     public void setPoolAreaId(int poolAreaId) { this.poolAreaId = poolAreaId; }
 
+    // THÊM GETTER VÀ SETTER NÀY
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
     @Override
     public String toString() {
         return "MaintenanceSchedule{" +
@@ -70,7 +94,9 @@ public class MaintenanceSchedule {
                 ", description='" + description + '\'' +
                 ", frequency='" + frequency + '\'' +
                 ", scheduledTime=" + scheduledTime +
+                ", createdBy=" + createdBy +
                 ", createdByName='" + createdByName + '\'' +
+                ", createdAt=" + createdAt + // Thêm vào toString để dễ debug
                 '}';
     }
 }
