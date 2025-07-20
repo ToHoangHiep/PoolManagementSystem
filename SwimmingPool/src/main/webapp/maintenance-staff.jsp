@@ -57,7 +57,7 @@
     <h1>📋 Nhiệm vụ bảo trì của tôi</h1>
 
     <a href="MaintenanceServlet?action=showRequestForm" class="btn btn-request">➕ Tạo Yêu Cầu Bảo Trì Mới</a>
-    <a href="${pageContext.request.contextPath}/staff-maintenance-sent-requests" class="btn btn-info">✉️ Xem Yêu Cầu Đã Gửi Của Tôi</a>
+    <%-- Đã loại bỏ hoặc thay đổi link "Xem Yêu Cầu Đã Gửi Của Tôi" ở đây --%>
 
     <div id="notificationArea" class="mt-4">
         <c:if test="${not empty unreadNotifications}">
@@ -126,7 +126,7 @@
     <div class="section">
         <h2>🔄 Yêu cầu của tôi – Đang xử lý</h2>
         <c:choose>
-            <c:when test="${not empty myProcessingRequests}"> <%-- Thay thế 'sentRequests' bằng 'myProcessingRequests' --%>
+            <c:when test="${not empty myProcessingRequests}">
                 <table>
                     <thead>
                     <tr>
@@ -143,15 +143,7 @@
                             <td>${r.poolAreaName}</td>
                             <td><fmt:formatDate value="${r.createdAt}" pattern="dd-MM-yyyy HH:mm"/></td>
                             <td>
-                                <c:choose>
-                                    <c:when test="${r.status eq 'Processing'}">
-                                        <span class="status-processing">Đang xử lý...</span>
-                                    </c:when>
-                                    <%-- Nếu bạn muốn hiển thị các trạng thái khác ở đây, ví dụ: "Open", "New" --%>
-                                    <c:otherwise>
-                                        <span class="status-pending">${r.status}</span>
-                                    </c:otherwise>
-                                </c:choose>
+                                <span class="status-processing">Đang xử lý...</span>
                             </td>
                         </tr>
                     </c:forEach>
@@ -215,33 +207,7 @@
         </c:choose>
     </div>
 
-    <%-- Phần "Yêu cầu được phân công cho tôi" đã bị comment, nếu bạn muốn dùng lại thì bỏ comment --%>
-    <%--
-    <div class="section">
-        <h2>🛠️ Yêu cầu được phân công cho tôi</h2>
-        <c:choose>
-            <c:when test="${not empty assigned}">
-                <table>
-                    <thead>
-                    <tr><th>Mô tả</th><th>Khu vực</th><th>Thời gian cập nhật</th></tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="r" items="${assigned}">
-                        <tr>
-                            <td>${r.description}</td>
-                            <td>${r.poolAreaName}</td>
-                            <td><fmt:formatDate value="${r.updatedAt}" pattern="dd-MM-yyyy HH:mm"/></td>
-                        </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
-            </c:when>
-            <c:otherwise>
-                <p>Chưa có yêu cầu nào được giao cho tôi.</p>
-            </c:otherwise>
-        </c:choose>
-    </div>
-    --%>
+    <%-- Phần "Yêu cầu được phân công cho tôi" đã bị comment --%>
 
 </div>
 

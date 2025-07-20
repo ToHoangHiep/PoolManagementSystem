@@ -12,12 +12,13 @@ public class MaintenanceLog {
     private String note;
     private String areaName;
     private String scheduleTitle;
+    private String frequency; // <--- Thêm dòng này
 
     public MaintenanceLog() { }
 
     public MaintenanceLog(int id, int scheduleId, int staffId, int poolAreaId,
                           Date maintenanceDate, String status, String note,
-                          String areaName, String scheduleTitle) {
+                          String areaName, String scheduleTitle, String frequency) { // <--- Cập nhật constructor
         this.id = id;
         this.scheduleId = scheduleId;
         this.staffId = staffId;
@@ -27,6 +28,7 @@ public class MaintenanceLog {
         this.note = note;
         this.areaName = areaName;
         this.scheduleTitle = scheduleTitle;
+        this.frequency = frequency; // <--- Gán giá trị
     }
 
     // Getters & Setters
@@ -103,6 +105,16 @@ public class MaintenanceLog {
         this.scheduleTitle = scheduleTitle;
     }
 
+    // <--- Thêm Getter & Setter cho frequency
+    public String getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(String frequency) {
+        this.frequency = frequency;
+    }
+    // End new getters & setters
+
     @Override
     public String toString() {
         return "MaintenanceLog{" +
@@ -115,6 +127,7 @@ public class MaintenanceLog {
                 ", note='" + note + '\'' +
                 ", areaName='" + areaName + '\'' +
                 ", scheduleTitle='" + scheduleTitle + '\'' +
+                ", frequency='" + frequency + '\'' + // <--- Thêm vào toString
                 '}';
     }
 }

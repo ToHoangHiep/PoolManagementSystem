@@ -90,16 +90,47 @@ public class MaintenanceDAO {
     }
 
     /** Lấy log đã gán cho staff */
+    /** Lấy log đã gán cho staff */
     public List<MaintenanceLog> getLogsByStaff(int staffId) {
         String sql =
                 "SELECT ml.id, ml.schedule_id, ml.pool_area_id, ml.maintenance_date, ml.status, ml.note, " +
-                        " pa.name AS area, ms.title " +
+                        " pa.name AS area, ms.title, ms.frequency " + // <-- THÊM ms.frequency vào SELECT
                         "FROM Maintenance_Log ml " +
                         " JOIN Maintenance_Schedule ms ON ml.schedule_id=ms.id " +
-                        " JOIN Pool_Area pa ON ml.pool_area_id=pa.id " + // Đã sửa: Pool_Area
+                        " JOIN Pool_Area pa ON ml.pool_area_id=pa.id " +
                         "WHERE ml.staff_id = ? ORDER BY ml.maintenance_date ASC, ml.status DESC";
-        return executeLogQuery(sql, staffId);
+        // Gọi lại phương thức executeLogQuery, nhưng chúng ta cần chỉnh sửa nó để lấy frequency.
+        // Tốt hơn là tạo một phương thức riêng biệt hoặc điều chỉnh executeLogQuery để linh hoạt hơn.
+        // Tạm thời, tôi sẽ chỉnh sửa trực tiếp logic trong phương thức này.
+        List<MaintenanceLog> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement p = conn.prepareStatement(sql)) {
+            p.setInt(1, staffId);
+            try (ResultSet rs = p.executeQuery()) {
+                while (rs.next()) {
+                    MaintenanceLog log = new MaintenanceLog();
+                    log.setId(rs.getInt("id"));
+                    log.setScheduleId(rs.getInt("schedule_id"));
+                    log.setPoolAreaId(rs.getInt("pool_area_id"));
+                    log.setMaintenanceDate(rs.getDate("maintenance_date"));
+                    log.setStatus(rs.getString("status"));
+                    log.setNote(rs.getString("note"));
+                    log.setAreaName(rs.getString("area"));
+                    log.setScheduleTitle(rs.getString("title"));
+                    log.setFrequency(rs.getString("frequency")); // <-- THÊM dòng này để set frequency
+                    list.add(log);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting logs by staff ID: " + staffId, e);
+        }
+        return list;
     }
+
+    // Bạn có thể xóa phương thức executeLogQuery(String sql, int id) nếu nó chỉ được dùng cho getLogsByStaff
+    // và bạn đã gộp logic vào getLogsByStaff trực tiếp.
+    // Nếu nó được dùng cho các query log khác với cấu trúc cột tương tự, hãy giữ nó và cập nhật nó.
+    // Đối với mục đích này, tôi đã gộp logic vào getLogsByStaff.
 
     private List<MaintenanceLog> executeLogQuery(String sql, int id) {
         List<MaintenanceLog> list = new ArrayList<>();
@@ -669,4 +700,34 @@ public class MaintenanceDAO {
         }
         return list;
     }
+
+    // Trong MaintenanceDAO
+    public void createAssignmentRequest(MaintenanceRequest request) throws SQLException {
+        // Đây là một yêu cầu được tạo bởi Admin/Manager và được gán cho Staff ngay lập tức.
+        // Status ban đầu có thể là 'Open' hoặc 'Assigned'.
+        // Sau đó Admin/Manager có thể 'Accept' request này để tạo MaintenanceLog.
+        String sql = "INSERT INTO Maintenance_Requests(description, status, created_by, pool_area_id, staff_id, created_at) VALUES(?, ?, ?, ?, ?, NOW())";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, request.getDescription());
+            ps.setString(2, "Open"); // Hoặc "Assigned" nếu bạn muốn phân biệt rõ hơn
+            ps.setInt(3, request.getCreatedBy());
+            ps.setInt(4, request.getPoolAreaId());
+            ps.setInt(5, request.getStaffId()); // Gán Staff ngay tại đây
+            ps.executeUpdate();
+            // Gửi thông báo cho Staff ngay khi tạo
+            createNotification(request.getStaffId(),
+                    "Bạn có một nhiệm vụ mới được giao: " + request.getDescription(),
+                    "NewAssignment", 0); // related_id có thể là ID của request mới này nếu cần
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error creating assignment request by admin/manager", e);
+            throw e;
+        }
+    }
+
+// Cập nhật getAllRequests để lấy cả các request có staff_id NULL (do Staff gửi) và NOT NULL (do Admin gán)
+// Hoặc bạn có thể tạo một phương thức riêng để lấy các "nhiệm vụ được gán trực tiếp" nếu cần.
+// Hiện tại, logic 'Open' của getAllRequests chỉ lấy các request chưa được xử lý,
+// và chúng sẽ được hiển thị trên trang Admin để Admin 'Accept' hoặc 'Reject'.
+
 }
