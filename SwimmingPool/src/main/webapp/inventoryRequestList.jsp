@@ -25,11 +25,12 @@
           <form action="inventory" method="post" style="display:inline;">
             <input type="hidden" name="action" value="updateStatus"/>
             <input type="hidden" name="request_id" value="${r.requestId}"/>
-            <button name="status" value="approved">Phê duyệt</button>
-            <button name="status" value="rejected">Từ chối</button>
+            <a href="inventory?action=approveRequest&id=${r.requestId}">Phê duyệt</a>
+            <a href="inventory?action=rejectRequest&id=${r.requestId}">Từ chối</a>
           </form>
         </c:if>
       </td>
+
     </tr>
   </c:forEach>
 </table>

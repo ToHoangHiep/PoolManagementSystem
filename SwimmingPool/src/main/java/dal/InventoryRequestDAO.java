@@ -55,18 +55,27 @@ public class InventoryRequestDAO {
     public static boolean updateStatusAndStock(int requestId, String status) {
         String updateStatusSql = "UPDATE Inventory_Request SET status = ?, approved_at = CURRENT_TIMESTAMP WHERE request_id = ?";
         String updateInventorySql = "UPDATE Inventory i JOIN Inventory_Request r ON i.inventory_id = r.inventory_id SET i.quantity = i.quantity + r.requested_quantity WHERE r.request_id = ?";
+
         try (Connection conn = DBConnect.getConnection()) {
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Transaction đảm bảo tính toàn vẹn
+
             try (
                     PreparedStatement statusStmt = conn.prepareStatement(updateStatusSql);
-                    PreparedStatement inventoryStmt = conn.prepareStatement(updateInventorySql)) {
+                    PreparedStatement inventoryStmt = conn.prepareStatement(updateInventorySql)
+            ) {
+                // Cập nhật trạng thái (approve/reject)
                 statusStmt.setString(1, status);
                 statusStmt.setInt(2, requestId);
-                statusStmt.executeUpdate();
-                if ("approved".equals(status)) {
+                int affectedRows = statusStmt.executeUpdate();
+
+                // Nếu trạng thái là "approved", cập nhật tồn kho
+                if ("approved".equalsIgnoreCase(status) && affectedRows > 0) {
+                    System.out.println("Đang cập nhật tồn kho cho request_id = " + requestId);
                     inventoryStmt.setInt(1, requestId);
                     inventoryStmt.executeUpdate();
                 }
+
+
                 conn.commit();
                 return true;
             } catch (Exception e) {
@@ -80,16 +89,12 @@ public class InventoryRequestDAO {
         }
     }
 
-    public static void main(String[] args) {
-        InventoryRequestDAO dao = new InventoryRequestDAO();
-        boolean success = dao.insertRequest(15, 10, "Thêm để phục vụ lớp mới");
 
-        if (success) {
-            System.out.println("Thêm yêu cầu thành công");
-        } else {
-            System.out.println("Thêm yêu cầu thất bại");
-        }
+    public static void main(String[] args) {
+        boolean result = updateStatusAndStock(1, "approved");
+        System.out.println("Cập nhật: " + result);
     }
+
 
 
 
