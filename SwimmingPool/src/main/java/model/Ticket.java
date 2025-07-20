@@ -19,10 +19,11 @@ public class Ticket {
     private BigDecimal total;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    private String customerName;    // Thêm: Tên khách hàng
+    private String customerIdCard;  // Thêm: CMND/CCCD khách hàng
 
     public enum TicketTypeName {
-       Single, Monthly, ThreeMonthly, SixMonthly, Year
+        Single, Monthly, ThreeMonthly, SixMonthly, Year
     }
     public enum TicketStatus {
         Active, Expired, Cancelled
@@ -37,7 +38,7 @@ public class Ticket {
     public Ticket(int ticketId, int userId, int ticketTypeId, String ticketTypeName, BigDecimal price, int quantity,
                   LocalDate startDate, LocalDate endDate, TicketStatus ticketStatus,
                   PaymentStatus paymentStatus, Integer paymentId, BigDecimal total,
-                  LocalDateTime createdAt, LocalDateTime updatedAt) {
+                  LocalDateTime createdAt, LocalDateTime updatedAt, String customerName, String customerIdCard) {
         this.ticketId = ticketId;
         this.userId = userId;
         this.ticketTypeId = ticketTypeId;
@@ -52,10 +53,11 @@ public class Ticket {
         this.total = total;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.customerName = customerName;
+        this.customerIdCard = customerIdCard;
     }
 
-    // Getters and setters
-
+    // Getters và Setters
     public int getTicketId() {
         return ticketId;
     }
@@ -120,7 +122,6 @@ public class Ticket {
         this.endDate = endDate;
     }
 
-
     public TicketStatus getTicketStatus() {
         return ticketStatus;
     }
@@ -167,5 +168,21 @@ public class Ticket {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerIdCard() {
+        return customerIdCard;
+    }
+
+    public void setCustomerIdCard(String customerIdCard) {
+        this.customerIdCard = customerIdCard;
     }
 }
