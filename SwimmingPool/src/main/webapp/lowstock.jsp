@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="model.Inventory" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -28,12 +29,12 @@
     <th>ID</th>
     <th>Tên thiết bị</th>
     <th>Danh mục</th>
-    <th>Số lượng tồn</th>
-    <th>Ngưỡng cảnh báo</th>
+    <th>Số lượng</th>
+    <th>Danh mục SL</th>
     <th>Trạng thái</th>
     <th>Cách sử dụng</th>
-    <th>Cập nhật lần cuối</th>
-    <th>Hoạt động</th>
+    <th>Cập nhật</th>
+    <th>Thao tác</th>
   </tr>
   </thead>
   <tbody>
@@ -48,7 +49,9 @@
       <td>${inv.usageName}</td>
       <td>${inv.lastUpdated}</td>
       <td>
-        <a href="inventory?action=edit&id=${inv.inventoryId}" class="btn-edit">Request Import</a>
+        <a href="inventory?action=requestForm&inventory_id=${inv.inventoryId}">
+          Nhập thêm
+        </a>
       </td>
     </tr>
   </c:forEach>
