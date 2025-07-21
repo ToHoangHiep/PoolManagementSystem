@@ -81,7 +81,7 @@
 
     <h2 style="text-align:center; color:#005caa;">See your old feedback</h2>
     <div style="text-align:center;" class="hero-content">
-        <button class="btn btn-primary" onclick="window.location.href='feedback?mode=list';">Feedback History</button>
+        <button class="btn btn-primary" onclick="window.location.href='feedback?action=list';">Feedback History</button>
     </div>
 </div>
 
