@@ -53,29 +53,6 @@ CREATE TABLE Courses (
     status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE Classes (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    course_id INT,
-    coach_id INT,
-    name VARCHAR(100),
-    description TEXT,
-    student_limit INT DEFAULT 2,
-    status ENUM('Chưa khai giảng', 'Đang học', 'Đã kết thúc') DEFAULT 'Chưa khai giảng',
-    schedule VARCHAR(255),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (course_id) REFERENCES Courses(id),
-    FOREIGN KEY (coach_id) REFERENCES Coaches(id)
-);
-
-CREATE TABLE Class_Registrations (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    class_id INT,
-    registered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Pending', 'Approved', 'Cancelled'),
-    FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (class_id) REFERENCES Classes(id)
-);
 
 CREATE TABLE Schedules (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -86,41 +63,7 @@ CREATE TABLE Schedules (
     FOREIGN KEY (class_id) REFERENCES Classes(id),
     FOREIGN KEY (coach_id) REFERENCES Coaches(id)
 );
-CREATE TABLE Payments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    amount DECIMAL(10, 2),
-    method VARCHAR(50),
-    payment_for ENUM('Course', 'Service'),
-    reference_id INT,
-    status ENUM('Pending', 'Completed', 'Failed'),
-    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id)
-);
 
-CREATE TABLE TicketType (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,
-    price DECIMAL(10,2) NOT NULL
-);
-
-CREATE TABLE Ticket (
-    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    ticket_type_id INT,
-    quantity INT,
-    start_date DATE,
-    end_date DATE,
-    ticket_status ENUM('Active', 'Expired', 'Cancelled'),
-    payment_status ENUM('Paid', 'Unpaid'),
-    payment_id INT,
-    total DECIMAL(10,2),
-    created_at DATETIME,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (payment_id) REFERENCES Payments(id),
-    FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
-);
 CREATE TABLE Inventory_usage (
     usage_id INT PRIMARY KEY AUTO_INCREMENT,
     usage_name VARCHAR(100),
@@ -337,15 +280,6 @@ CREATE TABLE Ticket (
 );
 
 
--- Study Roadmaps
-CREATE TABLE Study_Roadmaps (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
-    content TEXT,
-    created_by INT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES Users(id)
-);
 -- Maintenance Schedule table
 CREATE TABLE Maintenance_Schedule (
     id INT PRIMARY KEY AUTO_INCREMENT,

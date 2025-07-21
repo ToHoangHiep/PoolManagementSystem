@@ -1,4 +1,4 @@
-//package controller;
+package controller;
 //
 //import dal.BlogsDAO;
 //import dal.BlogsCommentDAO;
