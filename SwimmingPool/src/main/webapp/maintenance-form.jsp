@@ -66,14 +66,14 @@
 </head>
 <body>
 <div class="container">
-  <h2>Create Maintenance Task</h2>
-  <a href="maintenance.jsp" class="btn btn-back">⬅ Quay lại trang Maintenance</a>
+  <h2>Tạo nhiệm vụ bảo trì</h2>
+  <a href="MaintenanceServlet?action=list" class="btn btn-back">Quay lại trang bảo trì</a>
 
   <form action="MaintenanceServlet" method="post">
     <input type="hidden" name="action" value="create"/>
 
     <div class="form-row">
-      <label for="templateId">Use Template:</label>
+      <label for="templateId">Sử dụng mẫu:</label>
       <div class="input-wrap">
         <select name="templateId" id="templateId">
           <option value="">-- None --</option>
@@ -91,21 +91,21 @@
     </div>
 
     <div class="form-row">
-      <label for="title">Title:</label>
+      <label for="title">Tiêu đề:</label>
       <div class="input-wrap">
         <input type="text" name="title" id="title" required/>
       </div>
     </div>
 
     <div class="form-row">
-      <label for="description">Description:</label>
+      <label for="description">Mô tả:</label>
       <div class="input-wrap">
         <textarea name="description" id="description" rows="4" required></textarea>
       </div>
     </div>
 
     <div class="form-row">
-      <label for="frequency">Frequency:</label>
+      <label for="frequency">Tần suất:</label>
       <div class="input-wrap">
         <select name="frequency" id="frequency" required>
           <option value="Daily">Daily</option>
@@ -116,14 +116,14 @@
     </div>
 
     <div class="form-row">
-      <label for="scheduledTime">Scheduled Time:</label>
+      <label for="scheduledTime">Thời gian làm:</label>
       <div class="input-wrap">
         <input type="time" name="scheduledTime" id="scheduledTime" required/>
       </div>
     </div>
 
     <div class="form-row">
-      <label for="areaId">Area:</label>
+      <label for="areaId">Khu vực:</label>
       <div class="input-wrap">
         <select name="areaId" id="areaId" required>
           <c:forEach var="a" items="${areas}">
@@ -134,7 +134,7 @@
     </div>
 
     <div class="form-row">
-      <label for="staffId">Assign to Staff:</label>
+      <label for="staffId">Giao cho nhân viên:</label>
       <div class="input-wrap">
         <select name="staffId" id="staffId" required>
           <c:forEach var="u" items="${staffs}">
@@ -144,7 +144,7 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-create">Create Schedule</button>
+    <button type="submit" class="btn btn-create">Tạo lịch trình</button>
   </form>
 </div>
 
