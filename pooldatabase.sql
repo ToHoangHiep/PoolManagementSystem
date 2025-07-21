@@ -448,3 +448,50 @@ ALTER TABLE Maintenance_Schedule
 MODIFY COLUMN frequency VARCHAR(15) NOT NULL;
 ALTER TABLE Maintenance_Log
 ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+
+-- tach (DUCNT)--
+CREATE TABLE Inventory_Request (
+    request_id INT PRIMARY KEY AUTO_INCREMENT,
+    inventory_id INT NOT NULL,
+    requested_quantity INT NOT NULL,
+    reason TEXT,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    approved_at DATETIME,
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+CREATE TABLE Repair_request (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+    inventory_id INT,
+    reason TEXT,
+    request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'pending',
+    FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
+);
+
+-- tach (NGOC)--
+
+CREATE TABLE Coaches (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    phone_number VARCHAR(20),
+    gender ENUM('Male', 'Female', 'Other'),
+    bio TEXT,
+    profile_picture VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Courses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100),
+    description TEXT,
+    price DECIMAL(10, 2),
+    duration INT,
+    estimated_session_time VARCHAR(50),
+    student_description VARCHAR(100),
+    schedule_description VARCHAR(100),
+    status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
