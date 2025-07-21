@@ -1,71 +1,58 @@
 package model;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class MaintenanceRequest {
     private int id;
     private String description;
     private String status;
     private int createdBy;
-    private Date createdAt;
-    private Date updatedAt;
+    private int staffId; // Thêm trường này
+    private int poolAreaId;
+    private Timestamp createdAt;
+    private Timestamp updatedAt; // Thêm trường này
 
-    public MaintenanceRequest() {}
+    // transient fields for display
+    private String createdByName;
+    private String poolAreaName;
 
-    public MaintenanceRequest(int id, String description, String status, int createdBy, Date createdAt, Date updatedAt) {
-        this.id = id;
-        this.description = description;
-        this.status = status;
+    public MaintenanceRequest() {
+    }
+
+    public MaintenanceRequest(int createdBy, String description, int poolAreaId) {
         this.createdBy = createdBy;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
         this.description = description;
+        this.poolAreaId = poolAreaId;
     }
 
-    public String getStatus() {
-        return status;
-    }
+    // --- Getters and Setters ---
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public int getCreatedBy() {
-        return createdBy;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setCreatedBy(int createdBy) {
-        this.createdBy = createdBy;
-    }
+    public int getCreatedBy() { return createdBy; }
+    public void setCreatedBy(int createdBy) { this.createdBy = createdBy; }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+    public int getStaffId() { return staffId; }
+    public void setStaffId(int staffId) { this.staffId = staffId; }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+    public int getPoolAreaId() { return poolAreaId; }
+    public void setPoolAreaId(int poolAreaId) { this.poolAreaId = poolAreaId; }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
+    public Timestamp getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    public Timestamp getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getCreatedByName() { return createdByName; }
+    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
+
+    public String getPoolAreaName() { return poolAreaName; }
+    public void setPoolAreaName(String poolAreaName) { this.poolAreaName = poolAreaName; }
 }
