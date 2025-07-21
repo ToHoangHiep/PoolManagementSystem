@@ -1,211 +1,139 @@
 package dal;
 
 import model.SwimCourse;
+import utils.DBConnect;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class SwimCourseDAO {
-    private final Connection conn;
+    private Connection conn;
 
     public SwimCourseDAO(Connection conn) {
         this.conn = conn;
     }
 
-    public List<SwimCourse> getCourses(String status, String keyword) throws SQLException {
+    public List<SwimCourse> getAllCourses() throws SQLException {
         List<SwimCourse> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
-                "SELECT c.*, u.full_name AS coach_name FROM Courses c " +
-                        "LEFT JOIN Users u ON c.coach_id = u.id WHERE 1=1"
-        );
-
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND c.status = ?");
-        }
-        if (keyword != null && !keyword.isEmpty()) {
-            sql.append(" AND c.name LIKE ?");
-        }
-
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            if (status != null && !status.isEmpty()) {
-                ps.setString(index++, status);
-            }
-            if (keyword != null && !keyword.isEmpty()) {
-                ps.setString(index++, "%" + keyword + "%");
-            }
-
-            ResultSet rs = ps.executeQuery();
+        String sql = "SELECT * FROM Courses";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                SwimCourse sc = new SwimCourse();
-                sc.setId(rs.getInt("id"));
-                sc.setName(rs.getString("name"));
-                sc.setDescription(rs.getString("description"));
-                sc.setPrice(rs.getDouble("price"));
-                sc.setDuration(rs.getInt("duration"));
-                sc.setStatus(rs.getString("status"));
-                sc.setCoach(rs.getString("coach_name"));
-                list.add(sc);
-            }
-        }
-
-        return list;
-    }
-
-    public List<SwimCourse> getCoursesByCoach(int coachId, String status, String keyword) throws SQLException {
-        List<SwimCourse> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM Courses WHERE coach_id = ?");
-
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND status = ?");
-        }
-        if (keyword != null && !keyword.isEmpty()) {
-            sql.append(" AND name LIKE ?");
-        }
-
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            ps.setInt(index++, coachId);
-            if (status != null && !status.isEmpty()) {
-                ps.setString(index++, status);
-            }
-            if (keyword != null && !keyword.isEmpty()) {
-                ps.setString(index++, "%" + keyword + "%");
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                SwimCourse sc = new SwimCourse();
-                sc.setId(rs.getInt("id"));
-                sc.setName(rs.getString("name"));
-                sc.setDescription(rs.getString("description"));
-                sc.setPrice(rs.getDouble("price"));
-                sc.setDuration(rs.getInt("duration"));
-                sc.setStatus(rs.getString("status"));
-                list.add(sc);
+                SwimCourse course = new SwimCourse();
+                course.setId(rs.getInt("id"));
+                course.setName(rs.getString("name"));
+                course.setDescription(rs.getString("description"));
+                course.setPrice(rs.getDouble("price"));
+                course.setDuration(rs.getInt("duration"));
+                course.setEstimatedSessionTime(rs.getString("estimated_session_time"));
+                course.setStudentDescription(rs.getString("student_description"));
+                course.setScheduleDescription(rs.getString("schedule_description"));
+                course.setStatus(rs.getString("status"));
+                list.add(course);
             }
         }
         return list;
     }
 
+    public void addCourse(SwimCourse course) throws SQLException {
+        String sql = "INSERT INTO Courses (name, description, price, duration, estimated_session_time, student_description, schedule_description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, course.getName());
+            ps.setString(2, course.getDescription());
+            ps.setDouble(3, course.getPrice());
+            ps.setInt(4, course.getDuration());
+            ps.setString(5, course.getEstimatedSessionTime());
+            ps.setString(6, course.getStudentDescription());
+            ps.setString(7, course.getScheduleDescription());
+            ps.setString(8, course.getStatus());
+            ps.executeUpdate();
+        }
+    }
 
-    public SwimCourse getById(int id) throws SQLException {
+    public SwimCourse getCourseById(int id) throws SQLException {
         String sql = "SELECT * FROM Courses WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                SwimCourse sc = new SwimCourse();
-                sc.setId(id);
-                sc.setName(rs.getString("name"));
-                sc.setDescription(rs.getString("description"));
-                sc.setPrice(rs.getDouble("price"));
-                sc.setDuration(rs.getInt("duration"));
-                sc.setStatus(rs.getString("status"));
-                return sc;
+                SwimCourse course = new SwimCourse();
+                course.setId(rs.getInt("id"));
+                course.setName(rs.getString("name"));
+                course.setDescription(rs.getString("description"));
+                course.setPrice(rs.getDouble("price"));
+                course.setDuration(rs.getInt("duration"));
+                course.setEstimatedSessionTime(rs.getString("estimated_session_time"));
+                course.setStudentDescription(rs.getString("student_description"));
+                course.setScheduleDescription(rs.getString("schedule_description"));
+                course.setStatus(rs.getString("status"));
+                return course;
             }
         }
         return null;
     }
 
-    public void addCourse(SwimCourse sc) throws SQLException {
-        String sql = "INSERT INTO Courses(name, description, price, duration, status, coach_id) VALUES (?, ?, ?, ?, ?, ?)";
+    public void updateCourse(SwimCourse course) throws SQLException {
+        String sql = "UPDATE Courses SET name=?, description=?, price=?, duration=?, estimated_session_time=?, student_description=?, schedule_description=?, status=? WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sc.getName());
-            ps.setString(2, sc.getDescription());
-            ps.setDouble(3, sc.getPrice());
-            ps.setInt(4, sc.getDuration());
-            ps.setString(5, "Inactive"); // default status
-            ps.setInt(6, sc.getCoachId());
+            ps.setString(1, course.getName());
+            ps.setString(2, course.getDescription());
+            ps.setDouble(3, course.getPrice());
+            ps.setInt(4, course.getDuration());
+            ps.setString(5, course.getEstimatedSessionTime());
+            ps.setString(6, course.getStudentDescription());
+            ps.setString(7, course.getScheduleDescription());
+            ps.setString(8, course.getStatus());
+            ps.setInt(9, course.getId());
             ps.executeUpdate();
         }
     }
 
-    public void updateCourse(SwimCourse sc) throws SQLException {
-        String sql = "UPDATE Courses SET name = ?, description = ?, price = ?, duration = ? WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, sc.getName());
-            ps.setString(2, sc.getDescription());
-            ps.setDouble(3, sc.getPrice());
-            ps.setInt(4, sc.getDuration());
-            ps.setInt(5, sc.getId());
-            ps.executeUpdate();
-        }
-    }
+    public void deleteCourse(int courseId) throws SQLException {
+        String[] queries = {
+                // 1. Xóa FeedbackReplies trước (liên kết qua Feedbacks)
+                "DELETE FROM FeedbackReplies WHERE feedback_id IN (SELECT id FROM Feedbacks WHERE course_id = ?)",
 
-    public void deleteCourse(int id) throws SQLException {
-        String deleteCourse = "DELETE FROM Courses WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(deleteCourse)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        }
-    }
+                // 2. Xóa Feedbacks liên quan đến Course
+                "DELETE FROM Feedbacks WHERE course_id = ?",
 
-    public void toggleStatus(int id) throws SQLException {
-        String sql = "UPDATE Courses SET status = CASE " +
-                "WHEN status = 'Active' THEN 'Inactive' " +
-                "ELSE 'Active' END WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        }
-    }
+                // 3. Xóa Blog_Comments trước (liên kết qua Blogs)
+                "DELETE FROM Blog_Comments WHERE blog_id IN (SELECT id FROM Blogs WHERE course_id = ?)",
 
-    // SwimCourseDAO.java
-    public boolean hasRegistrations(int courseId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM course_registrations WHERE course_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, courseId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
+                // 4. Xóa Blogs liên quan đến Course
+                "DELETE FROM Blogs WHERE course_id = ?",
+
+                // 5. Xóa Class_Registrations liên quan đến Class trong khóa học
+                "DELETE FROM Class_Registrations WHERE class_id IN (SELECT id FROM Classes WHERE course_id = ?)",
+
+                // 6. Xóa Schedules liên quan đến Class trong khóa học
+                "DELETE FROM Schedules WHERE class_id IN (SELECT id FROM Classes WHERE course_id = ?)",
+
+                // 7. Xóa Classes thuộc Course
+                "DELETE FROM Classes WHERE course_id = ?",
+
+                // 8. Cuối cùng, xóa Course
+                "DELETE FROM Courses WHERE id = ?"
+        };
+
+        try (Connection conn = DBConnect.getConnection()) {
+            conn.setAutoCommit(false); // dùng transaction
+
+            try {
+                for (String sql : queries) {
+                    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                        stmt.setInt(1, courseId);
+                        stmt.executeUpdate();
+                    }
                 }
+
+                conn.commit(); // tất cả thành công
+            } catch (SQLException ex) {
+                conn.rollback(); // lỗi thì rollback lại toàn bộ
+                throw ex;
+            } finally {
+                conn.setAutoCommit(true);
             }
         }
-        return false;
     }
 
-    public List<SwimCourse> getAllCoursesByCoachRequest(String status, String keyword) throws SQLException {
-        List<SwimCourse> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
-                "SELECT c.id, c.name, c.description, c.price, c.duration, c.status, u.full_name AS coach_name " +
-                        "FROM Courses c LEFT JOIN Users u ON c.coach_id = u.id WHERE 1=1 "
-        );
-
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND c.status = ? ");
-        }
-
-        if (keyword != null && !keyword.isEmpty()) {
-            sql.append(" AND c.name LIKE ? ");
-        }
-
-        sql.append(" ORDER BY c.id DESC");
-
-        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            int index = 1;
-            if (status != null && !status.isEmpty()) {
-                ps.setString(index++, status);
-            }
-            if (keyword != null && !keyword.isEmpty()) {
-                ps.setString(index, "%" + keyword + "%");
-            }
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                SwimCourse c = new SwimCourse();
-                c.setId(rs.getInt("id"));
-                c.setName(rs.getString("name"));
-                c.setDescription(rs.getString("description"));
-                c.setPrice(rs.getDouble("price"));
-                c.setDuration(rs.getInt("duration"));
-                c.setStatus(rs.getString("status"));
-                c.setCoach(rs.getString("coach_name")); // nếu bạn có thuộc tính này trong model
-                list.add(c);
-            }
-        }
-
-        return list;
-    }
 }
