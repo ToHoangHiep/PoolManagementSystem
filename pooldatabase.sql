@@ -122,6 +122,25 @@ CREATE TABLE Inventory (
    FOREIGN KEY (category_id) REFERENCES Inventory_category(category_id),
    FOREIGN KEY (manager_id) REFERENCES Users(id)
 );
+CREATE TABLE Inventory_Request (
+    request_id INT PRIMARY KEY AUTO_INCREMENT,
+    inventory_id INT NOT NULL,
+    requested_quantity INT NOT NULL,
+    reason TEXT,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    approved_at DATETIME,
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+CREATE TABLE Repair_request (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+    inventory_id INT,
+    reason TEXT,
+    request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'pending',
+    FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
+);
+
 
 
 
