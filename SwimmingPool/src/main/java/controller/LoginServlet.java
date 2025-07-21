@@ -45,9 +45,9 @@ public class LoginServlet extends HttpServlet {
             // Phân luồng theo vai trò
             int roleId = user.getRole().getId();
 
-            if (roleId == 3) { // Customer
+            if (roleId == 4) { // Customer
                 response.sendRedirect("header.jsp");
-            } else if (roleId == 4) { // Staff
+            } else if (roleId == 5) { // Staff
                 response.sendRedirect("staff_dashboard.jsp");
             } else if (roleId == 2) { // Manager
                 response.sendRedirect("admin_dashboard.jsp");
