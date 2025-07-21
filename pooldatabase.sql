@@ -74,21 +74,21 @@ CREATE TABLE UserCode (
 
 
 -- Feedbacks
--- CREATE TABLE Feedbacks (
---     id INT PRIMARY KEY AUTO_INCREMENT,
---     user_id INT,
---     feedback_type ENUM('Course', 'Coach', 'General'),
---     coach_id INT,
---     course_id INT,
---     general_feedback_type ENUM('Food', 'Service', 'Facility', 'Other'),
---     content TEXT,
---     rating INT,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES Users(id),
---     FOREIGN KEY (coach_id) REFERENCES Users(id),
---     FOREIGN KEY (course_id) REFERENCES Courses(id)
--- );
+CREATE TABLE Feedbacks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    feedback_type ENUM('Course', 'Coach', 'General'),
+    coach_id INT,
+    course_id INT,
+    general_feedback_type ENUM('Food', 'Service', 'Facility', 'Other'),
+    content TEXT,
+    rating INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (coach_id) REFERENCES Users(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
 
 -- Complaints
 CREATE TABLE Complaints (
@@ -484,3 +484,23 @@ CREATE TABLE Courses (
     status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- MINH
+
+USE swimming_pool_management;
+CREATE TABLE CourseForm(
+id INT PRIMARY KEY AUTO_INCREMENT,
+user_id INT  , -- nối đến bảng user
+FOREIGN KEY (user_id) REFERENCES Users(id),
+user_fullName varchar (50),
+user_email varchar (50),
+user_phone varchar (11) ,
+coach_id INT, -- nối đến bảng coach
+FOREIGN KEY (coach_id) REFERENCES Coaches(id),
+course_id INT, -- nối đến bảng coach
+FOREIGN KEY (course_id) REFERENCES Courses(id),
+request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+has_processed boolean DEFAULT false
+
+); 
