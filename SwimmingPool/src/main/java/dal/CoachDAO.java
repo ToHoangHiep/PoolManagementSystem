@@ -5,12 +5,12 @@ import java.sql.*;
 import java.util.*;
 
 public class CoachDAO {
-    private Connection conn;
+    private static Connection conn;
     public CoachDAO(Connection conn) {
         this.conn = conn;
     }
 
-    public List<Coach> getAll() throws SQLException {
+    public static List<Coach> getAll() throws SQLException {
         List<Coach> list = new ArrayList<>();
         String sql = "SELECT * FROM Coaches";
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -30,7 +30,7 @@ public class CoachDAO {
         return list;
     }
 
-    public Coach getById(int id) throws SQLException {
+    public static Coach getById(int id) throws SQLException {
         String sql = "SELECT * FROM Coaches WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -51,7 +51,7 @@ public class CoachDAO {
         return null;
     }
 
-    public void insert(Coach c) throws SQLException {
+    public static void insert(Coach c) throws SQLException {
         String sql = "INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getFullName());
@@ -64,7 +64,7 @@ public class CoachDAO {
         }
     }
 
-    public void update(Coach c) throws SQLException {
+    public static void update(Coach c) throws SQLException {
         String sql = "UPDATE Coaches SET full_name = ?, email = ?, phone_number = ?, gender = ?, bio = ?, profile_picture = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getFullName());
@@ -78,22 +78,11 @@ public class CoachDAO {
         }
     }
 
-    public void delete(int id) throws SQLException {
+    public static void delete(int id) throws SQLException {
         String sql = "DELETE FROM Coaches WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
-    }
-    public boolean isCoachUsed(int coachId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Classes WHERE coach_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, coachId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        }
-        return false;
     }
 }
