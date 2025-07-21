@@ -25,6 +25,10 @@
         <a href="home.jsp" class="nav-btn">🏠 Home</a>
         <a href="inventory?action=default" class="nav-btn orange">🔙 Return To List</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
+        <a href="inventory?action=lowstock" class="nav-btn blue" >Thiết bị sắp hết kho</a>
+        <a href="inventory?action=requestList">Xem yêu cầu nhập kho</a>
+
+
 
     </div>
 
@@ -111,6 +115,7 @@
                onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Delete</a>
         </td>
     </tr>
+
     <%
         }
     } else {
@@ -121,7 +126,6 @@
     %>
     </tbody>
 </table>
-
 <% if (totalPages != null && currentPage != null && totalPages > 1) { %>
 <div class="pagination" style="margin-top: 20px;">
     <% for (int i = 1; i <= totalPages; i++) { %>
@@ -130,6 +134,16 @@
     <% } %>
 </div>
 <% } %>
+<c:if test="${not empty lowStockItems}">
+    <h3>Danh sách thiết bị sắp hết kho</h3>
+    <ul>
+        <c:forEach var="item" items="${lowStockItems}">
+            <li>${item.getItemName()} (Còn: ${item.getQuantity()}, Mức cảnh báo: ${item.categoryQuantity})</li>
+        </c:forEach>
+    </ul>
+</c:if>
+
+
 
 </body>
 </html>

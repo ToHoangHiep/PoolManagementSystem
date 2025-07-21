@@ -1,6 +1,8 @@
 package dal;
 
 import model.Inventory;
+import model.InventoryCategory;
+
 import utils.DBConnect;
 
 
@@ -261,6 +263,28 @@ public class InventoryDAO {
     }
 
 
+    public static List<InventoryCategory> getAllCategories() {
+        List<InventoryCategory> list = new ArrayList<>();
+        String sql = "SELECT * FROM inventory_category";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                InventoryCategory cat = new InventoryCategory();
+                cat.setCategoryId(rs.getInt("category_id"));
+                cat.setCategoryName(rs.getString("category_name"));
+                list.add(cat);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
 
 
 
@@ -388,19 +412,24 @@ public class InventoryDAO {
 
 
     public static void main(String[] args) {
-        List<Inventory> lowStockItems = getLowStockItems();
+        Inventory newItem = new Inventory();
 
-        if (lowStockItems.isEmpty()) {
-            System.out.println("Không có món hàng nào sắp hết.");
+        newItem.setManagerId(2);  // Giả sử manager ID là 2
+        newItem.setItemName("Phao bơi trẻ em");
+        newItem.setCategoryID(1); // ✅ Vì ID 1 = "Thiết bị cá nhân", đã có trong DB
+        newItem.setQuantity(50);
+        newItem.setUnit("cái");
+        newItem.setStatus("Available");
+        newItem.setImportPrice(120000); // VND hoặc theo đơn vị bạn chọ
+        newItem.setLastUpdated(new java.util.Date());
+        newItem.setUsageId(1); // Giả sử là thiết bị cho thuê
+
+        boolean inserted = insertInventory(newItem);
+
+        if (inserted) {
+            System.out.println("✅ Thiết bị đã được thêm thành công!");
         } else {
-            System.out.println("⚠️ Các món hàng sắp hết:");
-            for (Inventory inv : lowStockItems) {
-                System.out.println("ID: " + inv.getInventoryId()
-                        + ", Tên: " + inv.getItemName()
-                        + ", Số lượng hiện tại: " + inv.getQuantity()
-                        + ", Cảnh báo khi dưới: " + inv.getCategoryQuantity()
-                        + ", Loại: " + inv.getCategoryName());
-            }
+            System.out.println("❌ Thêm thiết bị thất bại.");
         }
     }
 

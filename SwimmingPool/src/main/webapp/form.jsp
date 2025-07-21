@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="model.Inventory" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
   Inventory inv = (Inventory) request.getAttribute("inventory");
   String action = (inv != null) ? "update" : "insert";
@@ -8,10 +9,11 @@
 <head>
   <title><%= inv != null ? "Cập nhật thiết bị" : "Thêm thiết bị mới" %></title>
   <link rel="stylesheet" href="./Resources/CSS/inventoryForm.css">
-
 </head>
 <body>
-<h2 style="text-align: center;"><%= inv != null ? "Update Item" : "Add New Item" %></h2>
+
+<h2 style="text-align: center;"><%= inv != null ? "Cập nhật thiết bị" : "Thêm thiết bị mới" %></h2>
+
 <form action="inventory" method="post">
   <input type="hidden" name="action" value="<%= action %>"/>
   <% if (inv != null) { %>
@@ -25,13 +27,23 @@
   <input type="text" name="item_name" value="<%= inv != null ? inv.getItemName() : "" %>" required/>
 
   <label>Category:</label>
-  <input type="text" name="category" value="<%= inv != null ? inv.getCategory() : "" %>" required/>
+  <select name="category_id" required>
+    <c:forEach var="cat" items="${categoryList}">
+      <option value="${cat.categoryId}"
+              <c:if test="${inv != null and inv.categoryId == cat.categoryId}">selected</c:if>>
+          ${cat.categoryName}/${cat.categoryId}
+      </option>
+    </c:forEach>
+  </select>
 
   <label>Quantity:</label>
   <input type="number" name="quantity" value="<%= inv != null ? inv.getQuantity() : "" %>" required/>
 
   <label>Unit:</label>
   <input type="text" name="unit" value="<%= inv != null ? inv.getUnit() : "" %>" required/>
+
+  <label>Giá nhập:</label>
+  <input type="number" step="0.01" name="import_price" value="<%= inv != null ? inv.getImportPrice() : "" %>" required/>
 
   <label>Status:</label>
   <select name="status">
@@ -50,7 +62,7 @@
 
   </select>
 
-
+  <br><br>
   <input type="submit" value="Save"/>
   <a href="inventory">Return</a>
 </form>
