@@ -117,14 +117,14 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>CourseServlet</servlet-name>
-        <servlet-class>controller.CourseServlet</servlet-class>
+        <servlet-name>CoachServlet</servlet-name>
+        <servlet-class>controller.CoachServlet</servlet-class>
     </servlet>
 
-
     <servlet-mapping>
-        <servlet-name>CourseServlet</servlet-name>
-        <url-pattern>/coachcourse</url-pattern>
+        <servlet-name>CoachServlet</servlet-name>
+        <url-pattern>/coach-list</url-pattern>
     </servlet-mapping>
+
     <!-- TODO - ERROR HANDLER -->
 </web-app>

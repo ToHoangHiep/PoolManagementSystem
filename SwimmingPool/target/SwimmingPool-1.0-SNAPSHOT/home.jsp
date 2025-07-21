@@ -1,5 +1,5 @@
-<%@ page import="model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="model.User" %>
 <%
     User user = (User) session.getAttribute("user");
 %>
@@ -9,14 +9,12 @@
     <meta charset="UTF-8">
     <title>Swimming Pool - Home Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="Resources/CSS/home.css">
 </head>
 
 <body>
 <jsp:include page="header.jsp" />
-
 
 <!-- Hero Section -->
 <div class="hero">
@@ -29,7 +27,6 @@
     </div>
 </div>
 
-
 <!-- About Us -->
 <div class="section" id="about">
     <div class="flex-row reverse">
@@ -38,10 +35,7 @@
         </div>
         <div class="text-box">
             <h2>About Our Swimming Pool</h2>
-            <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and
-                families.</p>
-            <p>Our pool is designed to offer both recreation and training, with safety and cleanliness as top
-                priorities.</p>
+            <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and families.</p>
             <ul>
                 <li>Certified lifeguards on duty</li>
                 <li>Weekly water quality checks</li>
@@ -60,7 +54,6 @@
         </div>
         <div class="text-box">
             <h2>Our Services</h2>
-            <p>Explore our offerings to enhance your swimming experience:</p>
             <ul>
                 <li>Professional Swimming Training for all ages</li>
                 <li>Private Pool Booking for Events & Families</li>
@@ -90,7 +83,5 @@
     <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
     <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
-
 </body>
 </html>
-
