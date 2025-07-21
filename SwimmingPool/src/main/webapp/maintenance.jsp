@@ -298,7 +298,7 @@
 <div class="container">
   <div class="dashboard-header">
     <h1><span class="icon">🛠️</span> Maintenance Dashboard</h1>
-    <a href="home.jsp" class="btn btn-secondary">
+    <a href="admin_dashboard.jsp" class="btn btn-secondary">
       <span class="btn-icon">🏠</span> Về Trang Chủ
     </a>
   </div>

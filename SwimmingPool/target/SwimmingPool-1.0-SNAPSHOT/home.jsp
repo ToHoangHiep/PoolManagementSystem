@@ -14,8 +14,6 @@
 </head>
 <body>
 
-<<<<<<< HEAD
-=======
 <!-- Navbar (Header.jsp nội tuyến) -->
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
@@ -68,7 +66,6 @@
 <!-- Spacer tránh bị che bởi navbar cố định -->
 <div style="height: 70px;"></div>
 
->>>>>>> origin/hiepthhe173531
 <!-- Hero Section -->
 <div class="hero">
     <div class="hero-content">
@@ -89,10 +86,7 @@
         <div class="text-box">
             <h2>About Our Swimming Pool</h2>
             <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and families.</p>
-<<<<<<< HEAD
-=======
             <p>Our pool is designed to offer both recreation and training, with safety and cleanliness as top priorities.</p>
->>>>>>> origin/hiepthhe173531
             <ul>
                 <li>Certified lifeguards on duty</li>
                 <li>Weekly water quality checks</li>

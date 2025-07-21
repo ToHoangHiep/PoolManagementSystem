@@ -2,7 +2,7 @@
 <%@ page import="model.User" %>
 <%
     User user = (User) session.getAttribute("user");
-    if (user == null || user.getRole() == null || user.getRole().getId() != 1) {
+    if (user == null || user.getRole() == null || user.getRole().getId() != 1 && user.getRole().getId() != 2) {
         response.sendRedirect("error.jsp");
         return;
     }
@@ -125,7 +125,7 @@
 
 <div class="sidebar">
     <a href="admin-user"><i class="fas fa-users-cog"></i> Quản lý người dùng</a>
-    <a href="warehouse"><i class="fas fa-warehouse"></i> Quản lý kho</a>
+    <a href="inventory"><i class="fas fa-warehouse"></i> Quản lý kho</a>
 
     <!-- Dropdown cho Quản lý khóa học -->
     <div style="padding-left: 20px;">
@@ -133,11 +133,12 @@
         <a href="swimcourse" style="padding-left: 30px;"><i class="fas fa-book"></i> Khóa học</a>
         <a href="class-list" style="padding-left: 30px;"><i class="fas fa-chalkboard-teacher"></i> Lớp học</a>
         <a href="register-course" style="padding-left: 30px;"><i class="fas fa-chalkboard-teacher"></i>Đăng kí mới</a>
+
     </div>
 
-    <a href="maintenance"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
+    <a href="MaintenanceServlet"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
     <a href="coach-list"><i class="fas fa-user-tie"></i> Quản lý huấn luyện viên</a>
-
+    <a href="pool-area"><i class="fas fa-warehouse"></i> Quản bể bơi</a>
 </div>
 
 

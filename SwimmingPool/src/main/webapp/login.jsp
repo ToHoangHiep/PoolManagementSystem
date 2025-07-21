@@ -35,7 +35,7 @@
             <a href="register.jsp">User Registration</a>
         </div>
         <div style="margin-top: 10px;">
-            <a href="index.jsp">Back to Home</a>
+            <a href="home.jsp">Back to Home</a>
         </div>
     </div>
 

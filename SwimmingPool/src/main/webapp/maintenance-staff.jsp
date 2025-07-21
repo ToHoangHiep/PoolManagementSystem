@@ -315,7 +315,7 @@
     <div class="header">
         <h1><span class="icon">📋</span> Nhiệm vụ bảo trì của tôi</h1>
         <div class="header-actions">
-            <a href="home.jsp" style="background: #007bff; color: white; padding: 10px 20px; border-radius: 6px; display: inline-flex; gap: 8px; text-decoration: none;">
+            <a href="staff_dashboard.jsp" style="background: #007bff; color: white; padding: 10px 20px; border-radius: 6px; display: inline-flex; gap: 8px; text-decoration: none;">
                 <span>🏠</span><span>Quay lại Trang chủ</span>
             </a>
 
