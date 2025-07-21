@@ -16,7 +16,15 @@ public class EquipmentRental {
     private String status;
     private Timestamp createdAt;
     private Timestamp returnTime;
+    private Date dueDate;
+    private String notes;
+
+    // Additional fields for display
     private String itemName;
+    private String category;
+    private String unit;
+    private double salePrice;
+    private int usageId;
 
     // Constructors
     public EquipmentRental() {}
@@ -48,8 +56,13 @@ public class EquipmentRental {
     public String getStatus() { return status; }
     public Timestamp getCreatedAt() { return createdAt; }
     public Timestamp getReturnTime() { return returnTime; }
+    public Date getDueDate() { return dueDate; }
+    public String getNotes() { return notes; }
     public String getItemName() { return itemName; }
-
+    public String getCategory() { return category; }
+    public String getUnit() { return unit; }
+    public double getSalePrice() { return salePrice; }
+    public int getUsageId() { return usageId; }
 
     // Setters
     public void setRentalId(int rentalId) { this.rentalId = rentalId; }
@@ -64,8 +77,13 @@ public class EquipmentRental {
     public void setStatus(String status) { this.status = status; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
     public void setReturnTime(Timestamp returnTime) { this.returnTime = returnTime; }
+    public void setDueDate(Date dueDate) { this.dueDate = dueDate; }
+    public void setNotes(String notes) { this.notes = notes; }
     public void setItemName(String itemName) { this.itemName = itemName; }
-
+    public void setCategory(String category) { this.category = category; }
+    public void setUnit(String unit) { this.unit = unit; }
+    public void setSalePrice(double salePrice) { this.salePrice = salePrice; }
+    public void setUsageId(int usageId) { this.usageId = usageId; }
 
     // Helper methods
     public boolean isActive() { return "active".equalsIgnoreCase(status); }

@@ -1,9 +1,10 @@
--- Drop table
-drop database swimming_pool_management;
+-- Drop table 
+-- drop database swimming_pool_management;
+
 
 -- Tạo database
-CREATE DATABASE swimming_pool_management;
-USE swimming_pool_management;
+-- CREATE DATABASE swimming_pool_management;
+-- USE swimming_pool_management;
 -- Roles
 CREATE TABLE Roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -26,7 +27,7 @@ CREATE TABLE Users (
     address TEXT,
     dob DATE,
     gender ENUM('Male', 'Female', 'Other'),
-    role_id INT default 4,
+    role_id INT,
     profile_picture VARCHAR(255) DEFAULT NULL,
     user_status enum('Active', 'Deactive', 'Banned'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -34,25 +35,7 @@ CREATE TABLE Users (
     FOREIGN KEY (role_id) REFERENCES Roles(id)
 );
 
-INSERT INTO Users (
-    full_name,
-    email,
-    password_hash,
-    phone_number,
-    address,
-    dob,
-    gender,
-    role_id
-) VALUES (
-    'Nguyễn Văn A',
-    'nguyenvana@example.com',
-    'hashed_password_here', -- giả sử bạn dùng hash
-    '0909123456',
-    '123 Đường ABC, Quận 1, TP.HCM',
-    '1990-01-01',
-    'Male',
-    2
-);
+
 
 -- Courses
 CREATE TABLE Courses (
@@ -61,9 +44,8 @@ CREATE TABLE Courses (
     description TEXT,
     price DECIMAL(10, 2),
     duration INT,
-    student_limit INT DEFAULT 2,
     coach_id INT,
-    status ENUM('Active', 'Inactive', 'Full'),
+    status ENUM('Active', 'Inactive'),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (coach_id) REFERENCES Users(id)
 );
@@ -100,6 +82,7 @@ CREATE TABLE Course_Registrations (
 --     FOREIGN KEY (service_id) REFERENCES Services(id)
 -- );
 
+
 -- Reset Password
 CREATE TABLE UserCode (
 	user_id int primary key,
@@ -109,28 +92,40 @@ CREATE TABLE UserCode (
 );
 
 
+-- Iventory
 CREATE TABLE Inventory_usage(
-    usage_id INT PRIMARY KEY AUTO_INCREMENT,
+	usage_id INT PRIMARY KEY AUTO_INCREMENT,
     usage_name varchar(100),
     last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+CREATE TABLE Inventory_category(
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name varchar(100),
+    category_quantity INT,
+    last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
--- Iventory
 CREATE TABLE Inventory (
    inventory_id INT PRIMARY KEY AUTO_INCREMENT,
    manager_id INT,
    item_name VARCHAR(100),
-   category VARCHAR(100),
+   category_id INT,
    quantity INT,
    unit VARCHAR(100),
-   status ENUM('Available', 'In Use', 'Maintenance', 'Broken'),
+   status ENUM('Available', 'In Use', 'Maintenance', 'Broken', 'Unavailable'),
    rent_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá thuê 1 lần',
    sale_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá bán',
+   import_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá nhập',
    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
    usage_id INT,
    FOREIGN KEY (usage_id) REFERENCES Inventory_usage(usage_id),
+   FOREIGN KEY (category_id) REFERENCES Inventory_category(category_id),
    FOREIGN KEY (manager_id) REFERENCES Users(id)
 );
+
+
+
+
 
 CREATE TABLE Equipment_Rentals (
    rental_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -162,39 +157,6 @@ CREATE TABLE Equipment_Sales (
     FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
 );
 
-
-INSERT INTO Inventory_usage(usage_name)
-VALUES 
-  ('item for rent'),
-  ('item for maintannance'),
-  ('item for sold'),
-  ('item for facility');
-
--- Blog
-CREATE TABLE Blogs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
-    content TEXT,
-    author_id INT,
-    course_id INT,
-    tags VARCHAR(255),
-    likes INT DEFAULT 0,
-    active BOOLEAN DEFAULT FALSE,
-    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES Users(id),
-    FOREIGN KEY (course_id) REFERENCES Courses(id)
-);
-
--- Blog Comments
-CREATE TABLE Blog_Comments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    blog_id INT,
-    user_id INT,
-    content TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (blog_id) REFERENCES Blogs(id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
-);
 
 -- Feedbacks
 CREATE TABLE Feedbacks (
@@ -259,8 +221,6 @@ CREATE TABLE Maintenance_Requests (
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
 
-
-
 -- Payments
 CREATE TABLE Payments (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -284,6 +244,33 @@ CREATE TABLE Tracking (
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES Users(id),
     FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
+
+
+-- Blog
+CREATE TABLE Blogs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(200),
+    content TEXT,
+    author_id INT,
+    course_id INT,
+    tags VARCHAR(255),
+    likes INT DEFAULT 0,
+    active BOOLEAN DEFAULT FALSE,
+    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES Users(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
+
+-- Blog Comments
+CREATE TABLE Blog_Comments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    blog_id INT,
+    user_id INT,
+    content TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (blog_id) REFERENCES Blogs(id),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
 CREATE TABLE TicketType (
@@ -317,6 +304,7 @@ CREATE TABLE Ticket (
     FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
 
+
 -- Study Roadmaps
 CREATE TABLE Study_Roadmaps (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -326,7 +314,6 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
-
 -- Maintenance Schedule table
 CREATE TABLE Maintenance_Schedule (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -354,21 +341,44 @@ CREATE TABLE Maintenance_Log (
     FOREIGN KEY (schedule_id) REFERENCES Maintenance_Schedule(id),
     FOREIGN KEY (staff_id) REFERENCES Users(id)
 );
-
-
-
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
+INSERT INTO Inventory_usage(usage_name)
+VALUES 
+  ('item for rent and sold'),
+  ('item for rent'),
+  ('item for maintannance'),
+  ('item for sold'),
+  ('item for facility');
+  
+  INSERT INTO Inventory_category (category_name, category_quantity)
 VALUES
-  (1, 'Gậy bơi', 'Thiết bị tập luyện', 100, 'cây', 'Available', NOW(), 1),
-  (1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', NOW(), 1),
-  (1, 'Phao tay', 'Phao cứu sinh', 80, 'cái', 'Available', NOW(), 1),
-  (1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', NOW(), 4),
-  (1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', NOW(), 4),
-  (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
-  (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
-  (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1);
+  ('Thiết bị cá nhân', 10),         -- id = 1
+  ('Phụ kiện hồ bơi', 15),          -- id = 2
+  ('Thiết bị kiểm tra nước', 9),   -- id = 3
+  ('Hóa chất hồ bơi', 10),          -- id = 4
+  ('Thiết bị an toàn', 9);         -- id = 5
+
+INSERT INTO Inventory (manager_id, item_name, category_id, quantity, unit, status, rent_price, sale_price, usage_id)
+VALUES
+-- Thiết bị chỉ cho thuê (usage_id = 2)
+(2, 'Đai bơi', 1, 40, 'cái', 'Available', 10000, 0, 2),
+(2, 'Tạ nước', 2, 25, 'cái', 'Available', 15000, 0, 2),
+(2, 'Ván tập bơi', 1, 60, 'cái', 'Available', 12000, 0, 2),
+(2, 'Chân vịt tập bơi', 1, 30, 'đôi', 'Available', 18000, 0, 2),
+
+-- Thiết bị chỉ để bán (usage_id = 4)
+(2, 'Bộ kiểm tra độ pH', 3, 60, 'bộ', 'Available', 0, 80000, 4),
+(2, 'Dung dịch diệt rêu', 4, 35, 'chai', 'Available', 0, 115000, 4),
+(2, 'Viên clo', 4, 100, 'hộp', 'Available', 0, 95000, 4),
+(2, 'Nhiệt kế điện tử', 3, 20, 'cái', 'Available', 0, 135000, 4),
+
+-- Thiết bị vừa cho thuê vừa bán (usage_id = 1)
+(2, 'Phao bơi hơi', 2, 70, 'cái', 'Available', 12000, 75000, 1),
+(2, 'Máy ảnh dưới nước', 1, 10, 'cái', 'Available', 50000, 2500000, 1),
+(2, 'Áo phao an toàn', 5, 50, 'cái', 'Available', 20000, 180000, 1),
+(2, 'Loa chống nước', 2, 15, 'cái', 'Available', 40000, 550000, 1);
+
+
+
 
 -- Insert fake data for Users table
 INSERT INTO Users (full_name, email, password_hash, phone_number, address, dob, gender, role_id, user_status) VALUES
@@ -408,6 +418,7 @@ INSERT INTO UserCode (user_id, user_code, created_at) VALUES
 (7, 'DEF67890', '2023-05-16 11:45:00'),
 (8, 'GHI13579', '2023-05-17 09:15:00');
 
+
 -- Insert fake data for Feedbacks table
 INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating) VALUES
 (6, 'Course', NULL, 1, NULL, 'Great course for beginners! I learned a lot.', 5),
@@ -416,6 +427,65 @@ INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feed
 (9, 'Course', NULL, 4, NULL, 'The competitive swimming course is challenging but rewarding.', 4),
 (10, 'General', NULL, NULL, 'Service', 'The staff is friendly and helpful.', 5),
 (6, 'General', NULL, NULL, 'Food', 'The snack bar offers healthy options.', 3);
+
+-- Insert fake data for Complaints table
+INSERT INTO Complaints (user_id, staff_id, content, status) VALUES
+(7, 5, 'The water temperature was too cold during my last session.', 'Resolved'),
+(8, 5, 'The changing rooms need better ventilation.', 'In Progress'),
+(9, 5, 'One of the showers is not working properly.', 'New');
+
+-- Insert fake data for Schedules table
+INSERT INTO Schedules (course_id, coach_id, start_time, end_time, location) VALUES
+(1, 3, '2023-06-05 09:00:00', '2023-06-05 10:00:00', 'Pool A'),
+(2, 3, '2023-06-05 11:00:00', '2023-06-05 12:30:00', 'Pool B'),
+(3, 4, '2023-06-05 14:00:00', '2023-06-05 15:30:00', 'Pool A'),
+(4, 4, '2023-06-06 09:00:00', '2023-06-06 11:00:00', 'Pool C'),
+(5, 3, '2023-06-06 13:00:00', '2023-06-06 14:00:00', 'Pool B'),
+(1, 3, '2023-06-07 09:00:00', '2023-06-07 10:00:00', 'Pool A');
+
+-- Insert fake data for Maintenance_Requests table
+INSERT INTO Maintenance_Requests (description, status, created_by) VALUES
+('Pool filter needs cleaning', 'Closed', 2),
+('Leak in the men\'s changing room', 'In Progress', 5),
+('Light fixture broken near Pool B', 'Open', 3);
+
+-- Insert fake data for Payments table
+INSERT INTO Payments (user_id, amount, method, payment_for, reference_id, status) VALUES
+(6, 199.99, 'Credit Card', 'Course', 1, 'Completed'),
+(7, 249.99, 'PayPal', 'Course', 2, 'Completed'),
+(8, 299.99, 'Bank Transfer', 'Course', 3, 'Pending'),
+(9, 349.99, 'Credit Card', 'Course', 4, 'Completed'),
+(10, 149.99, 'Cash', 'Course', 5, 'Completed'),
+(6, 299.99, 'Credit Card', 'Course', 3, 'Completed');
+
+-- Insert fake data for Tracking table
+INSERT INTO Tracking (student_id, course_id, progress, coach_feedback) VALUES
+(6, 1, 'Completed 60% of the course', 'Good progress, needs to work on breathing technique'),
+(7, 2, 'Completed 45% of the course', 'Improving steadily, focus on arm movement'),
+(8, 3, 'Completed 30% of the course', 'Excellent form, continue practicing turns'),
+(9, 4, 'Completed 70% of the course', 'Outstanding progress, ready for competition soon');
+
+-- Insert fake data for Blogs table
+INSERT INTO Blogs (title, content, author_id) VALUES
+('Benefits of Swimming', 'Swimming is one of the best full-body workouts...', 3),
+('Preparing for Your First Competition', 'Tips and tricks to prepare for your first swimming competition...', 4),
+('Water Safety Tips for Summer', 'As summer approaches, it\'s important to remember these water safety tips...', 2),
+('Nutrition for Swimmers', 'What to eat before and after swimming sessions for optimal performance...', 3),
+('Improving Your Freestyle Technique', 'Step-by-step guide to perfecting your freestyle swimming technique...', 4);
+
+-- Insert fake data for Ticket table
+INSERT INTO Ticket (user_id, ticket_type_id, quantity, start_date, end_date, ticket_status, payment_status, payment_id, total, created_at) VALUES
+(6, 2, 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 1, 300000.00, '2023-05-30 14:25:00'),
+(7, 1, 5, '2023-06-02', '2023-06-02', 'Active', 'Paid', 2, 250000.00, '2023-06-01 09:30:00'),
+(8, 3, 1, '2023-06-01', '2023-08-31', 'Active', 'Paid', 3, 850000.00, '2023-05-29 11:45:00'),
+(9, 2, 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 4, 300000.00, '2023-05-30 16:20:00'),
+(10, 1, 3, '2023-06-03', '2023-06-03', 'Active', 'Paid', 5, 150000.00, '2023-06-02 10:15:00');
+
+-- Insert fake data for Study_Roadmaps table
+INSERT INTO Study_Roadmaps (title, content, created_by) VALUES
+('Beginner to Intermediate Swimmer', 'Week 1-4: Focus on basic techniques...\nWeek 5-8: Introduce different strokes...', 3),
+('Competitive Swimming Preparation', 'Month 1: Build endurance...\nMonth 2: Speed training...\nMonth 3: Competition strategies...', 4),
+('Water Safety Certification Path', 'Step 1: Basic water safety...\nStep 2: Rescue techniques...\nStep 3: First aid certification...', 2);
 
 -- Insert more fake data for FeedbackReplies table
 INSERT INTO FeedbackReplies (feedback_id, user_id, content) VALUES
@@ -552,73 +622,6 @@ INSERT INTO Blog_Comments (blog_id, user_id, content) VALUES
 -- Science Behind Swimming blog
 (7, 6, 'The physics explanation helps me understand why technique matters so much.'),
 (7, 10, 'This scientific approach makes swimming more interesting and logical.');
-
--- Insert fake data for Schedules table
-INSERT INTO Schedules (course_id, coach_id, start_time, end_time, location) VALUES
-(1, 3, '2023-06-05 09:00:00', '2023-06-05 10:00:00', 'Pool A'),
-(2, 3, '2023-06-05 11:00:00', '2023-06-05 12:30:00', 'Pool B'),
-(3, 4, '2023-06-05 14:00:00', '2023-06-05 15:30:00', 'Pool A'),
-(4, 4, '2023-06-06 09:00:00', '2023-06-06 11:00:00', 'Pool C'),
-(5, 3, '2023-06-06 13:00:00', '2023-06-06 14:00:00', 'Pool B'),
-(1, 3, '2023-06-07 09:00:00', '2023-06-07 10:00:00', 'Pool A');
-
--- Insert fake data for Maintenance_Requests table
-INSERT INTO Maintenance_Requests (description, status, created_by) VALUES
-('Pool filter needs cleaning', 'Closed', 2),
-('Leak in the men\'s changing room', 'In Progress', 5),
-('Light fixture broken near Pool B', 'Open', 3);
-
--- Insert fake data for Payments table
-INSERT INTO Payments (user_id, amount, method, payment_for, reference_id, status) VALUES
-(6, 199.99, 'Credit Card', 'Course', 1, 'Completed'),
-(7, 249.99, 'PayPal', 'Course', 2, 'Completed'),
-(8, 299.99, 'Bank Transfer', 'Course', 3, 'Pending'),
-(9, 349.99, 'Credit Card', 'Course', 4, 'Completed'),
-(10, 149.99, 'Cash', 'Course', 5, 'Completed'),
-(6, 299.99, 'Credit Card', 'Course', 3, 'Completed');
-
--- Insert fake data for Tracking table
-INSERT INTO Tracking (student_id, course_id, progress, coach_feedback) VALUES
-(6, 1, 'Completed 60% of the course', 'Good progress, needs to work on breathing technique'),
-(7, 2, 'Completed 45% of the course', 'Improving steadily, focus on arm movement'),
-(8, 3, 'Completed 30% of the course', 'Excellent form, continue practicing turns'),
-(9, 4, 'Completed 70% of the course', 'Outstanding progress, ready for competition soon');
-
--- Insert fake data for Blogs table
-INSERT INTO Blogs (title, content, author_id) VALUES
-('Benefits of Swimming', 'Swimming is one of the best full-body workouts...', 3),
-('Preparing for Your First Competition', 'Tips and tricks to prepare for your first swimming competition...', 4),
-('Water Safety Tips for Summer', 'As summer approaches, it\'s important to remember these water safety tips...', 2),
-('Nutrition for Swimmers', 'What to eat before and after swimming sessions for optimal performance...', 3),
-('Improving Your Freestyle Technique', 'Step-by-step guide to perfecting your freestyle swimming technique...', 4);
-
--- Insert fake data for Ticket table
-INSERT INTO Ticket (user_id, ticket_type_id, quantity, start_date, end_date, ticket_status, payment_status, payment_id, total, created_at) VALUES
-(6, 2, 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 1, 300000.00, '2023-05-30 14:25:00'),
-(7, 1, 5, '2023-06-02', '2023-06-02', 'Active', 'Paid', 2, 250000.00, '2023-06-01 09:30:00'),
-(8, 3, 1, '2023-06-01', '2023-08-31', 'Active', 'Paid', 3, 850000.00, '2023-05-29 11:45:00'),
-(9, 2, 1, '2023-06-01', '2023-06-30', 'Active', 'Paid', 4, 300000.00, '2023-05-30 16:20:00'),
-(10, 1, 3, '2023-06-03', '2023-06-03', 'Active', 'Paid', 5, 150000.00, '2023-06-02 10:15:00');
-
--- Insert fake data for Study_Roadmaps table
-INSERT INTO Study_Roadmaps (title, content, created_by) VALUES
-('Beginner to Intermediate Swimmer', 'Week 1-4: Focus on basic techniques...\nWeek 5-8: Introduce different strokes...', 3),
-('Competitive Swimming Preparation', 'Month 1: Build endurance...\nMonth 2: Speed training...\nMonth 3: Competition strategies...', 4),
-('Water Safety Certification Path', 'Step 1: Basic water safety...\nStep 2: Rescue techniques...\nStep 3: First aid certification...', 2);
-
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id)
-VALUES
-  (1, 'Gậy bơi', 'Thiết bị tập luyện', 100, 'cây', 'Available', NOW(), 1),
-  (1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', NOW(), 1),
-  (1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', NOW(), 4),
-  (1, 'Phao tay', 'Phao cứu sinh', 80, 'cái', 'Available', NOW(), 1),
-  (1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', NOW(), 4),
-  (1, 'Khăn tắm', 'Tiện ích', 200, 'cái', 'Available', NOW(), 1),
-  (1, 'Dép nhựa', 'Tiện ích', 150, 'đôi', 'Available', NOW(), 1),
-  (1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nam', 'Trang phục', 70, 'bộ', 'Available', NOW(), 1),
-  (1, 'Đồ bơi nữ', 'Trang phục', 60, 'bộ', 'Available', NOW(), 1);
-
 -- Insert fake data for Complaints table
 INSERT INTO Complaints (user_id, staff_id, content, status) VALUES
 (7, 5, 'The water temperature was too cold during my last session.', 'Resolved'),

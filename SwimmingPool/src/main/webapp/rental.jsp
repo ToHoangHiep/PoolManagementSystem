@@ -1,14 +1,14 @@
 <%@ page import="model.User" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Poolax - Equipment Shop</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poolax - Equipment Rental Shop</title>
     <style>
         * {
             margin: 0;
@@ -426,16 +426,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-1px);
-        }
-
         .btn:disabled {
             background: #e9ecef;
             color: #6c757d;
@@ -734,7 +724,7 @@
         <a href="home.jsp#services">Services</a>
         <a href="home.jsp#gallery">Gallery</a>
         <a href="home.jsp#contact">Contact</a>
-        <a href="equipment-rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
+        <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
             🏊 Equipment Rental
         </a>
     </div>
@@ -758,8 +748,8 @@
 
 <!-- Page Header -->
 <div class="page-header">
-    <h1>Equipment Shop</h1>
-    <p>Find and rent or purchase swimming pool equipment</p>
+    <h1>Equipment Rental Shop</h1>
+    <p>Find and rent swimming pool equipment</p>
 </div>
 
 <!-- Main Container -->
@@ -781,27 +771,17 @@
                 <li class="category-item">
                     <a href="#" class="category-link active" onclick="filterByCategory('all')" id="filter-all">
                         <span class="category-icon">🏊</span>
-                        All Equipment
+                        All Categories
                     </a>
                 </li>
-                <li class="category-item">
-                    <a href="#" class="category-link" onclick="filterByCategory('rental')" id="filter-rental">
-                        <span class="category-icon">🔄</span>
-                        For Rent Only
-                    </a>
-                </li>
-                <li class="category-item">
-                    <a href="#" class="category-link" onclick="filterByCategory('sale')" id="filter-sale">
-                        <span class="category-icon">🛒</span>
-                        For Sale Only
-                    </a>
-                </li>
-                <li class="category-item">
-                    <a href="#" class="category-link" onclick="filterByCategory('both')" id="filter-both">
-                        <span class="category-icon">⚡</span>
-                        Rent & Sale
-                    </a>
-                </li>
+                <c:forEach var="cat" items="${categories}">
+                    <li class="category-item">
+                        <a href="#" class="category-link" onclick="filterByCategory(${cat.id})" id="filter-${cat.id}">
+                            <span class="category-icon">🔄</span>
+                                ${cat.name} (${cat.quantity})
+                        </a>
+                    </li>
+                </c:forEach>
             </ul>
 
             <div class="filter-section">
@@ -821,9 +801,8 @@
             <!-- Tabs -->
             <div class="tabs">
                 <div class="tab-buttons">
-                    <button class="tab-btn active" onclick="showTab('equipment')">🏊 Equipment Shop</button>
+                    <button class="tab-btn active" onclick="showTab('equipment')">🏊 Equipment Rental</button>
                     <button class="tab-btn" onclick="showTab('rentals')">📋 Active Rentals</button>
-<%--                    <button class="tab-btn" onclick="showTab('sales')">💰 Equipment Saled</button>--%>
                 </div>
 
                 <!-- Equipment Tab -->
@@ -852,9 +831,7 @@
                     <div class="equipment-grid" id="equipmentGrid">
                         <c:forEach var="item" items="${equipmentList}">
                             <div class="equipment-card"
-                                 data-category="${(item.usageId == 5 && item.rentPrice > 0 && item.salePrice > 0) ? 'both' :
-                                                (item.usageId == 1 || (item.usageId == 5 && item.rentPrice > 0)) ? 'rental' :
-                                                (item.usageId == 3 || (item.usageId == 5 && item.salePrice > 0)) ? 'sale' : 'none'}"
+                                 data-category="${item.category}"
                                  data-name="${fn:toLowerCase(item.itemName)}"
                                  data-rent-price="${item.rentPrice}"
                                  data-sale-price="${item.salePrice}"
@@ -874,21 +851,21 @@
                                         <c:if test="${item.rentPrice > 0}">
                                             <div class="price-row">
                                                 <span>Rent Price:</span>
-                                                <span class="price"><fmt:formatNumber value="${item.rentPrice}" type="currency" currencySymbol="$"/></span>
+                                                <span class="price"><fmt:formatNumber value="${item.rentPrice}" type="currency" currencyCode="VND"/></span>
                                             </div>
                                         </c:if>
 
                                         <c:if test="${item.salePrice > 0}">
                                             <div class="price-row">
                                                 <span>Sale Price:</span>
-                                                <span class="price"><fmt:formatNumber value="${item.salePrice}" type="currency" currencySymbol="$"/></span>
+                                                <span class="price"><fmt:formatNumber value="${item.salePrice}" type="currency" currencyCode="VND"/></span>
                                             </div>
                                         </c:if>
                                     </div>
 
                                     <div class="stock-info">
                                         <span class="stock-text">Available: ${item.quantity}</span>
-                                        <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.aquantity <= 5 ? 'low-stock' : 'in-stock')}">
+                                        <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.quantity <= 5 ? 'low-stock' : 'in-stock')}">
                                                 ${item.quantity == 0 ? 'Out of Stock' : (item.quantity <= 5 ? 'Low Stock' : 'In Stock')}
                                         </span>
                                     </div>
@@ -899,13 +876,6 @@
                                                     onclick="openRentalModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.rentPrice}')"
                                                 ${item.quantity == 0 ? 'disabled' : ''}>
                                                 🔄 Rent
-                                            </button>
-                                        </c:if>
-                                        <c:if test="${item.salePrice > 0}">
-                                            <button class="btn btn-success"
-                                                    onclick="openSaleModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}')"
-                                                ${item.quantity == 0 ? 'disabled' : ''}>
-                                                🛒 Buy
                                             </button>
                                         </c:if>
                                     </div>
@@ -939,10 +909,21 @@
                                 <td>${rental.quantity}</td>
                                 <td><fmt:formatDate value="${rental.rentalDate}" pattern="dd/MM/yyyy"/></td>
                                 <td>${rental.customerIdCard}</td>
-                                <td><fmt:formatNumber value="${rental.totalAmount}" type="currency" currencySymbol="$"/></td>
-                                <td>
-                                    <button class="btn-return" onclick="processReturn(${rental.rentalId})">
-                                        Return
+                                <td><fmt:formatNumber value="${rental.totalAmount}" type="currency" currencyCode="VND"/></td>
+                                <td class="actions">
+                                    <!-- Return Button -->
+                                    <button class="btn-return" onclick="processReturn(${rental.rentalId})" title="Mark as returned normally">
+                                        ✅ Return
+                                    </button>
+
+                                    <!-- Report Issue Button -->
+                                    <button class="btn-report" onclick="reportIssue(${rental.rentalId})" title="Report damage, loss, or overdue">
+                                        ⚠️ Report Issue
+                                    </button>
+
+                                    <!-- Optional: View Details Button -->
+                                    <button class="btn-view" onclick="viewRentalDetails(${rental.rentalId})" title="View rental details">
+                                        👁️ View
                                     </button>
                                 </td>
                             </tr>
@@ -951,47 +932,6 @@
                     </table>
                 </div>
 
-                <!-- Equipment Saled Tab -->
-<%--                <div id="sales" class="tab-content">--%>
-<%--                    <div class="search-sort-bar">--%>
-<%--                        <div class="search-box">--%>
-<%--                            <input type="text" class="search-input" placeholder="Search sales..." id="searchSales">--%>
-<%--                            <button class="search-btn" onclick="searchSales()">🔍</button>--%>
-<%--                        </div>--%>
-<%--                        <div>--%>
-<%--                            <input type="date" id="saleDateFrom" class="form-input">--%>
-<%--                            <input type="date" id="saleDateTo" class="form-input">--%>
-<%--                            <button class="btn btn-primary" onclick="filterByDate()">Filter</button>--%>
-<%--                        </div>--%>
-<%--                    </div>--%>
-
-<%--                    <table class="table">--%>
-<%--                        <thead>--%>
-<%--                        <tr>--%>
-<%--                            <th>Sale ID</th>--%>
-<%--                            <th>Equipment</th>--%>
-<%--                            <th>Customer</th>--%>
-<%--                            <th>Quantity</th>--%>
-<%--                            <th>Unit Price</th>--%>
-<%--                            <th>Total</th>--%>
-<%--                            <th>Date</th>--%>
-<%--                        </tr>--%>
-<%--                        </thead>--%>
-<%--                        <tbody>--%>
-<%--                        <c:forEach var="sale" items="${saleHistory}">--%>
-<%--                            <tr>--%>
-<%--                                <td>#${sale.saleId}</td>--%>
-<%--                                <td>${sale.itemName}</td>--%>
-<%--                                <td>${sale.customerName}</td>--%>
-<%--                                <td>${sale.quantity}</td>--%>
-<%--                                <td><fmt:formatNumber value="${sale.salePrice}" type="currency" currencySymbol="$"/></td>--%>
-<%--                                <td><fmt:formatNumber value="${sale.totalAmount}" type="currency" currencySymbol="$"/></td>--%>
-<%--                                <td><fmt:formatDate value="${sale.createdAt}" pattern="dd/MM/yyyy HH:mm"/></td>--%>
-<%--                            </tr>--%>
-<%--                        </c:forEach>--%>
-<%--                        </tbody>--%>
-<%--                    </table>--%>
-<%--                </div>--%>
             </div>
         </div>
     </div>
@@ -1035,10 +975,10 @@
             <h3 class="modal-title">🔄 Rent Equipment</h3>
             <button class="close" onclick="closeModal('rentalModal')">&times;</button>
         </div>
-        <form action="equipment-rental" method="post" onsubmit="handleRentalSubmit(event)">
+        <form action="equipment" method="post" onsubmit="handleRentalSubmit(event)">
             <input type="hidden" name="action" value="rental">
+            <input type="hidden" name="mode" value="rental">
             <input type="hidden" name="inventoryId" id="rental_inventoryId">
-            <input type="hidden" name="currentFilter" value="${currentFilter}">
 
             <div class="modal-body">
                 <div class="form-group">
@@ -1070,54 +1010,17 @@
     </div>
 </div>
 
-<!-- Sale Modal -->
-<div id="saleModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">🛒 Purchase Equipment</h3>
-            <button class="close" onclick="closeModal('saleModal')">&times;</button>
-        </div>
-        <form action="equipment-rental" method="post">
-            <input type="hidden" name="action" value="sale">
-            <input type="hidden" name="inventoryId" id="sale_inventoryId">
-            <input type="hidden" name="currentFilter" value="${currentFilter}">
-
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Equipment</label>
-                    <input type="text" class="form-input" id="sale_itemName" readonly>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Customer Name *</label>
-                    <input type="text" name="customerName" class="form-input" placeholder="Enter customer name" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Quantity *</label>
-                    <input type="number" name="quantity" class="form-input" min="1" value="1" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Sale Price</label>
-                    <input type="text" class="form-input" id="sale_price" readonly>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-cancel" onclick="closeModal('saleModal')">Cancel</button>
-                <button type="submit" class="btn btn-success">Confirm Purchase</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
     // Filter by category
-    function filterByCategory(category) {
+    function filterByCategory(categoryId) {
         // Remove active class from all links
         document.querySelectorAll('.category-link').forEach(link => {
             link.classList.remove('active');
         });
 
         // Add active class to clicked link
-        document.getElementById('filter-' + category).classList.add('active');
+        const activeLink = document.getElementById('filter-' + (categoryId === 'all' ? 'all' : categoryId));
+        if (activeLink) activeLink.classList.add('active');
 
         const cards = document.querySelectorAll('.equipment-card');
         let visibleCount = 0;
@@ -1125,7 +1028,7 @@
         cards.forEach(card => {
             const cardCategory = card.getAttribute('data-category');
 
-            if (category === 'all' || cardCategory === category) {
+            if (categoryId === 'all' || cardCategory == categoryId) {
                 card.style.display = 'block';
                 visibleCount++;
             } else {
@@ -1168,25 +1071,17 @@
                 case 'name':
                     return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
                 case 'price-low':
-                    const priceA = Math.min(
-                        parseFloat(a.getAttribute('data-rent-price')) || Infinity,
-                        parseFloat(a.getAttribute('data-sale-price')) || Infinity
-                    );
-                    const priceB = Math.min(
-                        parseFloat(b.getAttribute('data-rent-price')) || Infinity,
-                        parseFloat(b.getAttribute('data-sale-price')) || Infinity
-                    );
+                    const priceA = parseFloat(a.getAttribute('data-rent-price')) || Infinity;
+                    const priceB = parseFloat(b.getAttribute('data-rent-price')) || Infinity;
                     return priceA - priceB;
                 case 'price-high':
-                    const maxPriceA = Math.max(
-                        parseFloat(a.getAttribute('data-rent-price')) || 0,
-                        parseFloat(a.getAttribute('data-sale-price')) || 0
-                    );
-                    const maxPriceB = Math.max(
-                        parseFloat(b.getAttribute('data-rent-price')) || 0,
-                        parseFloat(b.getAttribute('data-sale-price')) || 0
-                    );
-                    return maxPriceB - maxPriceA;
+                    const priceAHigh = parseFloat(a.getAttribute('data-rent-price')) || 0;
+                    const priceBHigh = parseFloat(b.getAttribute('data-rent-price')) || 0;
+                    return priceBHigh - priceAHigh;
+                case 'availability':
+                    const qtyA = parseInt(a.querySelector('.stock-text').textContent.split(': ')[1]);
+                    const qtyB = parseInt(b.querySelector('.stock-text').textContent.split(': ')[1]);
+                    return qtyB - qtyA;
                 default:
                     return 0;
             }
@@ -1205,15 +1100,7 @@
 
         cards.forEach(card => {
             const rentPrice = parseFloat(card.getAttribute('data-rent-price')) || 0;
-            const salePrice = parseFloat(card.getAttribute('data-sale-price'))
-
-            // Get minimum price (for filtering)
-            const minCardPrice = Math.min(
-                rentPrice > 0 ? rentPrice : Infinity,
-                salePrice > 0 ? salePrice : Infinity
-            );
-
-            if (minCardPrice >= minPrice && minCardPrice <= maxPrice) {
+            if (rentPrice >= minPrice && rentPrice <= maxPrice) {
                 card.style.display = 'block';
                 visibleCount++;
             } else {
@@ -1247,17 +1134,8 @@
 
         document.getElementById('rental_inventoryId').value = inventoryId;
         document.getElementById('rental_itemName').value = itemName;
-        document.getElementById('rental_price').value = '$' + parseFloat(rentPrice).toFixed(2);
+        document.getElementById('rental_price').value = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(rentPrice);
         document.getElementById('rentalModal').style.display = 'block';
-    }
-
-    function openSaleModal(inventoryId, itemName, salePrice) {
-        console.log('Opening sale modal:', inventoryId, itemName, salePrice);
-
-        document.getElementById('sale_inventoryId').value = inventoryId;
-        document.getElementById('sale_itemName').value = itemName;
-        document.getElementById('sale_price').value = '$' + parseFloat(salePrice).toFixed(2);
-        document.getElementById('saleModal').style.display = 'block';
     }
 
     function closeModal(modalId) {
@@ -1268,7 +1146,7 @@
         if (confirm('Are you sure you want to process this return?')) {
             const form = document.createElement('form');
             form.method = 'post';
-            form.action = 'equipment-rental';
+            form.action = 'equipment';
 
             const actionInput = document.createElement('input');
             actionInput.type = 'hidden';
@@ -1280,21 +1158,28 @@
             rentalIdInput.name = 'rentalId';
             rentalIdInput.value = rentalId;
 
-            // Add current filter to maintain page state
-            const currentFilter = '${currentFilter}';
-            if (currentFilter && currentFilter !== 'null') {
-                const filterInput = document.createElement('input');
-                filterInput.type = 'hidden';
-                filterInput.name = 'currentFilter';
-                filterInput.value = currentFilter;
-                form.appendChild(filterInput);
-            }
+            // Add mode to maintain page
+            const modeInput = document.createElement('input');
+            modeInput.type = 'hidden';
+            modeInput.name = 'mode';
+            modeInput.value = 'rental';
+            form.appendChild(modeInput);
 
             form.appendChild(actionInput);
             form.appendChild(rentalIdInput);
             document.body.appendChild(form);
             form.submit();
         }
+    }
+
+    function reportIssue(rentalId) {
+        if (confirm('Report issue for this rental?')) {
+            location.href = 'compensation?action=create&rentalId=' + rentalId;
+        }
+    }
+
+    function viewRentalDetails(rentalId) {
+        alert('Viewing details for Rental #' + rentalId + '\n\nThis feature will be implemented soon.');
     }
 
     // Event listeners
@@ -1377,7 +1262,7 @@
 
     // Utility functions
     function formatCurrency(amount) {
-        return '$' + parseFloat(amount).toFixed(2);
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     }
 
     function refreshPage() {
@@ -1409,55 +1294,7 @@
 
         // Option 1: Submit lại bằng JS sau khi xử lý
         form.submit(); // Submit thủ công nếu bạn đã validate xong
-
-        // Option 2: Gửi bằng fetch/AJAX (nếu bạn không muốn reload trang)
-        /*
-        const formData = new FormData(form);
-        fetch(form.action, {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.text())
-        .then(data => {
-            console.log("Rental submitted:", data);
-            // Hiển thị thông báo hoặc đóng modal...
-        })
-        .catch(error => console.error("Error:", error));
-        */
     }
-    // Tìm kiếm sales
-    <%--function searchSales() {--%>
-    <%--    const searchTerm = document.getElementById('searchSales').value.toLowerCase();--%>
-    <%--    const rows = document.querySelectorAll('#sales tbody tr');--%>
-
-    <%--    rows.forEach(row => {--%>
-    <%--        const text = row.textContent.toLowerCase();--%>
-    <%--        row.style.display = text.includes(searchTerm) ? '' : 'none';--%>
-    <%--    });--%>
-    <%--}--%>
-
-    <%--// Lọc theo ngày--%>
-    <%--function filterByDate() {--%>
-    <%--    const fromDate = new Date(document.getElementById('saleDateFrom').value);--%>
-    <%--    const toDate = new Date(document.getElementById('saleDateTo').value);--%>
-    <%--    const rows = document.querySelectorAll('#sales tbody tr');--%>
-
-    <%--    rows.forEach(row => {--%>
-    <%--        const dateStr = row.cells[6].textContent; // Giả sử cột ngày là cột thứ 7--%>
-    <%--        const saleDate = parseDate(dateStr);--%>
-
-    <%--        const showRow = (!fromDate || saleDate >= fromDate) &&--%>
-    <%--            (!toDate || saleDate <= toDate);--%>
-
-    <%--        row.style.display = showRow ? '' : 'none';--%>
-    <%--    });--%>
-    <%--}--%>
-
-    <%--function parseDate(dateStr) {--%>
-    <%--    const [datePart, timePart] = dateStr.split(' ');--%>
-    <%--    const [day, month, year] = datePart.split('/');--%>
-    <%--    return new Date(`${year}-${month}-${day}T${timePart || '00:00'}`);--%>
-    <%--}--%>
 </script>
 </body>
 </html>

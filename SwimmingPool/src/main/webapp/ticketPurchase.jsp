@@ -1,5 +1,6 @@
 <%@ page import="model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
@@ -129,6 +130,7 @@
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
+            text-align: center;
         }
         .success { color: green; }
         .error { color: red; }
@@ -163,6 +165,20 @@
         .footer a:hover {
             text-decoration: underline;
         }
+
+        .cart-link {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 20px;
+            float: right;
+        }
+        .cart-link:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +212,8 @@
     <h2>Ticket Purchase Form</h2>
     <form action="purchase" method="post">
         <table>
+            <tr><th>Customer Name</th><td><input type="text" name="customerName" required placeholder="Enter customer name"></td></tr>
+            <tr><th>Customer ID Card</th><td><input type="text" name="customerIdCard" required placeholder="Enter ID card"></td></tr>
             <tr><th>Ticket Type</th><td>
                 <select name="ticketType" id="ticketType" onchange="updateEndDate()" required>
                     <option value="Single">Single (1 day)</option>
@@ -204,18 +222,25 @@
                     <option value="SixMonthly">SixMonths</option>
                     <option value="Year">Year</option>
                 </select></td></tr>
-            <tr><th>Quantity</th><td><input type="number" name="quantity" value="1" min="1" required></td></tr>
+            <tr><th>Quantity</th><td><input type="number" name="quantity" id="quantity" value="1" min="1" required></td></tr>
             <tr><th>Start Date</th><td><input type="date" id="startDate" name="startDate" required readonly></td></tr>
             <tr><th>End Date</th><td><input type="date" id="endDate" name="endDate" required readonly></td></tr>
-            <tr><td colspan="2" style="text-align:right;"><button type="submit" class="btn">Confirm Purchase</button></td></tr>
+            <tr><td colspan="2" style="text-align:right;"><button type="submit" class="btn">Add to Cart</button></td></tr>
         </table>
-        <div class="message">
-            <p class="success"><%= request.getAttribute("success") != null ? request.getAttribute("success") : "" %></p>
-            <p class="error"><%= request.getAttribute("error") != null ? request.getAttribute("error") : "" %></p>
-        </div>
     </form>
-</div>
 
+    <div class="message">
+        <c:if test="${sessionScope.success != null}">
+            <p class="success">${sessionScope.success}</p>
+            <c:remove var="success" scope="session" />
+        </c:if>
+        <c:if test="${error != null}">
+            <p class="error">${error}</p>
+        </c:if>
+    </div>
+
+    <a href="cart" class="cart-link">View Cart & Checkout</a>
+</div>
 <div class="footer">
     <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
     <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
@@ -245,6 +270,5 @@
         endDateInput.value = endDate.toISOString().split("T")[0];
     }
 </script>
-
 </body>
 </html>
