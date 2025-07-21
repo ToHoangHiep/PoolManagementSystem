@@ -1,235 +1,178 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
-
-<%@ page import="java.util.List" %>
-
-<%@ page import="model.MaintenanceSchedule" %>
-
-<%@ page import="model.PoolArea" %>
-
-<%@ page import="model.User" %>
-
+<%@ page import="java.util.List, model.MaintenanceSchedule, model.PoolArea, model.User" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-
-
 <%
-
   List<MaintenanceSchedule> templates = (List<MaintenanceSchedule>) request.getAttribute("templates");
-
   List<PoolArea> areas = (List<PoolArea>) request.getAttribute("areas");
-
   List<User> staffs = (List<User>) request.getAttribute("staffs");
-
 %>
-
 <!DOCTYPE html>
-
 <html lang="vi">
-
 <head>
-
   <meta charset="UTF-8">
-
   <title>Create Maintenance Task</title>
-
   <link rel="stylesheet" href="Resources/CSS/style.css">
-
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; margin-bottom: 20px; }
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      color: white;
+    }
+    .btn-back { background: #6c757d; }
+    .btn-create { background: #28a745; float: right; }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .form-row label {
+      width: 150px;
+      padding: 6px 0;
+    }
+    .form-row .input-wrap {
+      flex: 1;
+    }
+    input[type=text], input[type=time], select, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .form-row label { width: 100%; padding-bottom: 4px; }
+    }
+  </style>
 </head>
-
 <body>
-
-<h2>Create Maintenance Task</h2>
-
-<form action="MaintenanceServlet" method="post">
-
-  <input type="hidden" name="action" value="create"/>
-
-
-
-  <!-- Use template -->
-
-  <label for="templateId">Use Template:</label>
-
-  <select name="templateId" id="templateId">
-
-    <option value="">-- None --</option>
-
-    <c:forEach var="t" items="${templates}">
-
-      <option value="${t.id}"
-
-              data-title="${t.title}"
-
-              data-description="${t.description}"
-
-              data-frequency="${t.frequency}"
-
-              data-time="${t.scheduledTime}">
-
-          ${t.title} (${t.frequency} at ${t.scheduledTime})
-
-      </option>
-
-    </c:forEach>
-
-  </select>
-
-  <br/><br/>
-
-
-
-  <!-- Title -->
-
-  <label for="title">Title:</label>
-
-  <input type="text" name="title" id="title" required />
-
-  <br/><br/>
-
-
-
-  <!-- Description -->
-
-  <label for="description">Description:</label><br/>
-
-  <textarea name="description" id="description" rows="4" cols="50" required></textarea>
-
-  <br/><br/>
-
-
-
-  <!-- Frequency -->
-
-  <label for="frequency">Frequency:</label>
-
-  <select name="frequency" id="frequency" required>
-
-    <option value="Daily">Daily</option>
-
-    <option value="Weekly">Weekly</option>
-
-    <option value="Monthly">Monthly</option>
-
-  </select>
-
-  <br/><br/>
-
-
-
-  <!-- Scheduled Time -->
-
-  <label for="scheduledTime">Scheduled Time:</label>
-
-  <input type="time" name="scheduledTime" id="scheduledTime" required />
-
-  <br/><br/>
-
-
-
-  <!-- Area -->
-
-  <label for="areaId">Area:</label>
-
-  <select name="areaId" id="areaId" required>
-
-    <c:forEach var="a" items="${areas}">
-
-      <option value="${a.id}">${a.name}</option>
-
-    </c:forEach>
-
-  </select>
-
-  <br/><br/>
-
-
-
-  <!-- Staff -->
-
-  <label for="staffId">Assign to Staff:</label>
-
-  <select name="staffId" id="staffId" required>
-
-    <c:forEach var="u" items="${staffs}">
-
-      <option value="${u.id}">${u.fullName}</option>
-
-    </c:forEach>
-
-  </select>
-
-  <br/><br/>
-
-
-
-  <button type="submit">Create Schedule</button>
-
-</form>
-
-
+<div class="container">
+  <h2>Create Maintenance Task</h2>
+  <a href="maintenance.jsp" class="btn btn-back">⬅ Quay lại trang Maintenance</a>
+
+  <form action="MaintenanceServlet" method="post">
+    <input type="hidden" name="action" value="create"/>
+
+    <div class="form-row">
+      <label for="templateId">Use Template:</label>
+      <div class="input-wrap">
+        <select name="templateId" id="templateId">
+          <option value="">-- None --</option>
+          <c:forEach var="t" items="${templates}">
+            <option value="${t.id}"
+                    data-title="${t.title}"
+                    data-description="${t.description}"
+                    data-frequency="${t.frequency}"
+                    data-time="${t.scheduledTime}">
+                ${t.title} (${t.frequency} @ ${t.scheduledTime})
+            </option>
+          </c:forEach>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="title">Title:</label>
+      <div class="input-wrap">
+        <input type="text" name="title" id="title" required/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="description">Description:</label>
+      <div class="input-wrap">
+        <textarea name="description" id="description" rows="4" required></textarea>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="frequency">Frequency:</label>
+      <div class="input-wrap">
+        <select name="frequency" id="frequency" required>
+          <option value="Daily">Daily</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Monthly">Monthly</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="scheduledTime">Scheduled Time:</label>
+      <div class="input-wrap">
+        <input type="time" name="scheduledTime" id="scheduledTime" required/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="areaId">Area:</label>
+      <div class="input-wrap">
+        <select name="areaId" id="areaId" required>
+          <c:forEach var="a" items="${areas}">
+            <option value="${a.id}">${a.name}</option>
+          </c:forEach>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="staffId">Assign to Staff:</label>
+      <div class="input-wrap">
+        <select name="staffId" id="staffId" required>
+          <c:forEach var="u" items="${staffs}">
+            <option value="${u.id}">${u.fullName}</option>
+          </c:forEach>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-create">Create Schedule</button>
+  </form>
+</div>
 
 <script>
-
   const templateSel = document.getElementById('templateId');
-
   const titleInput = document.getElementById('title');
-
   const descInput = document.getElementById('description');
-
   const freqSel = document.getElementById('frequency');
-
   const timeInput = document.getElementById('scheduledTime');
 
-
-
   templateSel.addEventListener('change', function() {
-
     const opt = this.options[this.selectedIndex];
-
-    const hasTpl = opt.value !== '';
-
-    if (hasTpl) {
-
-// fill and lock
-
-      titleInput.value = opt.getAttribute('data-title') || '';
-
-      descInput.value = opt.getAttribute('data-description') || '';
-
-      freqSel.value = opt.getAttribute('data-frequency') || 'Daily';
-
-      timeInput.value = opt.getAttribute('data-time') || '';
-
-
-
+    if (opt.value) {
+      titleInput.value = opt.dataset.title || '';
+      descInput.value = opt.dataset.description || '';
+      freqSel.value = opt.dataset.frequency || 'Daily';
+      timeInput.value = opt.dataset.time || '';
       titleInput.readOnly = true;
-
       descInput.readOnly = true;
-
     } else {
-
-// clear and unlock
-
       titleInput.value = '';
-
       descInput.value = '';
-
       freqSel.value = 'Daily';
-
       timeInput.value = '';
-
-
-
       titleInput.readOnly = false;
-
       descInput.readOnly = false;
-
     }
-
   });
-
 </script>
-
 </body>
-
 </html>

@@ -127,35 +127,8 @@ public class MaintenanceDAO {
         return list;
     }
 
-    // Bạn có thể xóa phương thức executeLogQuery(String sql, int id) nếu nó chỉ được dùng cho getLogsByStaff
-    // và bạn đã gộp logic vào getLogsByStaff trực tiếp.
-    // Nếu nó được dùng cho các query log khác với cấu trúc cột tương tự, hãy giữ nó và cập nhật nó.
-    // Đối với mục đích này, tôi đã gộp logic vào getLogsByStaff.
 
-    private List<MaintenanceLog> executeLogQuery(String sql, int id) {
-        List<MaintenanceLog> list = new ArrayList<>();
-        try (Connection conn = getConnection(); // Mở kết nối mới
-             PreparedStatement p = conn.prepareStatement(sql)) {
-            p.setInt(1, id);
-            try (ResultSet rs = p.executeQuery()) {
-                while (rs.next()) {
-                    MaintenanceLog log = new MaintenanceLog();
-                    log.setId(rs.getInt("id"));
-                    log.setScheduleId(rs.getInt("schedule_id"));
-                    log.setPoolAreaId(rs.getInt("pool_area_id"));
-                    log.setMaintenanceDate(rs.getDate("maintenance_date"));
-                    log.setStatus(rs.getString("status"));
-                    log.setNote(rs.getString("note"));
-                    log.setAreaName(rs.getString("area"));
-                    log.setScheduleTitle(rs.getString("title"));
-                    list.add(log);
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error executing log query with ID: " + id + ", SQL: " + sql, e);
-        }
-        return list;
-    }
+
 
     /** Lấy tất cả PoolArea */
     public List<PoolArea> getAllPoolAreas() {
@@ -535,24 +508,6 @@ public class MaintenanceDAO {
         }
     }
 
-    /**
-     * Lấy request mà staff đã tạo và được chấp nhận (và đã được chuyển đổi).
-     * Sửa đổi để lấy các request có status là 'Transferred'.
-     */
-    public List<MaintenanceRequest> getMyAcceptedRequests(int createdByStaffId) {
-        String sql = "SELECT mr.*, u.full_name AS createdByName, pa.name AS poolAreaName FROM Maintenance_Requests mr " +
-                "JOIN Users u ON mr.created_by=u.id JOIN Pool_Area pa ON mr.pool_area_id=pa.id " + // Đã sửa: Pool_Area
-                "WHERE mr.status='Transferred' AND mr.created_by=? ORDER BY mr.updated_at DESC";
-        return executeRequestQuery(sql, createdByStaffId);
-    }
-
-    /** Lấy request bị reject của staff (mà staff đã tạo) */
-    public List<MaintenanceRequest> getRejectedRequestsByStaff(int createdByStaffId) {
-        String sql = "SELECT mr.*, u.full_name AS createdByName, pa.name AS poolAreaName FROM Maintenance_Requests mr " +
-                "JOIN Users u ON mr.created_by=u.id JOIN Pool_Area pa ON mr.pool_area_id=pa.id " + // Đã sửa: Pool_Area
-                "WHERE mr.status='Rejected' AND mr.created_by=? ORDER BY mr.updated_at DESC";
-        return executeRequestQuery(sql, createdByStaffId);
-    }
 
     private List<MaintenanceRequest> executeRequestQuery(String sql, int id) {
         List<MaintenanceRequest> list = new ArrayList<>();
@@ -570,34 +525,6 @@ public class MaintenanceDAO {
         return list;
     }
 
-    /**
-     * Lấy các request đã được admin assign cho staff.
-     * PHƯƠNG THỨC NÀY KHÔNG CÒN CẦN THIẾT NỮA NẾU YÊU CẦU ĐƯỢC CHUYỂN THÀNH LOG.
-     * Tôi sẽ giữ lại nó nhưng khuyến nghị KHÔNG GỌI trong Servlet nữa.
-     */
-    public List<MaintenanceRequest> getAssignedRequestsForStaff(int staffId) {
-        String sql = """
-            SELECT mr.*, u.full_name AS createdByName, pa.name AS poolAreaName
-            FROM Maintenance_Requests mr
-            JOIN Users u ON mr.created_by = u.id
-            JOIN Pool_Area pa ON mr.pool_area_id = pa.id
-            WHERE mr.status = 'Accepted' AND mr.staff_id = ?
-            ORDER BY mr.updated_at DESC
-            """; // Đã sửa: Pool_Area
-        List<MaintenanceRequest> list = new ArrayList<>();
-        try (Connection conn = getConnection(); // Mở kết nối mới
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, staffId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapRequest(rs));
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error getting assigned requests for staff: " + staffId, e);
-        }
-        return list;
-    }
 
     /**
      * Lấy tên nhân viên theo ID.
@@ -700,34 +627,51 @@ public class MaintenanceDAO {
         }
         return list;
     }
+    public List<MaintenanceLog> getAllMaintenanceLogs() {
+        List<MaintenanceLog> list = new ArrayList<>();
+        String sql = "SELECT ml.id, ml.schedule_id, ml.pool_area_id, ml.maintenance_date, ml.status, ml.note, " +
+                "ml.staff_id, ml.updated_at, " + // Thêm ml.updated_at
+                "u.full_name AS staff_name, " + // Lấy tên nhân viên từ bảng Users
+                "pa.name AS area_name, " + // Lấy tên khu vực từ bảng Pool_Area
+                "ms.title AS schedule_title, ms.frequency " + // Lấy tiêu đề và tần suất từ Maintenance_Schedule
+                "FROM Maintenance_Log ml " +
+                "JOIN Maintenance_Schedule ms ON ml.schedule_id = ms.id " +
+                "JOIN Pool_Area pa ON ml.pool_area_id = pa.id " +
+                "JOIN Users u ON ml.staff_id = u.id " + // JOIN với bảng Users
+                "ORDER BY ml.maintenance_date DESC, ml.updated_at DESC"; // Sắp xếp để dễ nhìn
 
-    // Trong MaintenanceDAO
-    public void createAssignmentRequest(MaintenanceRequest request) throws SQLException {
-        // Đây là một yêu cầu được tạo bởi Admin/Manager và được gán cho Staff ngay lập tức.
-        // Status ban đầu có thể là 'Open' hoặc 'Assigned'.
-        // Sau đó Admin/Manager có thể 'Accept' request này để tạo MaintenanceLog.
-        String sql = "INSERT INTO Maintenance_Requests(description, status, created_by, pool_area_id, staff_id, created_at) VALUES(?, ?, ?, ?, ?, NOW())";
         try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, request.getDescription());
-            ps.setString(2, "Open"); // Hoặc "Assigned" nếu bạn muốn phân biệt rõ hơn
-            ps.setInt(3, request.getCreatedBy());
-            ps.setInt(4, request.getPoolAreaId());
-            ps.setInt(5, request.getStaffId()); // Gán Staff ngay tại đây
-            ps.executeUpdate();
-            // Gửi thông báo cho Staff ngay khi tạo
-            createNotification(request.getStaffId(),
-                    "Bạn có một nhiệm vụ mới được giao: " + request.getDescription(),
-                    "NewAssignment", 0); // related_id có thể là ID của request mới này nếu cần
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error creating assignment request by admin/manager", e);
-            throw e;
-        }
-    }
+             PreparedStatement p = conn.prepareStatement(sql);
+             ResultSet rs = p.executeQuery()) {
+            while (rs.next()) {
+                MaintenanceLog log = new MaintenanceLog();
+                log.setId(rs.getInt("id"));
+                log.setScheduleId(rs.getInt("schedule_id"));
+                log.setPoolAreaId(rs.getInt("pool_area_id"));
 
-// Cập nhật getAllRequests để lấy cả các request có staff_id NULL (do Staff gửi) và NOT NULL (do Admin gán)
-// Hoặc bạn có thể tạo một phương thức riêng để lấy các "nhiệm vụ được gán trực tiếp" nếu cần.
-// Hiện tại, logic 'Open' của getAllRequests chỉ lấy các request chưa được xử lý,
-// và chúng sẽ được hiển thị trên trang Admin để Admin 'Accept' hoặc 'Reject'.
+                // Sử dụng rs.getDate() cho maintenance_date nếu đó là kiểu DATE trong DB
+                // và gán cho java.util.Date
+                log.setMaintenanceDate(new java.util.Date(rs.getDate("maintenance_date").getTime()));
+
+                log.setStatus(rs.getString("status"));
+                log.setNote(rs.getString("note"));
+                log.setStaffId(rs.getInt("staff_id"));
+
+                // Set các giá trị từ JOIN
+                log.setStaffName(rs.getString("staff_name")); // Set tên nhân viên
+                log.setAreaName(rs.getString("area_name")); // Set tên khu vực
+                log.setScheduleTitle(rs.getString("schedule_title")); // Set tiêu đề lịch trình
+                log.setFrequency(rs.getString("frequency")); // Set tần suất
+
+                // Set updated_at
+                log.setUpdatedAt(rs.getTimestamp("updated_at")); // Lấy timestamp
+
+                list.add(log);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting all maintenance logs for admin/manager", e);
+        }
+        return list;
+    }
 
 }

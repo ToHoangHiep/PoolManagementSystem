@@ -1,37 +1,15 @@
 package controller;
-
-
-
 import dal.MaintenanceDAO;
-
-import dal.MaintenanceLogDAO; // Bạn vẫn có thể cần MaintenanceLogDAO cho các tác vụ tạo log định kỳ riêng biệt
-
 import model.MaintenanceLog;
-
 import model.MaintenanceRequest;
-
 import model.MaintenanceSchedule;
-
 import model.User;
-
-
-
 import jakarta.servlet.ServletException;
-
 import jakarta.servlet.annotation.WebServlet;
-
 import jakarta.servlet.http.*;
-
 import java.io.IOException;
-
 import java.sql.Time;
-
-import java.time.LocalDate;
-
-import java.time.DayOfWeek;
-
 import java.util.*;
-
 
 
 @WebServlet("/MaintenanceServlet")
@@ -40,127 +18,73 @@ public class MaintenanceServlet extends HttpServlet {
 
     private MaintenanceDAO dao;
 
-// Khởi tạo MaintenanceLogDAO nếu bạn vẫn cần nó cho các tác vụ tạo log định kỳ
-
-// private MaintenanceLogDAO maintenanceLogDAO;
-
-
-
     @Override
 
     public void init() throws ServletException {
 
         dao = new MaintenanceDAO();
 
-// maintenanceLogDAO = new MaintenanceLogDAO(); // Nếu bạn có các phương thức riêng biệt trong đó
-
     }
-
 
 
     @Override
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         HttpSession session = req.getSession();
-
         User user = (User) session.getAttribute("user");
-
         if (user == null) {
-
             resp.sendRedirect("login.jsp");
-
             return;
-
         }
-
         String role = user.getRole().getName();
-
         String action = req.getParameter("action");
-
         if (action == null) {
-
             action = role.equalsIgnoreCase("Staff") ? "staffView" : "list";
-
         }
-
-
 
         switch (action) {
 
             case "list":
-
                 if (role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Manager")) {
-
                     List<MaintenanceSchedule> templates = dao.getAllTemplates();
-
-// Lấy các request CÓ TRẠNG THÁI 'Open' để Admin/Manager xử lý
-
                     List<MaintenanceRequest> requests = dao.getAllRequests();
-
                     List<User> staffs = dao.getAllStaff();
-
-
+                    // Lấy tất cả các MaintenanceLog
+                    List<MaintenanceLog> allLogs = dao.getAllMaintenanceLogs(); // <-- Dòng này gọi phương thức đã cập nhật trong DAO
 
                     req.setAttribute("schedules", templates);
-
                     req.setAttribute("requests", requests);
-
                     req.setAttribute("staffs", staffs);
-
-
+                    req.setAttribute("allMaintenanceLogs", allLogs); // <-- Truyền danh sách logs sang JSP
 
                     req.getRequestDispatcher("maintenance.jsp").forward(req, resp);
 
                 } else {
-
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                 }
-
                 break;
 
-
-
             case "showForm":
-
                 if (role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Manager")) {
-
                     req.setAttribute("templates", dao.getAllTemplates());
-
                     req.setAttribute("areas", dao.getAllPoolAreas());
-
                     req.setAttribute("staffs", dao.getAllStaff());
 
                     req.getRequestDispatcher("maintenance-form.jsp").forward(req, resp);
-
                 } else {
-
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                 }
-
                 break;
 
-
-
             case "showRequestForm":
-
                 if (role.equalsIgnoreCase("Staff")) {
-
                     req.setAttribute("areas", dao.getAllPoolAreas());
 
                     req.getRequestDispatcher("request-form.jsp").forward(req, resp);
-
                 } else {
-
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                 }
-
                 break;
-
-
 
             case "staffView":
             if (!role.equalsIgnoreCase("Staff")) {
@@ -220,34 +144,18 @@ public class MaintenanceServlet extends HttpServlet {
             req.getRequestDispatcher("maintenance-staff.jsp").forward(req, resp);
             break;
 
-
-
-
-
             case "listRequests": // Hành động này có thể bị loại bỏ vì `maintenance.jsp` đã hiển thị requests
-
                 if (role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Manager")) {
-
                     List<MaintenanceRequest> requests = dao.getAllRequests();
-
                     req.setAttribute("requests", requests);
-
                     req.getRequestDispatcher("maintenance-requests.jsp").forward(req, resp);
-
                 } else {
-
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                 }
-
                 break;
 
-
-
             default:
-
                 resp.sendRedirect("MaintenanceServlet");
-
         }
 
     }
@@ -257,19 +165,12 @@ public class MaintenanceServlet extends HttpServlet {
     @Override
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
         User user = (User) req.getSession().getAttribute("user");
-
         String role = user.getRole().getName();
-
         String action = req.getParameter("action");
 
-
-
         try {
-
             switch (action) {
-
                 case "create":
                     if (!role.equalsIgnoreCase("Admin") && !role.equalsIgnoreCase("Manager")) {
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -310,162 +211,63 @@ public class MaintenanceServlet extends HttpServlet {
                     if (newId > 0) dao.insertLog(newId, staff, newArea);
                     break;
 
-
-
                 case "complete":
-
-// Đây là hành động staff hoàn thành một MaintenanceLog
-
                     dao.updateLogStatus(
-
                             Integer.parseInt(req.getParameter("logId")), "Done"
-
                     );
-
                     break;
-
-
-
-                case "submitWeekStatus":
-
-                    String[] days = req.getParameterValues("dates");
-
-                    LocalDate td = LocalDate.now();
-
-                    if (days == null || !Arrays.asList(days).contains(td.toString())) {
-
-                        req.setAttribute("error", "Bạn phải tick ngày hôm nay trước khi submit.");
-
-                        doGet(req, resp);
-
-                        return;
-
-                    }
-
-                    int schedId = Integer.parseInt(req.getParameter("scheduleId"));
-
-                    int weekArea = Integer.parseInt(req.getParameter("areaId"));
-
-// Sử dụng dao.insertLogOnDate thay vì MaintenanceLogDAO nếu bạn đã di chuyển nó sang MaintenanceDAO
-
-// Hoặc đảm bảo MaintenanceLogDAO được khởi tạo và sử dụng đúng cách
-
-                    MaintenanceLogDAO weekDao = new MaintenanceLogDAO(); // Giữ lại nếu bạn có lý do riêng để dùng 2 DAO
-
-                    for (String d : days) {
-
-                        LocalDate ld = LocalDate.parse(d);
-
-                        if (!weekDao.checkLogExists(schedId, user.getId(), ld)) { // Giả định checkLogExists nằm trong MaintenanceLogDAO
-
-                            weekDao.insertLog(schedId, user.getId(), weekArea, ld, "Done");
-
-                        }
-
-                    }
-
-                    break;
-
 
 
                 case "request":
-
                     if (!role.equalsIgnoreCase("Staff")) {
-
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                         return;
-
                     }
-
                     int areaReq = Integer.parseInt(req.getParameter("areaId"));
-
                     String rdesc = req.getParameter("description");
-
                     dao.insertRequest(new MaintenanceRequest(user.getId(), rdesc, areaReq));
-
                     break;
 
-
-
                 case "acceptRequest":
-
                     if (!role.equalsIgnoreCase("Admin") && !role.equalsIgnoreCase("Manager")) {
-
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                         return;
-
                     }
-
                     int requestId = Integer.parseInt(req.getParameter("id"));
-
                     String staffIdParam = req.getParameter("staffId");
-
                     if (staffIdParam == null || staffIdParam.isEmpty()) {
-
                         req.setAttribute("error", "Bạn phải chọn nhân viên trước khi chấp nhận.");
-
                         doGet(req, resp);
-
                         return;
-
                     }
-
                     int staffId = Integer.parseInt(staffIdParam);
-
-// GỌI PHƯƠNG THỨC MỚI CỦA DAO: acceptRequest sẽ tạo log và cập nhật request.
-
                     dao.acceptRequest(requestId, staffId); // Tên phương thức vẫn là acceptRequest nhưng logic đã thay đổi trong DAO
-
                     resp.sendRedirect("MaintenanceServlet?action=list");
-
                     return;
-
-
 
                 case "rejectRequest":
-
                     if (!role.equalsIgnoreCase("Admin") && !role.equalsIgnoreCase("Manager")) {
-
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-
                         return;
-
                     }
-
                     int rejectId = Integer.parseInt(req.getParameter("id"));
-
                     dao.rejectRequest(rejectId);
-
                     resp.sendRedirect("MaintenanceServlet?action=list");
-
                     return;
-
             }
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
             req.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
-
             doGet(req, resp);
-
             return;
 
         }
 
-
-
 // Sau khi xử lý POST, redirect về trang view phù hợp với vai trò
-
         if (role.equalsIgnoreCase("Staff")) {
-
             resp.sendRedirect("MaintenanceServlet?action=staffView");
-
         } else {
-
             resp.sendRedirect("MaintenanceServlet?action=list");
 
         }
