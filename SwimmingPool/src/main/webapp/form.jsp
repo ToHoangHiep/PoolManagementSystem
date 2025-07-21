@@ -31,7 +31,7 @@
     <c:forEach var="cat" items="${categoryList}">
       <option value="${cat.categoryId}"
               <c:if test="${inv != null and inv.categoryId == cat.categoryId}">selected</c:if>>
-          ${cat.categoryName}
+          ${cat.categoryName}/${cat.categoryId}
       </option>
     </c:forEach>
   </select>

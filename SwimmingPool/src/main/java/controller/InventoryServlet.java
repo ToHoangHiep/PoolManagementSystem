@@ -21,40 +21,35 @@ public class InventoryServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         if (action == null) action = "list";
-        if ("approveRequest".equals(action) || "rejectRequest".equals(action)) {
-            handleApproveRequest(request, response); // gọi method bạn đã viết
-        } else {
-            // các action khác
-            switch (action) {
-                case "new":
-                    showNewForm(request, response);
-                    break;
-                case "edit":
-                    showEditForm(request, response);
-                    break;
-                case "delete":
-                    deleteInventory(request, response);
-                    break;
-                case "search":
-                    searchInventory(request, response);
-                    break;
-                case "filter":
-                    filterInventory(request, response);
-                    break;
-                case "lowstock":
-                    showLowStockItems(request, response);
-                    break;
-                case "requestList":
-                    listInventoryRequests(request, response);
-                    break;
-                case "requestForm":
-                    showRequestForm(request, response);
-                    break;
+        switch (action) {
+            case "new":
+                showNewForm(request, response);
+                break;
+            case "edit":
+                showEditForm(request, response);
+                break;
+            case "delete":
+                deleteInventory(request, response);
+                break;
+            case "search":
+                searchInventory(request, response);
+                break;
+            case "filter":
+                filterInventory(request, response);
+                break;
+            case "lowstock":
+                showLowStockItems(request, response);
+                break;
+            case "requestList":
+                listInventoryRequests(request, response);
+                break;
+            case "requestForm":
+                showRequestForm(request, response);
+                break;
 
-                default:
-                    listInventory(request, response);
-                    break;
-            }
+            default:
+                listInventory(request, response);
+                break;
         }
 
 
@@ -78,6 +73,10 @@ public class InventoryServlet extends HttpServlet {
             case "updateRequestStatus":
                 updateRequestStatus(request, response);
                 break;
+            case "approveRequest":  // ✅ Thêm dòng này
+            case "rejectRequest":   // (tuỳ logic nếu có)
+                handleApproveRequest(request, response);
+                break;
         }
     }
 
@@ -90,9 +89,8 @@ public class InventoryServlet extends HttpServlet {
         }
 
         List<Inventory> lowStockItems = InventoryDAO.getLowStockItems();
-        if (!lowStockItems.isEmpty()) {
-            request.setAttribute("lowStockItems", lowStockItems);
-        }
+        request.setAttribute("lowStockItems", lowStockItems); // luôn set, kể cả khi rỗng
+
 
         List<Inventory> list = InventoryDAO.getInventoriesByPage((page - 1) * recordsPerPage, recordsPerPage);
         int totalRecords = InventoryDAO.getTotalInventoryCount();
@@ -121,6 +119,7 @@ public class InventoryServlet extends HttpServlet {
 
     private void insertInventory(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Inventory inv = getInventoryFromRequest(request);
+        System.out.println(inv.toString());
         boolean success = InventoryDAO.insertInventory(inv);
         HttpSession session = request.getSession();
         session.setAttribute("message", success ? "Thêm thiết bị thành công!" : "Thêm thất bại!");
@@ -228,12 +227,14 @@ public class InventoryServlet extends HttpServlet {
         request.getRequestDispatcher("requestImportForm.jsp").forward(request, response);
     }
     private void handleApproveRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int requestId = Integer.parseInt(request.getParameter("id"));
-        String action = request.getParameter("action");
-
+        int requestId = Integer.parseInt(request.getParameter("request_id"));
+        String action = request.getParameter("statusUD");
+        System.out.println("approve action = " + action);
+        System.out.println("requestId = " + requestId);
         String status = "pending";
         if ("approve".equalsIgnoreCase(action)) {
             status = "approved";
+            System.out.println("approve action = " + action);
         } else if ("reject".equalsIgnoreCase(action)) {
             status = "rejected";
         }
@@ -257,6 +258,7 @@ public class InventoryServlet extends HttpServlet {
         Inventory inv = new Inventory();
         inv.setManagerId(Integer.parseInt(request.getParameter("manager_id")));
         inv.setItemName(request.getParameter("item_name"));
+        inv.setCategoryID(Integer.parseInt(request.getParameter("category_id")));
         inv.setCategoryName(request.getParameter("category_name"));
         inv.setQuantity(Integer.parseInt(request.getParameter("quantity")));
         inv.setUnit(request.getParameter("unit"));

@@ -101,6 +101,22 @@ public class Inventory {
     public double getImportPrice() {return importPrice;}
     public void setImportPrice(double importPrice) {this.importPrice = importPrice;}
 
-
-
+    @Override
+    public String toString() {
+        return "Inventory{" +
+                "inventoryId=" + inventoryId +
+                ", managerId=" + managerId +
+                ", itemName='" + itemName + '\'' +
+                ", categoryID=" + categoryID +
+                ", quantity=" + quantity +
+                ", unit='" + unit + '\'' +
+                ", status='" + status + '\'' +
+                ", lastUpdated=" + lastUpdated +
+                ", categoryQuantity=" + categoryQuantity +
+                ", usageId=" + usageId +
+                ", usageName='" + usageName + '\'' +
+                ", categoryName='" + categoryName + '\'' +
+                ", importPrice=" + importPrice +
+                '}';
+    }
 }

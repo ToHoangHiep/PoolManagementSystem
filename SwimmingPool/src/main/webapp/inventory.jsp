@@ -115,6 +115,7 @@
                onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Delete</a>
         </td>
     </tr>
+
     <%
         }
     } else {
@@ -125,17 +126,23 @@
     %>
     </tbody>
 </table>
-
+<% if (totalPages != null && currentPage != null && totalPages > 1) { %>
+<div class="pagination" style="margin-top: 20px;">
+    <% for (int i = 1; i <= totalPages; i++) { %>
+    <a href="inventory?page=<%= i %><%= keyword != null ? "&keyword=" + keyword : "" %>"
+       class="<%= (i == currentPage) ? "active" : "" %>"><%= i %></a>
+    <% } %>
+</div>
+<% } %>
 <c:if test="${not empty lowStockItems}">
-    <div style="margin-top: 20px; padding: 10px; background-color: #fff3cd; border-left: 5px solid #ffecb5;">
-        <strong>&#9888; Cảnh báo:</strong> Các mặt hàng sắp hết:
-        <ul>
-            <c:forEach var="item" items="${lowStockItems}">
-                <li>${item.itemName} (Còn: ${item.quantity}, Mức cảnh báo: ${item.categoryQuantity})</li>
-            </c:forEach>
-        </ul>
-    </div>
+    <h3>Danh sách thiết bị sắp hết kho</h3>
+    <ul>
+        <c:forEach var="item" items="${lowStockItems}">
+            <li>${item.getItemName()} (Còn: ${item.getQuantity()}, Mức cảnh báo: ${item.categoryQuantity})</li>
+        </c:forEach>
+    </ul>
 </c:if>
+
 
 
 </body>
