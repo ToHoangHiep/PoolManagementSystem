@@ -1,5 +1,5 @@
-<%@ page import="model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="model.User" %>
 <%
     User user = (User) session.getAttribute("user");
 %>
@@ -9,15 +9,66 @@
     <meta charset="UTF-8">
     <title>Swimming Pool - Home Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="Resources/CSS/home.css">
 </head>
-
 <body>
-<jsp:include page="header.jsp" />
 
+<<<<<<< HEAD
+=======
+<!-- Navbar (Header.jsp nội tuyến) -->
+<div class="navbar">
+    <div class="logo">SwimmingPool</div>
+    <div class="nav-links">
+        <a href="home.jsp">Home</a>
+        <a href="#about">About Us</a>
+        <a href="#services">Services</a>
 
+        <%-- Equipment Rental chỉ cho Staff --%>
+        <% if (user != null && user.getRole() != null && "Staff".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="equipment-rental">Equipment Rental</a>
+        <% } %>
+
+        <%-- Maintenance cho Admin & Manager --%>
+        <% if (user != null && user.getRole() != null) {
+            String roleName = user.getRole().getName();
+            if ("Admin".equalsIgnoreCase(roleName) || "Manager".equalsIgnoreCase(roleName)) {
+        %>
+        <a href="MaintenanceServlet?action=list">Maintenance</a>
+        <a href="pool-area">Pool Area</a>
+        <% } } %>
+
+        <%-- View My Maintenance cho Staff --%>
+        <% if (user != null && user.getRole() != null && "Staff".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="MaintenanceServlet?action=staffView">My Maintenance</a>
+        <% } %>
+
+        <a href="#contact">Contact</a>
+        <a href="blogs">Blogs</a>
+
+        <%-- User List cho Admin --%>
+        <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
+        <a href="admin-user">User List</a>
+        <% } %>
+    </div>
+
+    <div class="auth">
+        <% if (user == null) { %>
+        <a class="login-btn" href="login.jsp">Login</a>
+        <a class="register-btn" href="register.jsp">Register</a>
+        <% } else { %>
+        <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;"><%= user.getFullName() %></a>!</span>
+        <form action="logout" method="post" style="display:inline;">
+            <input type="submit" value="Logout">
+        </form>
+        <% } %>
+    </div>
+</div>
+
+<!-- Spacer tránh bị che bởi navbar cố định -->
+<div style="height: 70px;"></div>
+
+>>>>>>> origin/hiepthhe173531
 <!-- Hero Section -->
 <div class="hero">
     <div class="hero-content">
@@ -29,7 +80,6 @@
     </div>
 </div>
 
-
 <!-- About Us -->
 <div class="section" id="about">
     <div class="flex-row reverse">
@@ -38,10 +88,11 @@
         </div>
         <div class="text-box">
             <h2>About Our Swimming Pool</h2>
-            <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and
-                families.</p>
-            <p>Our pool is designed to offer both recreation and training, with safety and cleanliness as top
-                priorities.</p>
+            <p>We provide modern, hygienic and professionally maintained swimming pool services for individuals and families.</p>
+<<<<<<< HEAD
+=======
+            <p>Our pool is designed to offer both recreation and training, with safety and cleanliness as top priorities.</p>
+>>>>>>> origin/hiepthhe173531
             <ul>
                 <li>Certified lifeguards on duty</li>
                 <li>Weekly water quality checks</li>
@@ -60,7 +111,6 @@
         </div>
         <div class="text-box">
             <h2>Our Services</h2>
-            <p>Explore our offerings to enhance your swimming experience:</p>
             <ul>
                 <li>Professional Swimming Training for all ages</li>
                 <li>Private Pool Booking for Events & Families</li>
@@ -90,7 +140,5 @@
     <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
     <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
-
 </body>
 </html>
-
