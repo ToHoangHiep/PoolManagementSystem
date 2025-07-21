@@ -26,7 +26,8 @@
         <a href="inventory?action=default" class="nav-btn orange">🔙 Return To List</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
         <a href="inventory?action=lowstock" class="nav-btn blue" >Thiết bị sắp hết kho</a>
-        <a href="inventory?action=requestList">Xem yêu cầu nhập kho</a>
+        <a href="inventory?action=requestList" class="nav-btn purple">Xem yêu cầu nhập kho</a>
+        <a href="inventory?action=maintanence" class="nav-btn purple">Thiết bị bảo trì</a>
 
 
 
