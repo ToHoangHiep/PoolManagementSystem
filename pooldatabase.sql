@@ -351,45 +351,100 @@ INSERT INTO Study_Roadmaps (title, content, created_by) VALUES
 ('Competitive Swimming Preparation', 'Month 1: Build endurance...\nMonth 2: Speed training...\nMonth 3: Competition strategies...', 4),
 ('Water Safety Certification Path', 'Step 1: Basic water safety...\nStep 2: Rescue techniques...\nStep 3: First aid certification...', 2);
 
--- Maintenance Schedule table
+-- Tạo bảng Pool_Area (Khu vực bể bơi)
+CREATE TABLE Pool_Area (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+-- Tạo bảng Maintenance_Schedule (danh sách nhiệm vụ bảo trì định kỳ - KHÔNG gắn khu vực)
+DROP TABLE IF EXISTS Maintenance_Schedule;
 CREATE TABLE Maintenance_Schedule (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(100) NOT NULL,
     description TEXT,
     frequency ENUM('Daily', 'Weekly', 'Monthly'),
-    assigned_staff_id INT,
     scheduled_time TIME,
-    status ENUM('Scheduled', 'Completed', 'Missed') DEFAULT 'Scheduled',
     created_by INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (assigned_staff_id) REFERENCES Users(id),
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
 
--- Maintenance Log table
+-- Tạo bảng Maintenance_Log (nhật ký thực hiện bảo trì - CÓ gắn khu vực cụ thể)
+DROP TABLE IF EXISTS Maintenance_Log;
 CREATE TABLE Maintenance_Log (
     id INT PRIMARY KEY AUTO_INCREMENT,
     schedule_id INT,
     staff_id INT,
+    pool_area_id INT,
     maintenance_date DATE,
     note TEXT,
     status ENUM('Done', 'Missed', 'Rescheduled'),
     log_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (schedule_id) REFERENCES Maintenance_Schedule(id),
-    FOREIGN KEY (staff_id) REFERENCES Users(id)
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (pool_area_id) REFERENCES Pool_Area(id)
 );
+-- Dữ liệu Pool_Area (khu vực bể)
+INSERT INTO Pool_Area (name, description) VALUES
+('Bể A', 'Bể bơi chính tiêu chuẩn Olympic'),
+('Bể B', 'Bể dành cho trẻ em vui chơi'),
+('Bể C', 'Bể huấn luyện dành cho người lớn'),
+('Bể D', 'Bể thư giãn VIP'),
+('Khu thay đồ', 'Khu thay đồ và tủ gửi đồ');
 
--- Insert sample daily maintenance schedules
-INSERT INTO Maintenance_Schedule (title, description, frequency, assigned_staff_id, scheduled_time, created_by)
+-- Dữ liệu Maintenance_Schedule (các nhiệm vụ định kỳ)
+INSERT INTO Maintenance_Schedule (title, description, frequency, scheduled_time, created_by)
 VALUES
-('Check Bathroom Cleanliness', 'Ensure all toilets and sinks are clean', 'Daily', 5, '08:00:00', 1),
-('Clean Pool Trash', 'Remove debris from pool and surroundings', 'Daily', 5, '07:30:00', 2),
-('Check Locker Rooms', 'Inspect and clean locker rooms', 'Daily', 5, '09:00:00', 1);
+('Vệ sinh nhà vệ sinh', 'Lau chùi và khử mùi toilet', 'Daily', '08:00:00', 1),
+('Vớt rác mặt nước', 'Dọn rác nổi và lá cây trên mặt nước', 'Daily', '07:30:00', 2),
+('Kiểm tra thiết bị bể bơi', 'Kiểm tra phao, chân vịt, gậy chống đuối nước', 'Weekly', '09:00:00', 1),
+('Đo nồng độ Clo', 'Kiểm tra nồng độ Clo trong nước để đảm bảo an toàn', 'Daily', '10:00:00', 1),
+('Vệ sinh sàn khu thay đồ', 'Lau chùi, diệt khuẩn khu thay đồ', 'Daily', '11:00:00', 2),
+('Vệ sinh bể định kỳ', 'Vệ sinh kỹ toàn bộ lòng bể và tường bể', 'Monthly', '12:00:00', 1);
 
--- Insert sample maintenance logs
-INSERT INTO Maintenance_Log (schedule_id, staff_id, maintenance_date, note, status)
+-- Dữ liệu Maintenance_Log (gán nhiệm vụ + khu vực cụ thể)
+INSERT INTO Maintenance_Log (schedule_id, staff_id, pool_area_id, maintenance_date, note, status)
 VALUES
-(1, 5, '2025-06-22', 'All bathrooms clean', 'Done'),
-(2, 5, '2025-06-22', 'Removed leaves and plastic bottles', 'Done'),
-(3, 5, '2025-06-22', 'Locker room floor mopped and cleaned properly', 'Done');
+(1, 5, 5, '2025-06-22', 'Đã lau dọn sạch toilet nam/nữ', 'Done'),
+(2, 5, 1, '2025-06-22', 'Đã vớt sạch lá và rác nổi', 'Done'),
+(4, 5, 1, '2025-06-23', 'Clo ở mức 2.5ppm, đạt chuẩn', 'Done'),
+(5, 5, 5, '2025-06-23', 'Sàn trơn nhẹ, cần thêm biển cảnh báo', 'Done'),
+(6, 5, 4, '2025-06-24', 'Đã làm sạch đáy bể, nước trong', 'Done');
 
+
+ALTER TABLE Maintenance_Requests
+ADD COLUMN pool_area_id INT,
+ADD FOREIGN KEY (pool_area_id) REFERENCES Pool_Area(id);
+
+
+ALTER TABLE Maintenance_Requests MODIFY status 
+    ENUM('Open', 'Accepted', 'Rejected', 'In Progress', 'Closed') 
+    NOT NULL DEFAULT 'Open';
+    
+ALTER TABLE Maintenance_Requests
+ADD COLUMN staff_id INT NULL,
+ADD CONSTRAINT fk_request_staff
+  FOREIGN KEY (staff_id) REFERENCES Users(id);
+  
+CREATE TABLE Notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,           -- Người nhận thông báo (ví dụ: staff)
+    message TEXT NOT NULL,          -- Nội dung thông báo
+    notification_type VARCHAR(50),  -- Loại thông báo (ví dụ: 'MaintenanceRequestStatus')
+    related_id INT,                 -- ID của yêu cầu bảo trì liên quan
+    is_read BOOLEAN DEFAULT FALSE,  -- Trạng thái: FALSE (chưa đọc), TRUE (đã đọc)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id)
+);
+ALTER TABLE Maintenance_Schedule
+MODIFY COLUMN frequency VARCHAR(10) NOT NULL;
+ALTER TABLE Maintenance_Log
+MODIFY COLUMN status VARCHAR(15) NOT NULL;
+ALTER TABLE Maintenance_Requests
+MODIFY COLUMN status VARCHAR(15) NOT NULL;
+ALTER TABLE Maintenance_Schedule
+MODIFY COLUMN frequency VARCHAR(15) NOT NULL;
+ALTER TABLE Maintenance_Log
+ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
