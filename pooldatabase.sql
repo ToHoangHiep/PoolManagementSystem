@@ -1,8 +1,6 @@
--- DROP & CREATE DATABASE
-DROP DATABASE IF EXISTS swimming_pool_management;
+Drop database swimming_pool_management;
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
--- 1. ROLES
 CREATE TABLE Roles (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL
@@ -31,7 +29,6 @@ CREATE TABLE UserCode (
     created_at DATETIME,
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
-
 CREATE TABLE Coaches (
     id INT PRIMARY KEY AUTO_INCREMENT,
     full_name VARCHAR(100) NOT NULL,
@@ -49,12 +46,18 @@ CREATE TABLE Courses (
     description TEXT,
     price DECIMAL(10, 2),
     duration INT,
+    estimated_session_time VARCHAR(50),
+    student_description VARCHAR(100),
+    schedule_description VARCHAR(100),
+    status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE Classes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     course_id INT,
     coach_id INT,
+    name VARCHAR(100),
+    description TEXT,
     student_limit INT DEFAULT 2,
     status ENUM('Chưa khai giảng', 'Đang học', 'Đã kết thúc') DEFAULT 'Chưa khai giảng',
     schedule VARCHAR(255),
@@ -62,7 +65,6 @@ CREATE TABLE Classes (
     FOREIGN KEY (course_id) REFERENCES Courses(id),
     FOREIGN KEY (coach_id) REFERENCES Coaches(id)
 );
-
 
 CREATE TABLE Class_Registrations (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -74,28 +76,15 @@ CREATE TABLE Class_Registrations (
     FOREIGN KEY (class_id) REFERENCES Classes(id)
 );
 
-
-CREATE TABLE Tracking (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    student_id INT,
-    class_id INT,
-    progress TEXT,
-    coach_feedback TEXT,
-    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES Users(id),
-    FOREIGN KEY (class_id) REFERENCES Classes(id)
-);
-
-
 CREATE TABLE Schedules (
     id INT PRIMARY KEY AUTO_INCREMENT,
     class_id INT,
-    start_time DATETIME,
-    end_time DATETIME,
+    coach_id INT,
+    weekday VARCHAR(50),
     location VARCHAR(100),
-    FOREIGN KEY (class_id) REFERENCES Classes(id)
+    FOREIGN KEY (class_id) REFERENCES Classes(id),
+    FOREIGN KEY (coach_id) REFERENCES Coaches(id)
 );
-
 CREATE TABLE Payments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
@@ -123,7 +112,7 @@ CREATE TABLE Ticket (
     end_date DATE,
     ticket_status ENUM('Active', 'Expired', 'Cancelled'),
     payment_status ENUM('Paid', 'Unpaid'),
-    payment_id INT NULL,
+    payment_id INT,
     total DECIMAL(10,2),
     created_at DATETIME,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -131,59 +120,57 @@ CREATE TABLE Ticket (
     FOREIGN KEY (payment_id) REFERENCES Payments(id),
     FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
-
-CREATE TABLE Inventory_usage(
+CREATE TABLE Inventory_usage (
     usage_id INT PRIMARY KEY AUTO_INCREMENT,
     usage_name VARCHAR(100),
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Inventory (
-   inventory_id INT PRIMARY KEY AUTO_INCREMENT,
-   manager_id INT,
-   item_name VARCHAR(100),
-   category VARCHAR(100),
-   quantity INT,
-   unit VARCHAR(100),
-   status ENUM('Available', 'In Use', 'Maintenance', 'Broken'),
-   rent_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá thuê 1 lần',
-   sale_price DECIMAL(10,2) DEFAULT 0 COMMENT 'Giá bán',
-   last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-   usage_id INT,
-   FOREIGN KEY (usage_id) REFERENCES Inventory_usage(usage_id),
-   FOREIGN KEY (manager_id) REFERENCES Users(id)
+    inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+    manager_id INT,
+    item_name VARCHAR(100),
+    category VARCHAR(100),
+    quantity INT,
+    unit VARCHAR(100),
+    status ENUM('Available', 'In Use', 'Maintenance', 'Broken'),
+    rent_price DECIMAL(10,2) DEFAULT 0,
+    sale_price DECIMAL(10,2) DEFAULT 0,
+    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    usage_id INT,
+    FOREIGN KEY (usage_id) REFERENCES Inventory_usage(usage_id),
+    FOREIGN KEY (manager_id) REFERENCES Users(id)
 );
 
 CREATE TABLE Equipment_Rentals (
-   rental_id INT PRIMARY KEY AUTO_INCREMENT,
-   customer_name VARCHAR(100) NOT NULL,
-   customer_id_card VARCHAR(20) NOT NULL COMMENT 'CCCD thế chấp',
-   staff_id INT NOT NULL,
-   inventory_id INT NOT NULL,
-   quantity INT NOT NULL,
-   rental_date DATE NOT NULL,
-   rent_price DECIMAL(10,2) NOT NULL,
-   total_amount DECIMAL(10,2) NOT NULL,
-   status ENUM('active', 'returned') DEFAULT 'active',
-   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   return_time TIMESTAMP NULL COMMENT 'Thời gian trả thực tế',
-   FOREIGN KEY (staff_id) REFERENCES Users(id),
-   FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
-);
-
-CREATE TABLE Equipment_Sales (
-    sale_id INT PRIMARY KEY AUTO_INCREMENT,
-    customer_name VARCHAR(100) NOT NULL,
-    staff_id INT NOT NULL,
-    inventory_id INT NOT NULL,
-    quantity INT NOT NULL,
-    sale_price DECIMAL(10,2) NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
+    rental_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100),
+    customer_id_card VARCHAR(20),
+    staff_id INT,
+    inventory_id INT,
+    quantity INT,
+    rental_date DATE,
+    rent_price DECIMAL(10,2),
+    total_amount DECIMAL(10,2),
+    status ENUM('active', 'returned') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_time TIMESTAMP NULL,
     FOREIGN KEY (staff_id) REFERENCES Users(id),
     FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
 );
 
+CREATE TABLE Equipment_Sales (
+    sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100),
+    staff_id INT,
+    inventory_id INT,
+    quantity INT,
+    sale_price DECIMAL(10,2),
+    total_amount DECIMAL(10,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
 CREATE TABLE Blogs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(200),
@@ -225,16 +212,15 @@ CREATE TABLE Feedbacks (
 );
 
 CREATE TABLE FeedbackReplies (
-     id INT PRIMARY KEY AUTO_INCREMENT,
-     feedback_id INT NOT NULL,
-     user_id INT NOT NULL,
-     content TEXT NOT NULL,
-     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-     FOREIGN KEY (feedback_id) REFERENCES Feedbacks(id),
-     FOREIGN KEY (user_id) REFERENCES Users(id)
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    feedback_id INT NOT NULL,
+    user_id INT NOT NULL,
+    content TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (feedback_id) REFERENCES Feedbacks(id),
+    FOREIGN KEY (user_id) REFERENCES Users(id)
 );
-
 CREATE TABLE Complaints (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
@@ -258,7 +244,7 @@ CREATE TABLE Maintenance_Requests (
 
 CREATE TABLE Maintenance_Schedule (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(100) NOT NULL,
+    title VARCHAR(100),
     description TEXT,
     frequency ENUM('Daily', 'Weekly', 'Monthly'),
     assigned_staff_id INT,
@@ -290,147 +276,105 @@ CREATE TABLE Study_Roadmaps (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
-
--- Dữ liệu mẫu cho bảng Roles
+-- Roles
 INSERT INTO Roles (id, name) VALUES
-  (1, 'Admin'),
-  (2, 'Quản lý'),
-  (3, 'Khách hàng'),
-  (4, 'Nhân viên');
+(1, 'Admin'), (2, 'Quản lý'), (3, 'Khách hàng'), (4, 'Nhân viên');
 
--- Dữ liệu mẫu cho bảng Users
-INSERT INTO Users (full_name, email, password_hash, phone_number, address, dob, gender, role_id, user_status) 
+-- Users
+INSERT INTO Users (full_name, email, password_hash, phone_number, address, dob, gender, role_id, user_status)
 VALUES
-('Nguyễn Văn A', 'admin@pool.com', 'mat_khau_ma_hoa', '0901000001', '123 Đường Quản Trị, TP.HCM', '1985-05-15', 'Male', 1, 'Active'),
-('Trần Văn B', 'manager@pool.com', 'mat_khau_ma_hoa', '0901000002', '456 Đường Quản Lý, TP.HCM', '1988-08-20', 'Female', 2, 'Active'),
-('Phạm Văn C', 'staff@pool.com', 'mat_khau_ma_hoa', '0901000003', '789 Đường Nhân Viên, TP.HCM', '1995-11-05', 'Male', 4, 'Active'),
-('Lê Thị D', 'khach1@example.com', 'mat_khau_ma_hoa', '0901000004', '101 Đường Khách Hàng, TP.HCM', '1998-01-30', 'Female', 3, 'Active');
+('Nguyễn Văn A', 'admin@example.com', 'hash_pass', '0901000001', '123 Lê Lợi, HCM', '1985-05-15', 'Male', 1, 'Active'),
+('Trần Thị B', 'manager@example.com', 'hash_pass', '0901000002', '456 Hai Bà Trưng, HCM', '1990-07-20', 'Female', 2, 'Active'),
+('Lê Văn C', 'staff@example.com', 'hash_pass', '0901000003', '789 Nguyễn Huệ, HCM', '1995-12-01', 'Male', 4, 'Active'),
+('Nguyễn Thị D', 'user1@example.com', 'hash_pass', '0901000004', '101 Trường Chinh, HCM', '2000-01-01', 'Female', 3, 'Active');
 
--- Dữ liệu mẫu cho bảng Coaches
+-- UserCode
+INSERT INTO UserCode (user_id, user_code, created_at)
+VALUES
+(1, 'AC123456', NOW()), (2, 'BC654321', NOW()), (3, 'XY999888', NOW()), (4, 'TT000111', NOW());
+
+-- Coaches
 INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture)
-VALUES 
-('Phạm Quốc Dũng', 'coach.dung@example.com', '0988123456', 'Male', 'Chuyên gia bơi lội quốc gia, có hơn 10 năm kinh nghiệm huấn luyện.', 'coach_dung.jpg'),
-('Nguyễn Hồng Nhung', 'coach.nhung@example.com', '0977555444', 'Female', 'HLV bơi lội cho trẻ em và người mới bắt đầu, thân thiện và nhiệt huyết.', 'coach_nhung.jpg');
+VALUES
+('Lê Văn Cường', 'coach.cuong@example.com', '0908000001', 'Male', '10 năm kinh nghiệm huấn luyện.', 'cuong.jpg'),
+('Nguyễn Thị Mai', 'coach.mai@example.com', '0908000002', 'Female', 'Chuyên trị liệu dưới nước.', 'mai.jpg');
 
--- Dữ liệu mẫu cho bảng Inventory_usage
-INSERT INTO Inventory_usage (usage_name)
-VALUES 
-('Dụng cụ cho thuê'),
-('Đang bảo trì'),
-('Dụng cụ bán'),
-('Thiết bị cơ sở vật chất');
+-- Courses
+INSERT INTO Courses (name, description, price, duration, estimated_session_time, student_description, schedule_description, status)
+VALUES
+('Bơi cơ bản', 'Khóa học bơi cho người mới bắt đầu.', 1000000, 10, '1h', '5 người/lớp', 'Thứ 2 - 4 - 6', 'Inactive'),
+('Bơi nâng cao', 'Cải thiện kỹ năng bơi.', 1500000, 12, '1h30', '3 người/lớp', 'Linh hoạt', 'Inactive');
 
--- Dữ liệu mẫu cho bảng Courses
-INSERT INTO Courses (name, description, price, duration, student_limit, coach_id, status)
-VALUES 
-('Khóa học bơi cơ bản', 'Dành cho người chưa biết bơi, học từ căn bản đến lướt nước.', 1200000.00, 600, 6, 1, 'Active'),
-('Khóa bơi nâng cao', 'Rèn luyện sức bền và kỹ thuật chuyên sâu.', 1500000.00, 720, 6, 2, 'Active');
+-- Classes
+INSERT INTO Classes (course_id, coach_id, name, description, student_limit, status, schedule)
+VALUES
+(1, 1, 'Lớp Bơi 1', 'Sáng Thứ 2 - 4 - 6', 5, 'Chưa khai giảng', 'Thứ 2 - 4 - 6'),
+(2, 2, 'Lớp Bơi 2', 'Lịch linh hoạt theo yêu cầu', 3, 'Đang học', 'Linh hoạt');
 
--- Dữ liệu mẫu cho bảng Course_Registrations
-INSERT INTO Course_Registrations (user_id, course_id, status)
-VALUES 
+-- Class_Registrations
+INSERT INTO Class_Registrations (user_id, class_id, status)
+VALUES
 (4, 1, 'Approved'),
 (4, 2, 'Pending');
 
--- Dữ liệu mẫu cho bảng Schedules
-INSERT INTO Schedules (course_id, coach_id, start_time, end_time, location)
-VALUES 
-(1, 1, '2025-07-10 07:00:00', '2025-07-10 08:00:00', 'Hồ bơi Di Linh A'),
-(2, 2, '2025-07-11 08:30:00', '2025-07-11 10:00:00', 'Hồ bơi Di Linh B');
-
--- Dữ liệu mẫu cho bảng Feedbacks
-INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating)
+-- Schedules
+INSERT INTO Schedules (class_id, coach_id, weekday, location)
 VALUES
-(4, 'Course', NULL, 1, NULL, 'Khóa học rất phù hợp cho người mới bắt đầu, tôi cảm thấy tự tin hơn khi xuống nước.', 5),
-(4, 'Coach', 2, NULL, NULL, 'Cô Nhung rất nhiệt tình và kiên nhẫn, hướng dẫn dễ hiểu.', 5),
-(4, 'General', NULL, NULL, 'Facility', 'Khu vực hồ bơi sạch sẽ và an toàn.', 4);
-
--- Dữ liệu mẫu cho bảng Blogs
-INSERT INTO Blogs (title, content, author_id, course_id, tags, likes)
-VALUES
-('Lợi ích của việc học bơi', 'Học bơi không chỉ giúp cải thiện sức khỏe mà còn là kỹ năng sinh tồn cần thiết...', 3, 1, 'sức khỏe,bơi lội,kỹ năng', 25),
-('Kỹ thuật thở khi bơi', 'Thở đúng cách giúp tiết kiệm sức và cải thiện tốc độ bơi...', 4, 2, 'kỹ thuật,thở,bơi', 40);
-
--- Dữ liệu mẫu cho bảng Blog_Comments
-INSERT INTO Blog_Comments (blog_id, user_id, content)
-VALUES
-(1, 4, 'Cảm ơn bài viết rất hữu ích, tôi sẽ bắt đầu học bơi ngay!'),
-(2, 4, 'Tôi luôn gặp khó khăn khi thở dưới nước, bài này giúp tôi hiểu rõ hơn.');
-
--- Dữ liệu mẫu cho bảng Inventory
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, usage_id)
-VALUES
-(1, 'Phao tròn', 'Phao cứu sinh', 50, 'cái', 'Available', 1),
-(1, 'Kính bơi', 'Trang bị cá nhân', 120, 'cái', 'Available', 1),
-(1, 'Ghế nằm', 'Thiết bị nghỉ ngơi', 30, 'cái', 'In Use', 4),
-(1, 'Đèn chiếu sáng', 'Thiết bị chiếu sáng', 20, 'bóng', 'Maintenance', 4);
-
--- Dữ liệu mẫu cho bảng Equipment_Rentals
-INSERT INTO Equipment_Rentals (customer_name, customer_id_card, staff_id, inventory_id, quantity, rental_date, rent_price, total_amount)
-VALUES
-('Trần Thị Hương', '123456789', 3, 1, 2, '2025-07-08', 10000, 20000),
-('Lê Văn Tâm', '987654321', 3, 2, 1, '2025-07-08', 15000, 15000);
-
--- Dữ liệu mẫu cho bảng Equipment_Sales
-INSERT INTO Equipment_Sales (customer_name, staff_id, inventory_id, quantity, sale_price, total_amount)
-VALUES
-('Nguyễn Thị Mai', 3, 2, 2, 120000, 240000),
-('Phạm Văn Lộc', 3, 4, 1, 80000, 80000);
-
--- Dữ liệu mẫu cho bảng Payments
+(1, 1, 'Thứ 2, 4, 6', 'Bể bơi Trung Tâm'),
+(2, 2, 'Linh hoạt', 'Bể bơi Linh Đàm');
 INSERT INTO Payments (user_id, amount, method, payment_for, reference_id, status)
 VALUES
-(4, 1200000, 'Chuyển khoản', 'Course', 1, 'Completed'),
+(4, 1000000, 'Chuyển khoản', 'Course', 1, 'Completed'),
 (4, 1500000, 'Tiền mặt', 'Course', 2, 'Completed');
 
--- Dữ liệu mẫu cho bảng TicketType
-INSERT INTO TicketType (type_name, price) VALUES
-('Single', 50000.00),
-('Monthly', 300000.00),
-('ThreeMonthly', 850000.00),
-('SixMonthly', 1600000.00),
-('Year', 3000000.00);
+INSERT INTO TicketType (type_name, price)
+VALUES
+('Single', 50000), ('Monthly', 300000);
 
--- Dữ liệu mẫu cho bảng Ticket
 INSERT INTO Ticket (user_id, ticket_type_id, quantity, start_date, end_date, ticket_status, payment_status, payment_id, total, created_at)
 VALUES
-(4, 2, 1, '2025-07-01', '2025-07-31', 'Active', 'Paid', 1, 300000, '2025-06-30 08:00:00'),
-(4, 1, 3, '2025-07-05', '2025-07-05', 'Active', 'Paid', 2, 150000, '2025-07-04 09:00:00');
+(4, 1, 1, '2025-07-01', '2025-07-01', 'Active', 'Paid', 1, 50000, '2025-06-30 08:00:00'),
+(4, 2, 1, '2025-07-01', '2025-07-31', 'Active', 'Paid', 2, 300000, '2025-06-30 08:30:00');
+INSERT INTO Inventory_usage (usage_name) VALUES
+('Dụng cụ cho thuê'), ('Đang bảo trì'), ('Dụng cụ bán'), ('Thiết bị cơ sở vật chất');
 
--- Dữ liệu mẫu cho bảng Tracking
-INSERT INTO Tracking (student_id, course_id, progress, coach_feedback)
+INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status, usage_id)
 VALUES
-(4, 1, 'Hoàn thành 60% khóa học', 'Học viên tiến bộ tốt, cần luyện thêm kỹ thuật thở.'),
-(4, 2, 'Hoàn thành 30% khóa học', 'Học viên chăm chỉ, cần cải thiện sải tay.');
+(1, 'Phao bơi', 'Phao cứu sinh', 50, 'cái', 'Available', 1),
+(2, 'Kính bơi', 'Trang bị cá nhân', 30, 'cái', 'Available', 1);
 
--- Dữ liệu mẫu cho bảng Complaints
+INSERT INTO Equipment_Rentals (customer_name, customer_id_card, staff_id, inventory_id, quantity, rental_date, rent_price, total_amount)
+VALUES
+('Ngô Thị Hồng', '123456789', 3, 1, 2, '2025-07-10', 10000, 20000);
+
+INSERT INTO Equipment_Sales (customer_name, staff_id, inventory_id, quantity, sale_price, total_amount)
+VALUES
+('Phạm Văn Hưng', 3, 2, 1, 120000, 120000);
+INSERT INTO Blogs (title, content, author_id, course_id, tags, likes)
+VALUES ('Tại sao nên học bơi?', 'Học bơi giúp bạn tăng cường sức khỏe và sự tự tin.', 3, 1, 'bơi,sức khỏe', 10);
+
+INSERT INTO Blog_Comments (blog_id, user_id, content)
+VALUES (1, 4, 'Bài viết rất hay, cảm ơn tác giả!');
+
+INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating)
+VALUES
+(4, 'Course', NULL, 1, NULL, 'Khóa học chất lượng.', 5),
+(4, 'Coach', 1, NULL, NULL, 'Huấn luyện viên rất tận tâm.', 4),
+(4, 'General', NULL, NULL, 'Facility', 'Cơ sở vật chất tốt.', 4);
+
+INSERT INTO FeedbackReplies (feedback_id, user_id, content)
+VALUES (1, 1, 'Cảm ơn bạn đã phản hồi tích cực!');
 INSERT INTO Complaints (user_id, staff_id, content, status)
-VALUES
-(4, 3, 'Nhiệt độ nước trong hồ bơi quá lạnh vào buổi sáng.', 'Resolved'),
-(4, 3, 'Phòng thay đồ có mùi ẩm mốc.', 'In Progress');
+VALUES (4, 3, 'Bể bơi hơi lạnh vào buổi sáng.', 'Resolved');
 
--- Dữ liệu mẫu cho bảng Maintenance_Requests
 INSERT INTO Maintenance_Requests (description, status, created_by)
-VALUES
-('Lọc hồ bơi cần được vệ sinh', 'Closed', 2),
-('Bóng đèn khu vực hồ B bị hỏng', 'Open', 3);
+VALUES ('Đèn ở bể bơi bị hỏng.', 'Open', 3);
 
--- Dữ liệu mẫu cho bảng Maintenance_Schedule
 INSERT INTO Maintenance_Schedule (title, description, frequency, assigned_staff_id, scheduled_time, created_by)
-VALUES
-('Kiểm tra nhà vệ sinh', 'Đảm bảo vệ sinh các bồn cầu và bồn rửa', 'Daily', 3, '08:00:00', 1),
-('Vớt rác hồ bơi', 'Loại bỏ lá cây và rác khỏi hồ', 'Daily', 3, '07:30:00', 2);
+VALUES ('Vệ sinh bể bơi', 'Dọn rác và làm sạch bể.', 'Daily', 3, '06:00:00', 1);
 
--- Dữ liệu mẫu cho bảng Maintenance_Log
 INSERT INTO Maintenance_Log (schedule_id, staff_id, maintenance_date, note, status)
-VALUES
-(1, 3, '2025-07-08', 'Nhà vệ sinh được lau dọn sạch sẽ', 'Done'),
-(2, 3, '2025-07-08', 'Đã vớt sạch lá cây và rác nổi', 'Done');
+VALUES (1, 3, '2025-07-10', 'Đã vệ sinh sạch sẽ.', 'Done');
 
--- Dữ liệu mẫu cho bảng Study_Roadmaps
 INSERT INTO Study_Roadmaps (title, content, created_by)
-VALUES
-('Lộ trình từ cơ bản đến nâng cao', 'Tuần 1-2: Học nổi và đập chân
-Tuần 3-4: Tập thở và quạt tay
-Tuần 5-6: Kết hợp động tác và di chuyển
-Tuần 7-8: Rèn luyện sức bền', 3);
+VALUES ('Lộ trình học 8 tuần', 'Tuần 1-2: Làm quen nước\nTuần 3-4: Kỹ thuật nổi\nTuần 5-6: Quạt tay, thở\nTuần 7-8: Kết hợp toàn thân', 3);

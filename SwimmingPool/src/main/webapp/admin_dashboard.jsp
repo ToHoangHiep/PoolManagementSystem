@@ -132,6 +132,7 @@
         <div style="font-weight:bold; margin-bottom:8px; color:#0078d7;"><i class="fas fa-swimmer"></i> Quản lý khóa học</div>
         <a href="swimcourse" style="padding-left: 30px;"><i class="fas fa-book"></i> Khóa học</a>
         <a href="class-list" style="padding-left: 30px;"><i class="fas fa-chalkboard-teacher"></i> Lớp học</a>
+        <a href="register-course" style="padding-left: 30px;"><i class="fas fa-chalkboard-teacher"></i>Đăng kí mới</a>
     </div>
 
     <a href="maintenance"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
