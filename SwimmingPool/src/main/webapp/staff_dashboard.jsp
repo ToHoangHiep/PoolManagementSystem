@@ -2,7 +2,7 @@
 <%@ page import="model.User" %>
 <%
     User user = (User) session.getAttribute("user");
-    if (user == null || user.getRole() == null || user.getRole().getId() != 4) {
+    if (user == null || user.getRole() == null || user.getRole().getId() != 5) {
         response.sendRedirect("error.jsp");
         return;
     }
@@ -125,7 +125,7 @@
 <!-- Sidebar -->
 <div class="sidebar">
     <a href="equipment-rental"><i class="fas fa-toolbox"></i> Thiết bị</a>
-    <a href="viewMyMaintenance"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
+    <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
     <a href="product"><i class="fas fa-box-open"></i> Sản phẩm</a>
     <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>
     <a href="feedback?mode=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>

@@ -538,12 +538,10 @@
                                         </thead>
                                         <tbody>
                                         <c:forEach var="payment" items="${payments}">
-                                            <tr>
-                                                <td>#${payment.paymentId}</td>
-                                                <td><fmt:formatNumber value="${payment.paymentAmount}" type="currency" currencyCode="VND"/></td>
-                                                <td><fmt:formatDate value="${payment.paymentDate}" pattern="dd/MM/yyyy HH:mm"/></td>
-                                                <td>${payment.notes}</td>
-                                            </tr>
+                                            <td>#${payment.paymentId}</td>
+                                            <td><fmt:formatNumber value="${payment.amount}" type="currency"/></td>
+                                            <td><fmt:formatDate value="${payment.paymentDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+                                            <td>${payment.notes}</td>
                                         </c:forEach>
                                         </tbody>
                                     </table>

@@ -16,65 +16,113 @@ public class EquipmentDAO {
      * Lấy danh sách thiết bị cho shop - chỉ usage_id: 1, 3, 5
      * Logic đơn giản: quantity trong Inventory = số lượng available
      */
-    public static List<Map<String, Object>> getEquipmentStatus() throws SQLException {
+    public static List<Map<String, Object>> getEquipmentStatus(String mode, Integer categoryId) throws SQLException {
         String sql = """
             SELECT 
-                i.inventory_id,
-                i.item_name,
-                i.category,
-                i.quantity AS available_quantity,
-                i.rent_price,
-                i.sale_price,
-                i.import_price,
-                i.unit,
-                i.usage_id,
-                i.status,
-                iu.usage_name
+                i.inventory_id, i.item_name, ic.category_id, ic.category_name AS category, i.quantity AS available_quantity,
+                i.rent_price, i.sale_price, i.import_price, i.unit, i.usage_id, i.status, iu.usage_name
             FROM Inventory i
             LEFT JOIN Inventory_usage iu ON i.usage_id = iu.usage_id
-            WHERE i.status = 'Available' 
-                AND i.usage_id IN (1, 3, 5)
-            ORDER BY i.item_name
-            """;
+            LEFT JOIN Inventory_category ic ON i.category_id = ic.category_id
+            WHERE i.status = 'Available' AND i.usage_id IN (1, 2)  -- Chỉ 1, 2 (Rental/Sale)
+        """;
 
-        List<Map<String, Object>> result = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Map<String, Object> item = new HashMap<>();
-                int availableQty = rs.getInt("available_quantity");
-
-                item.put("inventoryId", rs.getInt("inventory_id"));
-                item.put("itemName", rs.getString("item_name"));
-                item.put("category", rs.getString("category"));
-                item.put("quantity", availableQty); // Số lượng hiển thị trên màn hình
-                item.put("rentPrice", rs.getDouble("rent_price"));
-                item.put("salePrice", rs.getDouble("sale_price"));
-                item.put("importPrice", rs.getDouble("import_price")); // ← THÊM DÒNG NÀY
-                item.put("unit", rs.getString("unit"));
-                item.put("usageId", rs.getInt("usage_id"));
-                item.put("usageName", rs.getString("usage_name"));
-                item.put("status", rs.getString("status"));
-
-                // Xác định trạng thái kho cho hiển thị
-                if (availableQty == 0) {
-                    item.put("stockStatus", "out-stock");
-                } else if (availableQty <= 5) {
-                    item.put("stockStatus", "low-stock");
-                } else {
-                    item.put("stockStatus", "in-stock");
-                }
-
-                result.add(item);
-            }
+        if ("rental".equals(mode)) {
+            sql += " AND i.rent_price > 0";
+        } else if ("buy".equals(mode)) {
+            sql += " AND i.sale_price > 0";
         }
 
+        if (categoryId != null) {
+            sql += " AND i.category_id = ?";
+            params.add(categoryId);
+        }
+
+        sql += " ORDER BY i.item_name";
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("inventoryId", rs.getInt("inventory_id"));
+                    item.put("itemName", rs.getString("item_name"));
+                    item.put("categoryId", rs.getInt("category_id"));
+                    item.put("category", rs.getString("category"));
+                    item.put("quantity", rs.getInt("available_quantity"));
+                    item.put("rentPrice", rs.getDouble("rent_price"));
+                    item.put("salePrice", rs.getDouble("sale_price"));
+                    item.put("importPrice", rs.getDouble("import_price"));
+                    item.put("unit", rs.getString("unit"));
+                    item.put("usageId", rs.getInt("usage_id"));
+                    item.put("usageName", rs.getString("usage_name"));
+                    item.put("status", rs.getString("status"));
+                    // Stock status logic (giữ nguyên)
+                    int qty = rs.getInt("available_quantity");
+                    item.put("stockStatus", qty == 0 ? "out-stock" : qty <= 5 ? "low-stock" : "in-stock");
+                    result.add(item);
+                }
+            }
+        }
         return result;
     }
 
+    public static List<Map<String, Object>> getAllCategories(String mode) throws SQLException {
+        String sql = """
+            SELECT DISTINCT ic.category_id, ic.category_name 
+            FROM Inventory_category ic
+            JOIN Inventory i ON i.category_id = ic.category_id
+            WHERE i.status = 'Available' AND i.usage_id IN (1, 2)
+        """;
+
+        if ("rental".equals(mode)) {
+            sql += " AND i.rent_price > 0";
+        } else if ("buy".equals(mode)) {
+            sql += " AND i.sale_price > 0";
+        }
+
+        sql += " ORDER BY ic.category_name";
+
+        List<Map<String, Object>> categories = new ArrayList<>();
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> cat = new HashMap<>();
+                int catId = rs.getInt("category_id");
+                String catName = rs.getString("category_name");
+                cat.put("id", catId);
+                cat.put("name", catName);
+                // Compute category_quantity dynamically
+                int quantity = computeCategoryQuantity(catId);
+                cat.put("quantity", quantity);
+                categories.add(cat);
+            }
+        }
+        return categories;
+    }
+
+    // Helper method: Tính tổng quantity cho category_id
+    private static int computeCategoryQuantity(int categoryId) throws SQLException {
+        String sql = "SELECT SUM(quantity) AS total FROM Inventory WHERE category_id = ? AND status = 'Available'";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("total");
+                    return rs.wasNull() ? 0 : total;  // Trả 0 nếu null
+                }
+            }
+        }
+        return 0;
+    }
     /**
      * Lấy thông tin chi tiết của một thiết bị theo ID
      */

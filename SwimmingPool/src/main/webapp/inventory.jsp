@@ -22,10 +22,10 @@
 <!-- Thanh menu điều hướng -->
 <div class="top-navbar">
     <div class="nav-left">
-        <a href="home.jsp" class="nav-btn">🏠 Home</a>
-        <a href="inventory?action=default" class="nav-btn orange">🔙 Return To List</a>
+        <a href="admin_dashboard.jsp" class="nav-btn">🏠 Home</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
         <a href="inventory?action=lowstock" class="nav-btn blue" >Thiết bị sắp hết kho</a>
+        <a href="inventory?action=requestList" class="nav-btn purple">Xem yêu cầu nhập kho</a>
 
 
     </div>
@@ -113,6 +113,7 @@
                onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Delete</a>
         </td>
     </tr>
+
     <%
         }
     } else {
@@ -123,17 +124,23 @@
     %>
     </tbody>
 </table>
-
+<% if (totalPages != null && currentPage != null && totalPages > 1) { %>
+<div class="pagination" style="margin-top: 20px;">
+    <% for (int i = 1; i <= totalPages; i++) { %>
+    <a href="inventory?page=<%= i %><%= keyword != null ? "&keyword=" + keyword : "" %>"
+       class="<%= (i == currentPage) ? "active" : "" %>"><%= i %></a>
+    <% } %>
+</div>
+<% } %>
 <c:if test="${not empty lowStockItems}">
-    <div style="margin-top: 20px; padding: 10px; background-color: #fff3cd; border-left: 5px solid #ffecb5;">
-        <strong>&#9888; Cảnh báo:</strong> Các mặt hàng sắp hết:
-        <ul>
-            <c:forEach var="item" items="${lowStockItems}">
-                <li>${item.itemName} (Còn: ${item.quantity}, Mức cảnh báo: ${item.categoryQuantity})</li>
-            </c:forEach>
-        </ul>
-    </div>
+    <h3>Danh sách thiết bị sắp hết kho</h3>
+    <ul>
+        <c:forEach var="item" items="${lowStockItems}">
+            <li>${item.getItemName()} (Còn: ${item.getQuantity()}, Mức cảnh báo: ${item.categoryQuantity})</li>
+        </c:forEach>
+    </ul>
 </c:if>
+
 
 
 </body>

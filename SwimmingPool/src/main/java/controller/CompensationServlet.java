@@ -42,6 +42,9 @@ public class CompensationServlet extends HttpServlet {
                 case "photos":
                     showDamagePhotos(request, response);
                     break;
+                case "invoice":  // THÊM CASE NÀY
+                    showInvoice(request, response);
+                    break;
                 default:
                     showCompensationList(request, response);
                     break;
@@ -58,7 +61,7 @@ public class CompensationServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-
+        System.out.println("=== doPost called with action: " + action + " ===");  // THÊM DÒNG NÀY
         try {
             switch (action != null ? action : "") {
                 case "calculate":
@@ -177,8 +180,8 @@ public class CompensationServlet extends HttpServlet {
                     // Lấy rental info
                     EquipmentRental rental = EquipmentDAO.getRentalById(compensation.getRentalId());
 
-                    // Lấy payments
-                    List<CompensationPayment> payments = CompensationDAO.getPaymentsByCompensationId(compensationId);
+                    // SỬA: Lấy payments từ PaymentDAO thay vì CompensationDAO
+                    List<Payment> payments = PaymentDAO.getPaymentsByReference("compensation", compensationId);
 
                     // Lấy damage photos
                     List<EquipmentDamagePhoto> photos = CompensationDAO.getDamagePhotosByCompensationId(compensationId);
@@ -188,7 +191,7 @@ public class CompensationServlet extends HttpServlet {
 
                     request.setAttribute("compensation", compensation);
                     request.setAttribute("rental", rental);
-                    request.setAttribute("payments", payments);
+                    request.setAttribute("payments", payments);  // Giờ là List<Payment> thay vì List<CompensationPayment>
                     request.setAttribute("photos", photos);
                     request.setAttribute("repairs", repairs);
 
@@ -285,12 +288,12 @@ public class CompensationServlet extends HttpServlet {
             if (rateStr != null && !rateStr.trim().isEmpty()) {
                 double rate = Double.parseDouble(rateStr);
 
-                // Validation rate
-                if (rate < 0 || rate > 1) {
-                    request.setAttribute("error", "Compensation rate must be between 0.0 and 1.0");
-                    showCreateForm(request, response);
-                    return;
-                }
+//                // Validation rate
+//                if (rate < 0 || rate > 1) {
+//                    request.setAttribute("error", "Compensation rate must be between 0.0 and 1.0");
+//                    showCreateForm(request, response);
+//                    return;
+//                }
 
                 try {
                     // Gọi static method trực tiếp
@@ -359,7 +362,7 @@ public class CompensationServlet extends HttpServlet {
      */
     private void handleCreateCompensation(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        System.out.println("=== Starting handleCreateCompensation ===");  // THÊM
         try {
             // Lấy parameters từ form
             int rentalId = Integer.parseInt(request.getParameter("rentalId"));
@@ -367,17 +370,19 @@ public class CompensationServlet extends HttpServlet {
             String damageDescription = request.getParameter("damageDescription");
             BigDecimal compensationRate = new BigDecimal(request.getParameter("compensationRate"));
 
-            // Validation cơ bản
-            if (compensationRate.compareTo(BigDecimal.ZERO) <= 0 ||
-                    compensationRate.compareTo(BigDecimal.ONE) > 0) {
-                request.setAttribute("error", "Compensation rate must be between 0 and 1");
-                showCreateForm(request, response);
-                return;
-            }
+            System.out.println("Parameters: rentalId=" + rentalId + ", type=" + compensationType + ", rate=" + compensationRate + ", desc=" + damageDescription);  // THÊM
+//            // Validation cơ bản
+//            if (compensationRate.compareTo(BigDecimal.ZERO) <= 0 ||
+//                    compensationRate.compareTo(BigDecimal.ONE) > 0) {
+//                request.setAttribute("error", "Compensation rate must be between 0 and 1");
+//                showCreateForm(request, response);
+//                return;
+//            }
 
             // Lấy rental info để tính compensation
             EquipmentRental rental = EquipmentDAO.getRentalById(rentalId);
             if (rental == null || !"active".equals(rental.getStatus())) {
+                System.out.println("Error: Invalid rental or not active");  // THÊM
                 request.setAttribute("error", "Invalid rental or rental not active");
                 showCreateForm(request, response);
                 return;
@@ -385,6 +390,7 @@ public class CompensationServlet extends HttpServlet {
 
             // Check blacklist
             if (BlacklistDAO.isCustomerBanned(rental.getCustomerIdCard())) {
+                System.out.println("Error: Customer is banned");  // THÊM
                 request.setAttribute("error", "Customer is banned");
                 showCreateForm(request, response);
                 return;
@@ -393,6 +399,7 @@ public class CompensationServlet extends HttpServlet {
             // Lấy equipment info để tính import price total
             Map<String, Object> equipment = EquipmentDAO.getEquipmentById(rental.getInventoryId());
             if (equipment == null) {
+                System.out.println("Error: Equipment not found");  // THÊM
                 request.setAttribute("error", "Equipment not found");
                 showCreateForm(request, response);
                 return;
@@ -424,27 +431,30 @@ public class CompensationServlet extends HttpServlet {
 
             // Save compensation
             boolean success = CompensationDAO.createCompensation(compensation);
+            System.out.println("Create result: " + (success ? "SUCCESS" : "FAILED"));  // THÊM
 
             if (success) {
-                // Nếu severity cao, auto add to blacklist (based on amount instead of damage level)
                 if (shouldAddToBlacklist(compensationType, totalAmount)) {
                     addCustomerToBlacklist(rental, compensationType, totalAmount);
                 }
-
-                response.sendRedirect("compensation?action=view&id=" + compensation.getCompensationId());
+                System.out.println("Redirecting to invoice?id=" + compensation.getCompensationId());  // THÊM
+                response.sendRedirect("compensation?action=invoice&id=" + compensation.getCompensationId());
             } else {
                 request.setAttribute("error", "Failed to create compensation");
                 showCreateForm(request, response);
             }
 
         } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid input format - " + e.getMessage());  // THÊM
             request.setAttribute("error", "Invalid input format");
             showCreateForm(request, response);
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("System error: " + e.getMessage());  // THÊM
             request.setAttribute("error", "System error: " + e.getMessage());
             showCreateForm(request, response);
         }
+
     }
 
     /**
@@ -456,9 +466,10 @@ public class CompensationServlet extends HttpServlet {
         try {
             int compensationId = Integer.parseInt(request.getParameter("compensationId"));
             BigDecimal paymentAmount = new BigDecimal(request.getParameter("paymentAmount"));
+            String paymentMethod = request.getParameter("paymentMethod"); // Thêm mới
             String notes = request.getParameter("notes");
 
-            // Validation
+            // Lấy thông tin compensation
             EquipmentCompensation compensation = CompensationDAO.getCompensationById(compensationId);
             if (compensation == null) {
                 request.setAttribute("error", "Compensation not found");
@@ -466,6 +477,7 @@ public class CompensationServlet extends HttpServlet {
                 return;
             }
 
+            // Kiểm tra số tiền
             BigDecimal remainingAmount = compensation.getTotalAmount().subtract(compensation.getPaidAmount());
             if (paymentAmount.compareTo(BigDecimal.ZERO) <= 0 ||
                     paymentAmount.compareTo(remainingAmount) > 0) {
@@ -474,15 +486,30 @@ public class CompensationServlet extends HttpServlet {
                 return;
             }
 
-            // Create payment
-            CompensationPayment payment = new CompensationPayment();
-            payment.setCompensationId(compensationId);
-            payment.setPaymentAmount(paymentAmount);
+            // SỬA: Tạo Payment object thay vì CompensationPayment
+            // Lấy thông tin khách hàng từ rental
+            EquipmentRental rental = EquipmentDAO.getRentalById(compensation.getRentalId());
+
+            Payment payment = new Payment();
+            payment.setCustomerName(rental.getCustomerName());
+            payment.setCustomerIdCard(rental.getCustomerIdCard());
+            payment.setAmount(paymentAmount);
+            payment.setPaymentMethod(paymentMethod != null ? paymentMethod : "cash");
+            payment.setPaymentFor("compensation");
+            payment.setReferenceId(compensationId);
             payment.setNotes(notes);
 
-            boolean success = CompensationDAO.addPayment(payment);
+            // Lấy staff_id từ session
+            User user = (User) request.getSession().getAttribute("user");
+            if (user != null) {
+                payment.setStaffId(user.getId());
+            }
+
+            // SỬA: Gọi method mới trong CompensationDAO
+            boolean success = CompensationDAO.addCompensationPayment(payment);
 
             if (success) {
+                request.getSession().setAttribute("success", "Payment processed successfully!");
                 response.sendRedirect("compensation?action=view&id=" + compensationId);
             } else {
                 request.setAttribute("error", "Failed to process payment");
@@ -561,6 +588,49 @@ public class CompensationServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             // Log error but don't fail the main process
+        }
+    }
+
+    private void showInvoice(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String idParam = request.getParameter("id");
+
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            try {
+                int compensationId = Integer.parseInt(idParam);
+
+                // Load dữ liệu compensation
+                EquipmentCompensation compensation = CompensationDAO.getCompensationById(compensationId);
+
+                if (compensation != null) {
+                    // Load rental và equipment liên quan
+                    EquipmentRental rental = EquipmentDAO.getRentalById(compensation.getRentalId());
+                    Map<String, Object> equipment = EquipmentDAO.getEquipmentById(rental.getInventoryId());
+
+                    // Set attributes cho JSP (dựa trên compensation-invoice.jsp)
+                    request.setAttribute("compensation", compensation);
+                    request.setAttribute("rental", rental);
+                    request.setAttribute("equipment", equipment);
+                    request.setAttribute("invoiceNumber", String.format("COMP-%04d", compensationId));  // Ví dụ format mã hóa đơn
+
+                    // Forward đến trang invoice
+                    request.getRequestDispatcher("/compensation-invoice.jsp").forward(request, response);
+                } else {
+                    request.setAttribute("error", "Compensation not found");
+                    request.getRequestDispatcher("/error.jsp").forward(request, response);
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid compensation ID");
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Database error: " + e.getMessage());
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            }
+        } else {
+            request.setAttribute("error", "Missing compensation ID");
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 }
