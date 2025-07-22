@@ -110,17 +110,6 @@ CREATE TABLE Payments (
     FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
-
--- Blogs
-CREATE TABLE Blogs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
-    content TEXT,
-    author_id INT,
-    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES Users(id)
-);
-
 CREATE TABLE TicketType (
     id INT PRIMARY KEY AUTO_INCREMENT,
     type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,

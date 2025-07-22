@@ -14,8 +14,8 @@ public class CoachServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
+        try {
+            CoachDAO dao = new CoachDAO();
 
             if ("add".equals(action)) {
                 request.getRequestDispatcher("/coach-form.jsp").forward(request, response);
@@ -28,15 +28,17 @@ public class CoachServlet extends HttpServlet {
 
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                if (dao.isCoachUsed(id)) {
-                    request.setAttribute("error", "Không thể xóa vì huấn luyện viên đang được phân công lớp học.");
-                    List<Coach> list = dao.getAll();
-                    request.setAttribute("coaches", list);
-                    request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
-                } else {
-                    dao.delete(id);
-                    response.sendRedirect("coach");
-                }
+//                if (dao.isCoachUsed(id)) {
+//                    request.setAttribute("error", "Không thể xóa vì huấn luyện viên đang được phân công lớp học.");
+//                    List<Coach> list = dao.getAll();
+//                    request.setAttribute("coaches", list);
+//                    request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
+//                }
+//                else {
+//
+//                }
+                dao.delete(id);
+                response.sendRedirect("coach");
 
             } else {
                 // Mặc định hiển thị danh sách
@@ -53,8 +55,8 @@ public class CoachServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
+        try {
+            CoachDAO dao = new CoachDAO();
 
             int id = request.getParameter("id") != null && !request.getParameter("id").isEmpty()
                     ? Integer.parseInt(request.getParameter("id")) : 0;
