@@ -13,7 +13,6 @@
     <meta charset="UTF-8">
     <title>Trang Nhân viên - Swimming Pool</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- FontAwesome Icon -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
@@ -131,7 +130,12 @@
 <div class="main-wrapper">
     <!-- Sidebar -->
     <div class="sidebar">
-        <a href="equipment-rental"><i class="fas fa-toolbox"></i> Thiết bị</a>
+        <a href="equipment?mode=rental"><i class="fas fa-handshake"></i> Thuê thiết bị
+        </a>
+        <a href="equipment?mode=buy"><i class="fas fa-shopping-cart"></i> Mua thiết bị
+        </a>
+        <a href="purchase"><i class="fas fa-ticketpurchase"></i> Vé bơi
+        </a>
         <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
         <a href="product"><i class="fas fa-box-open"></i> Sản phẩm</a>
         <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>

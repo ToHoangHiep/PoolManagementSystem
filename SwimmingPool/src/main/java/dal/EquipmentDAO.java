@@ -5,10 +5,7 @@ import model.EquipmentSale;
 import utils.DBConnect;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EquipmentDAO {
 
@@ -128,22 +125,24 @@ public class EquipmentDAO {
      */
     public static Map<String, Object> getEquipmentById(int inventoryId) throws SQLException {
         String sql = """
-            SELECT 
-                i.inventory_id,
-                i.item_name,
-                i.category,
-                i.quantity,
-                i.rent_price,
-                i.sale_price,
-                i.import_price,
-                i.unit,
-                i.usage_id,
-                i.status,
-                iu.usage_name
-            FROM Inventory i
-            LEFT JOIN Inventory_usage iu ON i.usage_id = iu.usage_id
-            WHERE i.inventory_id = ? AND i.status = 'Available'
-            """;
+        SELECT 
+            i.inventory_id,
+            i.item_name,
+            ic.category_name AS category,
+            i.category_id,
+            i.quantity,
+            i.unit,
+            i.status,
+            i.rent_price,
+            i.sale_price,
+            i.import_price,
+            i.usage_id,
+            iu.usage_name
+        FROM Inventory i
+        LEFT JOIN Inventory_usage iu ON i.usage_id = iu.usage_id
+        LEFT JOIN Inventory_category ic ON i.category_id = ic.category_id
+        WHERE i.inventory_id = ?
+        """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -155,14 +154,15 @@ public class EquipmentDAO {
                     equipment.put("inventoryId", rs.getInt("inventory_id"));
                     equipment.put("itemName", rs.getString("item_name"));
                     equipment.put("category", rs.getString("category"));
+                    equipment.put("categoryId", rs.getInt("category_id"));
                     equipment.put("quantity", rs.getInt("quantity"));
+                    equipment.put("unit", rs.getString("unit"));
+                    equipment.put("status", rs.getString("status"));
                     equipment.put("rentPrice", rs.getDouble("rent_price"));
                     equipment.put("salePrice", rs.getDouble("sale_price"));
-                    equipment.put("importPrice", rs.getDouble("import_price")); // ← THÊM DÒNG NÀY
-                    equipment.put("unit", rs.getString("unit"));
+                    equipment.put("importPrice", rs.getDouble("import_price"));
                     equipment.put("usageId", rs.getInt("usage_id"));
                     equipment.put("usageName", rs.getString("usage_name"));
-                    equipment.put("status", rs.getString("status"));
                     return equipment;
                 }
             }
@@ -714,5 +714,111 @@ public class EquipmentDAO {
         rental.setReturnTime(rs.getTimestamp("return_time"));
         rental.setItemName(rs.getString("item_name"));
         return rental;
+    }
+
+    public static List<EquipmentRental> getRentalsByIds(List<Integer> ids) throws SQLException {
+        List<EquipmentRental> rentals = new ArrayList<>();
+        if (ids == null || ids.isEmpty()) return rentals;
+
+        String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT r.*, i.item_name, i.unit, i.sale_price, i.usage_id, c.category_name " +
+                "FROM equipment_rentals r " +
+                "JOIN inventory i ON r.inventory_id = i.inventory_id " +
+                "JOIN inventory_category c ON i.category_id = c.category_id " +
+                "WHERE r.rental_id IN (" + placeholders + ")";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < ids.size(); i++) {
+                stmt.setInt(i + 1, ids.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                EquipmentRental rental = new EquipmentRental();
+                rental.setRentalId(rs.getInt("rental_id"));
+                rental.setCustomerName(rs.getString("customer_name"));
+                rental.setCustomerIdCard(rs.getString("customer_id_card"));
+                rental.setStaffId(rs.getInt("staff_id"));
+                rental.setInventoryId(rs.getInt("inventory_id"));
+                rental.setQuantity(rs.getInt("quantity"));
+                rental.setRentalDate(rs.getDate("rental_date"));
+                rental.setRentPrice(rs.getDouble("rent_price"));
+                rental.setTotalAmount(rs.getDouble("total_amount"));
+                rental.setStatus(rs.getString("status"));
+                rental.setCreatedAt(rs.getTimestamp("created_at"));
+                rental.setReturnTime(rs.getTimestamp("return_time"));
+                rental.setDueDate(rs.getDate("due_date"));
+                rental.setNotes(rs.getString("notes"));
+
+                // Thêm thông tin bổ sung
+                rental.setItemName(rs.getString("item_name"));
+                rental.setUnit(rs.getString("unit"));
+                rental.setSalePrice(rs.getDouble("sale_price"));
+                rental.setUsageId(rs.getInt("usage_id"));
+                rental.setCategory(rs.getString("category_name"));
+
+                rentals.add(rental);
+            }
+        }
+
+        return rentals;
+    }
+
+    public static List<EquipmentSale> getSalesByIds(List<Integer> ids) throws SQLException {
+        List<EquipmentSale> sales = new ArrayList<>();
+        if (ids == null || ids.isEmpty()) return sales;
+
+        String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT s.*, i.item_name, i.unit, i.sale_price, i.usage_id, c.category_name " +
+                "FROM equipment_sales s " +
+                "JOIN inventory i ON s.inventory_id = i.inventory_id " +
+                "JOIN inventory_category c ON i.category_id = c.category_id " +
+                "WHERE s.sale_id IN (" + placeholders + ")";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < ids.size(); i++) {
+                stmt.setInt(i + 1, ids.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                EquipmentSale sale = new EquipmentSale();
+                sale.setSaleId(rs.getInt("sale_id"));
+                sale.setCustomerName(rs.getString("customer_name"));
+                sale.setStaffId(rs.getInt("staff_id"));
+                sale.setInventoryId(rs.getInt("inventory_id"));
+                sale.setQuantity(rs.getInt("quantity"));
+                sale.setSalePrice(rs.getDouble("sale_price"));
+                sale.setTotalAmount(rs.getDouble("total_amount"));
+                sale.setCreatedAt(rs.getTimestamp("created_at"));
+
+                // Thêm thông tin bổ sung (nếu bạn mở rộng model EquipmentSale)
+                sale.setItemName(rs.getString("item_name"));
+                sale.setUnit(rs.getString("unit"));
+                sale.setCategory(rs.getString("category_name"));
+                sale.setUsageId(rs.getInt("usage_id"));
+
+                sales.add(sale);
+            }
+        }
+
+        return sales;
+    }
+
+    public String getItemNameByInventoryId(int inventoryId) throws SQLException {
+        String sql = "SELECT item_name FROM Inventory WHERE inventory_id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, inventoryId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("item_name");
+            }
+        }
+        return "Unknown Item";  // Fallback
     }
 }

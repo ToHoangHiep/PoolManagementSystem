@@ -285,7 +285,6 @@
     <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
     <a href="${pageContext.request.contextPath}/equipment">Equipment</a>
     <a href="${pageContext.request.contextPath}/compensation">Compensations</a>
-    <a href="${pageContext.request.contextPath}/blacklist">Blacklist</a>
     <a href="${pageContext.request.contextPath}/reports">Reports</a>
   </div>
   <div class="auth">

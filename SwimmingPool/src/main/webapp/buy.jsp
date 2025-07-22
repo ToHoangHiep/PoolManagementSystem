@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -136,7 +136,7 @@
       background: white;
       border-radius: 12px;
       padding: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       position: sticky;
       top: 20px;
     }
@@ -302,13 +302,13 @@
       background: white;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       transition: all 0.3s;
       border: 1px solid #f0f0f0;
     }
 
     .equipment-card:hover {
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       transform: translateY(-5px);
     }
 
@@ -416,6 +416,16 @@
       text-align: center;
     }
 
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0056b3;
+      transform: translateY(-1px);
+    }
+
     .btn-success {
       background: #28a745;
       color: white;
@@ -433,72 +443,6 @@
       transform: none;
     }
 
-    /* Tabs for Active Rentals */
-    .tabs {
-      background: white;
-      border-radius: 12px;
-      margin-top: 40px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .tab-buttons {
-      display: flex;
-      border-bottom: 1px solid #eee;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 16px 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
-
-    .tab-btn.active {
-      background: #007bff;
-      color: white;
-    }
-
-    .tab-btn:hover:not(.active) {
-      background: #f8f9fa;
-    }
-
-    .tab-content {
-      display: none;
-      padding: 25px;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Table */
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .table th {
-      background: #f8f9fa;
-      padding: 12px;
-      text-align: left;
-      font-weight: 600;
-      border-bottom: 2px solid #dee2e6;
-    }
-
-    .table td {
-      padding: 12px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .table tr:hover {
-      background: #f8f9fa;
-    }
-
     /* Modal */
     .modal {
       display: none;
@@ -507,7 +451,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
     }
 
@@ -522,7 +466,7 @@
       max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
     .modal-header {
@@ -586,7 +530,7 @@
     .form-input:focus {
       outline: none;
       border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     }
 
     .form-input[readonly] {
@@ -630,21 +574,6 @@
       background: #f8d7da;
       color: #721c24;
       border-left-color: #dc3545;
-    }
-
-    /* Debug section */
-    .debug-section {
-      background: #f8f9fa;
-      padding: 20px;
-      margin: 20px 0;
-      border-radius: 8px;
-      border: 1px solid #dee2e6;
-    }
-
-    .debug-item {
-      margin: 5px 0;
-      font-size: 12px;
-      font-family: monospace;
     }
 
     /* ===== FOOTER STYLES ===== */
@@ -703,13 +632,16 @@
 <div class="navbar">
   <div class="logo">SwimmingPool</div>
   <div class="nav-links">
-    <a href="home.jsp">Home</a>
+    <a href="staff_dashboard.jsp.jsp">Home</a>
     <a href="home.jsp#about">About Us</a>
     <a href="home.jsp#services">Services</a>
     <a href="home.jsp#gallery">Gallery</a>
     <a href="home.jsp#contact">Contact</a>
     <a href="equipment?mode=buy" class="nav-link ${empty currentFilter ? 'active' : ''}">
-      🏊 Equipment Buy
+      🛒 Equipment Buy
+    </a>
+    <a href="cart" class="nav-link">
+      🛒 View Cart <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
     </a>
   </div>
   <div class="auth">
@@ -754,7 +686,7 @@
       <ul class="category-list">
         <li class="category-item">
           <a href="#" class="category-link active" onclick="filterByCategory('all')" id="filter-all">
-            <span class="category-icon">🏊</span>
+            <span class="category-icon">🛒</span>
             All Categories
           </a>
         </li>
@@ -782,147 +714,92 @@
 
     <!-- Content Area -->
     <div class="content-area">
-      <!-- Tabs -->
-      <div class="tabs">
-        <div class="tab-buttons">
-          <button class="tab-btn active" onclick="showTab('equipment')">🏊 Equipment Buy</button>
-          <button class="tab-btn" onclick="showTab('sales')">📋 Sale History</button>
+      <!-- Search & Sort Bar -->
+      <div class="search-sort-bar">
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="Search equipment..." id="searchInput">
+          <button class="search-btn" onclick="searchEquipment()">🔍</button>
         </div>
 
-        <!-- Equipment Tab -->
-        <div id="equipment" class="tab-content active">
-          <!-- Search & Sort Bar -->
-          <div class="search-sort-bar">
-            <div class="search-box">
-              <input type="text" class="search-input" placeholder="Search equipment..." id="searchInput">
-              <button class="search-btn" onclick="searchEquipment()">🔍</button>
+        <select class="sort-select" onchange="sortEquipment(this.value)">
+          <option value="name">Sort by Name</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="availability">Availability</option>
+        </select>
+      </div>
+
+      <div class="results-info">
+        Showing <span id="resultCount">${not empty equipmentList ? equipmentList.size() : 0}</span> equipment(s)
+      </div>
+
+      <!-- Equipment Grid -->
+      <div class="equipment-grid" id="equipmentGrid">
+        <c:forEach var="item" items="${equipmentList}">
+          <div class="equipment-card"
+               data-category="${item.category}"
+               data-name="${fn:toLowerCase(item.itemName)}"
+               data-sale-price="${item.salePrice}"
+               data-usage-id="${item.usageId}">
+
+            <div class="equipment-image">
+              🏊‍♂️
             </div>
 
+            <div class="equipment-content">
+              <h4 class="equipment-name">${item.itemName}</h4>
+              <div class="equipment-category">${item.category}</div>
 
-            <select class="sort-select" onchange="sortEquipment(this.value)">
-              <option value="name">Sort by Name</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="availability">Availability</option>
-            </select>
-          </div>
+              <div class="equipment-details">
+                <div><strong>Unit:</strong> ${item.unit}</div>
 
-          <div class="results-info">
-            Showing <span id="resultCount">${not empty equipmentList ? equipmentList.size() : 0}</span> equipment(s)
-          </div>
-
-          <!-- Equipment Grid -->
-          <div class="equipment-grid" id="equipmentGrid">
-            <c:forEach var="item" items="${equipmentList}">
-              <div class="equipment-card"
-                   data-category="${item.category}"
-                   data-name="${fn:toLowerCase(item.itemName)}"
-                   data-rent-price="${item.rentPrice}"
-                   data-sale-price="${item.salePrice}"
-                   data-usage-id="${item.usageId}">
-
-                <div class="equipment-image">
-                  🏊‍♂️
-                </div>
-
-                <div class="equipment-content">
-                  <h4 class="equipment-name">${item.itemName}</h4>
-                  <div class="equipment-category">${item.category}</div>
-
-                  <div class="equipment-details">
-                    <div><strong>Unit:</strong> ${item.unit}</div>
-
-                    <c:if test="${item.salePrice > 0}">
-                      <div class="price-row">
-                        <span>Sale Price:</span>
-                        <span class="price"><fmt:formatNumber value="${item.salePrice}" type="currency" currencyCode="VND"/></span>
-                      </div>
-                    </c:if>
+                <c:if test="${item.salePrice > 0}">
+                  <div class="price-row">
+                    <span>Sale Price:</span>
+                    <span class="price">
+                                            <c:if test="${not empty item.salePrice && item.salePrice != ''}"><fmt:formatNumber
+                                                    value="${item.salePrice}" type="currency"
+                                                    currencyCode="VND"/></c:if>
+                                        </span>
                   </div>
-
-                  <div class="stock-info">
-                    <span class="stock-text">Available: ${item.quantity}</span>
-                    <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.quantity <= 5 ? 'low-stock' : 'in-stock')}">
-                        ${item.quantity == 0 ? 'Out of Stock' : (item.quantity <= 5 ? 'Low Stock' : 'In Stock')}
-                    </span>
-                  </div>
-
-                  <div class="equipment-actions">
-                    <c:if test="${item.salePrice > 0}">
-                      <button class="btn btn-success"
-                              onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}')"
-                        ${item.quantity == 0 ? 'disabled' : ''}>
-                        🛒 Buy
-                      </button>
-                    </c:if>
-                  </div>
-                </div>
+                </c:if>
               </div>
-            </c:forEach>
+
+              <div class="stock-info">
+                <span class="stock-text">Available: ${item.quantity}</span>
+                <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.quantity <= 5 ? 'low-stock' : 'in-stock')}">
+                    ${item.quantity == 0 ? 'Out of Stock' : (item.quantity <= 5 ? 'Low Stock' : 'In Stock')}
+                </span>
+              </div>
+
+              <div class="equipment-actions">
+                <c:if test="${item.salePrice > 0}">
+                  <!-- Nút Buy: Gọi modal với redirectTo='cart' -->
+                  <button class="btn btn-success btn-sm"
+                          onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}', 'cart')"
+                    ${item.quantity == 0 ? 'disabled' : ''}>
+                    💳 Buy Now
+                  </button>
+
+                  <!-- Nút Add to Cart: Gọi modal với redirectTo='buy' -->
+                  <button class="btn btn-primary btn-sm"
+                          onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}', 'buy')"
+                    ${item.quantity == 0 ? 'disabled' : ''}>
+                    🛒 Add to Cart
+                  </button>
+                </c:if>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <!-- Sales Tab -->
-        <div id="sales" class="tab-content">
-          <table class="table">
-            <thead>
-            <tr>
-              <th>Sale ID</th>
-              <th>Equipment</th>
-              <th>Customer</th>
-              <th>Quantity</th>
-              <th>Date</th>
-              <th>Total</th>
-            </tr>
-            </thead>
-            <tbody>
-            <c:forEach var="sale" items="${saleHistory}">
-              <tr>
-                <td>#${sale.saleId}</td>
-                <td>${not empty sale.itemName ? sale.itemName : sale.inventoryId}</td>
-                <td>${sale.customerName}</td>
-                <td>${sale.quantity}</td>
-                <td><fmt:formatDate value="${sale.createdAt}" pattern="dd/MM/yyyy"/></td>
-                <td><fmt:formatNumber value="${sale.totalAmount}" type="currency" currencyCode="VND"/></td>
-              </tr>
-            </c:forEach>
-            </tbody>
-          </table>
-        </div>
-
+        </c:forEach>
       </div>
     </div>
-  </div>
-
-  <!-- Debug Section -->
-  <div class="debug-section">
-    <h4>🔍 DEBUG INFO:</h4>
-    <div><strong>Current Filter:</strong> ${currentFilter}</div>
-    <div><strong>Equipment Count:</strong> ${not empty equipmentList ? equipmentList.size() : 0}</div>
-    <c:forEach var="item" items="${equipmentList}" varStatus="status">
-      <c:if test="${status.index < 5}">
-        <div class="debug-item">
-          <strong>${item.itemName}</strong> -
-          Usage ID: ${item.usageId} |
-          Rent: ${item.rentPrice} |
-          Sale: ${item.salePrice} |
-          Type: <span style="color: blue;">
-                        <c:choose>
-                          <c:when test="${item.rentPrice > 0 && item.salePrice > 0}">BOTH</c:when>
-                          <c:when test="${item.rentPrice > 0 && item.salePrice == 0}">RENTAL</c:when>
-                          <c:when test="${item.rentPrice == 0 && item.salePrice > 0}">SALE</c:when>
-                          <c:otherwise>NONE</c:otherwise>
-                        </c:choose>
-                    </span>
-        </div>
-      </c:if>
-    </c:forEach>
   </div>
 </div>
 
 <!-- Footer -->
 <footer>
-  <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
+  <p>© 2025 SwimmingPool. All rights reserved.</p>
   <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
 
@@ -933,10 +810,11 @@
       <h3 class="modal-title">🛒 Buy Equipment</h3>
       <button class="close" onclick="closeModal('buyModal')">&times;</button>
     </div>
-    <form action="equipment" method="post" onsubmit="handleBuySubmit(event)">
-      <input type="hidden" name="action" value="sale">
+    <form action="equipment" method="post">
+      <input type="hidden" name="action" value="add">
       <input type="hidden" name="mode" value="buy">
       <input type="hidden" name="inventoryId" id="buy_inventoryId">
+      <input type="hidden" name="salePrice" id="buy_hiddenPrice">
 
       <div class="modal-body">
         <div class="form-group">
@@ -945,7 +823,8 @@
         </div>
         <div class="form-group">
           <label class="form-label">Customer Name *</label>
-          <input type="text" name="customerName" class="form-input" placeholder="Enter customer name" required>
+          <input type="text" name="customerName" class="form-input" placeholder="Enter customer name"
+                 required>
         </div>
         <div class="form-group">
           <label class="form-label">Quantity *</label>
@@ -958,24 +837,28 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-cancel" onclick="closeModal('buyModal')">Cancel</button>
-        <button type="submit" class="btn btn-success">Confirm Buy</button>
+        <button type="submit" class="btn btn-success">Add to Cart</button>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  // Filter by category
   function filterByCategory(categoryId) {
-    // Remove active class from all links
+    console.log('Filtering by category:', categoryId);
+
+    // Remove active class from all category links
     document.querySelectorAll('.category-link').forEach(link => {
       link.classList.remove('active');
     });
 
     // Add active class to clicked link
     const activeLink = document.getElementById('filter-' + (categoryId === 'all' ? 'all' : categoryId));
-    if (activeLink) activeLink.classList.add('active');
+    if (activeLink) {
+      activeLink.classList.add('active');
+    }
 
+    // Filter equipment cards
     const cards = document.querySelectorAll('.equipment-card');
     let visibleCount = 0;
 
@@ -990,21 +873,42 @@
       }
     });
 
-    // Update result count
-    document.getElementById('resultCount').textContent = visibleCount;
+    // Update result count display
+    updateResultCount(visibleCount);
   }
 
-  // Search equipment
+  // Ẩn các category filter (chỉ giữ lại "All Categories")
+  function hideCategoryFilters() {
+    console.log('Hiding category filters, keeping only "All Categories"');
+
+    const categoryItems = document.querySelectorAll('.category-item');
+    categoryItems.forEach((item, index) => {
+      // Giữ lại item đầu tiên (All Categories), ẩn các item còn lại
+      if (index > 0) {
+        item.style.display = 'none';
+      }
+    });
+
+    console.log(`Hidden ${categoryItems.length - 1} category filters`);
+  }
+
+  // ==================== SEARCH FUNCTIONS ====================
   function searchEquipment() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    console.log('Searching for:', searchTerm);
+
     const cards = document.querySelectorAll('.equipment-card');
     let visibleCount = 0;
 
     cards.forEach(card => {
-      const name = card.getAttribute('data-name');
-      const categoryText = card.querySelector('.equipment-category').textContent.toLowerCase();
+      const name = card.getAttribute('data-name') || '';
+      const categoryText = card.querySelector('.equipment-category')?.textContent.toLowerCase() || '';
+      const equipmentName = card.querySelector('.equipment-name')?.textContent.toLowerCase() || '';
 
-      if (name.includes(searchTerm) || categoryText.includes(searchTerm)) {
+      // Search in multiple fields
+      if (name.includes(searchTerm) ||
+              categoryText.includes(searchTerm) ||
+              equipmentName.includes(searchTerm)) {
         card.style.display = 'block';
         visibleCount++;
       } else {
@@ -1012,48 +916,66 @@
       }
     });
 
-    document.getElementById('resultCount').textContent = visibleCount;
+    updateResultCount(visibleCount);
   }
 
-  // Sort equipment
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    searchEquipment();
+  }
+
+  // ==================== SORT FUNCTIONS ====================
   function sortEquipment(sortBy) {
+    console.log('Sorting by:', sortBy);
+
     const grid = document.getElementById('equipmentGrid');
     const cards = Array.from(grid.querySelectorAll('.equipment-card'));
 
     cards.sort((a, b) => {
       switch(sortBy) {
         case 'name':
-          return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+          const nameA = a.getAttribute('data-name') || '';
+          const nameB = b.getAttribute('data-name') || '';
+          return nameA.localeCompare(nameB);
+
         case 'price-low':
           const priceA = parseFloat(a.getAttribute('data-sale-price')) || Infinity;
           const priceB = parseFloat(b.getAttribute('data-sale-price')) || Infinity;
           return priceA - priceB;
+
         case 'price-high':
           const priceAHigh = parseFloat(a.getAttribute('data-sale-price')) || 0;
           const priceBHigh = parseFloat(b.getAttribute('data-sale-price')) || 0;
           return priceBHigh - priceAHigh;
+
         case 'availability':
-          const qtyA = parseInt(a.querySelector('.stock-text').textContent.split(': ')[1]);
-          const qtyB = parseInt(b.querySelector('.stock-text').textContent.split(': ')[1]);
-          return qtyB - qtyA;
+          const qtyA = getQuantityFromCard(a);
+          const qtyB = getQuantityFromCard(b);
+          return qtyB - qtyA; // High to low availability
+
         default:
           return 0;
       }
     });
 
-    // Re-append sorted cards
+    // Clear grid and re-append sorted cards
+    grid.innerHTML = '';
     cards.forEach(card => grid.appendChild(card));
   }
 
-  // Filter by price
+  // ==================== PRICE FILTER FUNCTIONS ====================
   function filterByPrice() {
     const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
     const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+
+    console.log('Filtering by price range:', minPrice, 'to', maxPrice);
+
     const cards = document.querySelectorAll('.equipment-card');
     let visibleCount = 0;
 
     cards.forEach(card => {
       const salePrice = parseFloat(card.getAttribute('data-sale-price')) || 0;
+
       if (salePrice >= minPrice && salePrice <= maxPrice) {
         card.style.display = 'block';
         visibleCount++;
@@ -1062,84 +984,221 @@
       }
     });
 
-    document.getElementById('resultCount').textContent = visibleCount;
+    updateResultCount(visibleCount);
   }
 
-  // Tab switching
-  function showTab(tabName) {
-    // Hide all tabs
-    document.querySelectorAll('.tab-content').forEach(tab => {
-      tab.classList.remove('active');
-    });
-
-    // Remove active from all buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-
-    // Show selected tab
-    document.getElementById(tabName).classList.add('active');
-    event.target.classList.add('active');
+  function clearPriceFilter() {
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    filterByCategory('all'); // Reset to show all
   }
 
-  // Modal functions
-  function openBuyModal(inventoryId, itemName, salePrice) {
-    console.log('Opening buy modal:', inventoryId, itemName, salePrice);
+  // ==================== MODAL FUNCTIONS ====================
+  function openBuyModal(inventoryId, itemName, salePrice, redirectTo) {
+    console.log('Opening buy modal:', {
+      inventoryId: inventoryId,
+      itemName: itemName,
+      salePrice: salePrice,
+      redirectTo: redirectTo
+    });
 
+    // Validate inputs
+    if (!inventoryId || !itemName || !salePrice) {
+      console.error('Missing required parameters for buy modal');
+      alert('Error: Missing product information. Please try again.');
+      return;
+    }
+
+    // Set modal form values
     document.getElementById('buy_inventoryId').value = inventoryId;
     document.getElementById('buy_itemName').value = itemName;
-    document.getElementById('buy_price').value = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(salePrice);
+    document.getElementById('buy_price').value = formatCurrency(salePrice);
+    document.getElementById('buy_hiddenPrice').value = salePrice;
+
+    // Handle redirect parameter
+    let redirectInput = document.getElementById('redirectToInputBuy');
+    if (!redirectInput) {
+      redirectInput = document.createElement('input');
+      redirectInput.type = 'hidden';
+      redirectInput.id = 'redirectToInputBuy';
+      redirectInput.name = 'redirectTo';
+      document.querySelector('#buyModal form').appendChild(redirectInput);
+    }
+    redirectInput.value = redirectTo || 'buy';
+
+    // Reset form fields
+    const form = document.querySelector('#buyModal form');
+    form.querySelector('input[name="customerName"]').value = '';
+    form.querySelector('input[name="quantity"]').value = '1';
+
+    // Show modal
     document.getElementById('buyModal').style.display = 'block';
+
+    // Focus on customer name field
+    setTimeout(() => {
+      const customerNameField = form.querySelector('input[name="customerName"]');
+      if (customerNameField) {
+        customerNameField.focus();
+      }
+    }, 100);
   }
 
   function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.style.display = 'none';
+    }
   }
 
-  // Event listeners
-  document.addEventListener('DOMContentLoaded', function() {
-    // Search on Enter key
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        searchEquipment();
-      }
-    });
+  // ==================== BUY FUNCTIONS ====================
+  function buyNow(inventoryId, itemName, salePrice) {
+    openBuyModal(inventoryId, itemName, salePrice, 'cart');
+  }
 
-    // Auto-hide messages after 5 seconds
-    setTimeout(() => {
-      document.querySelectorAll('.message').forEach(msg => {
-        msg.style.opacity = '0';
-        setTimeout(() => {
-          msg.style.display = 'none';
+  function addToCart(inventoryId, itemName, salePrice) {
+    openBuyModal(inventoryId, itemName, salePrice, 'buy');
+  }
+
+  function validateBuyForm(form) {
+    const customerName = form.querySelector('input[name="customerName"]').value.trim();
+    const quantity = parseInt(form.querySelector('input[name="quantity"]').value);
+
+    if (!customerName) {
+      alert('Please enter customer name');
+      return false;
+    }
+
+    if (!quantity || quantity < 1) {
+      alert('Please enter a valid quantity');
+      return false;
+    }
+
+    return true;
+  }
+
+  // ==================== UTILITY FUNCTIONS ====================
+  function updateResultCount(count) {
+    const resultCountElement = document.getElementById('resultCount');
+    if (resultCountElement) {
+      resultCountElement.textContent = count;
+    }
+  }
+
+  function getQuantityFromCard(card) {
+    const stockText = card.querySelector('.stock-text');
+    if (stockText) {
+      const text = stockText.textContent;
+      const match = text.match(/Available:\s*(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    }
+    return 0;
+  }
+
+  function formatCurrency(amount) {
+    try {
+      const numAmount = parseFloat(amount);
+      if (isNaN(numAmount)) return 'N/A';
+      return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+      }).format(numAmount);
+    } catch (error) {
+      console.error('Error formatting currency:', error);
+      return amount.toString();
+    }
+  }
+
+  function refreshPage() {
+    window.location.reload();
+  }
+
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  function confirmAction(message) {
+    return confirm(message || 'Are you sure you want to proceed?');
+  }
+
+  // ==================== EVENT LISTENERS ====================
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing Equipment Buy System...');
+
+    // Ẩn category filters (chỉ giữ lại "All Categories")
+    hideCategoryFilters();
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      // Search on Enter key
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          searchEquipment();
+        }
+      });
+
+      // Real-time search (optional)
+      searchInput.addEventListener('input', function() {
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+          searchEquipment();
         }, 300);
       });
-    }, 5000);
+    }
 
-    // Close modal when clicking outside
+    // Price filter inputs
+    const minPriceInput = document.getElementById('minPrice');
+    const maxPriceInput = document.getElementById('maxPrice');
+
+    if (minPriceInput && maxPriceInput) {
+      [minPriceInput, maxPriceInput].forEach(input => {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            filterByPrice();
+          }
+        });
+      });
+    }
+
+    // Modal event listeners
     window.onclick = function(event) {
       if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
       }
-    }
-
-    // Clear price filters button
-    const clearFiltersBtn = document.createElement('button');
-    clearFiltersBtn.textContent = 'Clear';
-    clearFiltersBtn.className = 'btn btn-cancel';
-    clearFiltersBtn.style.width = '100%';
-    clearFiltersBtn.style.marginTop = '10px';
-    clearFiltersBtn.onclick = function() {
-      document.getElementById('minPrice').value = '';
-      document.getElementById('maxPrice').value = '';
-      filterByCategory('all');
     };
 
+    // Auto-hide success/error messages
+    setTimeout(() => {
+      document.querySelectorAll('.message').forEach(msg => {
+        msg.style.transition = 'opacity 0.3s';
+        msg.style.opacity = '0';
+        setTimeout(() => {
+          if (msg.parentNode) {
+            msg.parentNode.removeChild(msg);
+          }
+        }, 300);
+      });
+    }, 5000);
+
+    // Add clear filters button
     const priceRange = document.querySelector('.price-range');
     if (priceRange) {
+      const clearFiltersBtn = document.createElement('button');
+      clearFiltersBtn.textContent = 'Clear Filters';
+      clearFiltersBtn.className = 'btn btn-cancel';
+      clearFiltersBtn.style.width = '100%';
+      clearFiltersBtn.style.marginTop = '10px';
+      clearFiltersBtn.type = 'button';
+      clearFiltersBtn.onclick = clearPriceFilter;
       priceRange.appendChild(clearFiltersBtn);
     }
 
-    // Add keyboard shortcuts
+    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       // ESC to close modals
       if (e.key === 'Escape') {
@@ -1151,63 +1210,67 @@
       // Ctrl + F to focus search
       if (e.ctrlKey && e.key === 'f') {
         e.preventDefault();
-        document.getElementById('searchInput').focus();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
       }
     });
 
-    // Add tooltips to buttons
+    // Add tooltips to disabled buttons
     document.querySelectorAll('.btn[disabled]').forEach(btn => {
       btn.title = 'This item is currently out of stock';
     });
 
-    // Add loading state to forms
+    // Form submission handling
     document.querySelectorAll('form').forEach(form => {
-      form.addEventListener('submit', function() {
-        const submitBtn = form.querySelector('button[type="submit"]');
+      form.addEventListener('submit', function(e) {
+        // Validate buy form if it's the buy modal form
+        if (this.closest('#buyModal')) {
+          if (!validateBuyForm(this)) {
+            e.preventDefault();
+            return false;
+          }
+        }
+
+        // Add loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
         if (submitBtn) {
+          const originalText = submitBtn.textContent;
           submitBtn.textContent = 'Processing...';
           submitBtn.disabled = true;
+
+          // Reset button state if form submission fails
+          setTimeout(() => {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }, 10000);
         }
       });
     });
 
-    console.log('Equipment Buy System loaded successfully!');
+    // Initialize page state
+    const equipmentCards = document.querySelectorAll('.equipment-card');
+    updateResultCount(equipmentCards.length);
+
+    console.log('Equipment Buy System initialized successfully!');
+    console.log(`Found ${equipmentCards.length} equipment items`);
   });
 
-  // Utility functions
-  function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-  }
+  // ==================== ERROR HANDLING ====================
+  window.addEventListener('error', function(e) {
+    console.error('JavaScript Error:', e.error);
+  });
 
-  function refreshPage() {
-    window.location.reload();
-  }
-
-  // Add smooth scrolling for better UX
-  function scrollToTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
+  // ==================== PERFORMANCE MONITORING ====================
+  if ('performance' in window) {
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        const perfData = performance.getEntriesByType('navigation')[0];
+        console.log('Page Load Time:', Math.round(perfData.loadEventEnd - perfData.loadEventStart), 'ms');
+      }, 0);
     });
-  }
-
-  // Add confirmation for destructive actions
-  function confirmAction(message) {
-    return confirm(message || 'Are you sure you want to proceed?');
-  }
-  function handleBuySubmit(e) {
-    e.preventDefault(); // Ngăn form submit mặc định
-
-    // Lấy form từ sự kiện
-    const form = e.target;
-
-    // Nếu muốn xác nhận:
-    if (!confirm("Are you sure you want to confirm this purchase?")) {
-      return; // Hủy nếu người dùng chọn Cancel
-    }
-
-    // Submit thủ công
-    form.submit();
   }
 </script>
 </body>
