@@ -1,20 +1,19 @@
 package controller;
 
+import dal.CoachDAO;
+import dal.CourseDAO;
 import dal.FeedbackDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Feedback;
-import model.FeedbackSorting;
-import model.User;
+import model.*;
 import utils.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class FeedbackServlet extends HttpServlet {
     private static final String alert_message = "alert_message";
@@ -47,12 +46,10 @@ public class FeedbackServlet extends HttpServlet {
             switch (action) {
                 case "create" -> {
                     // Just display the empty form for creation
-                    request.getRequestDispatcher("feedback.jsp").forward(request, response);
+                    showFeedbackForm(request, response);
                     return;
                 }
                 case "details" -> {
-                    // This action is for viewing the details of a single feedback.
-                    // It is accessible to admins only.
                     User user = (User) request.getSession().getAttribute("user");
 
                     // User must be logged in to view details
@@ -61,46 +58,54 @@ public class FeedbackServlet extends HttpServlet {
                         return;
                     }
 
-                    String idParam = request.getParameter("id");
-                    if (idParam == null || idParam.isEmpty()) {
-                        response.sendRedirect(error_link);
+                    // Authorization: Only admins can view feedback details.
+                    // Assuming roles 3 (Coach) and 4 (Customer) are non-admins
+                    List<Integer> nonAdminRoles = Arrays.asList(3, 4);
+                    boolean isAdmin = !nonAdminRoles.contains(user.getRole().getId());
+
+                    if (!isAdmin) {
+                        request.getSession().setAttribute(alert_message, "You do not have permission to view this page.");
+                        response.sendRedirect("home.jsp"); // Redirect non-admins to home
                         return;
                     }
 
                     int feedbackId;
                     try {
-                        feedbackId = Integer.parseInt(idParam);
+                        feedbackId = Integer.parseInt(request.getParameter("id"));
                     } catch (NumberFormatException e) {
                         // Handle cases where ID is not a valid number
-                        response.sendRedirect(error_link);
+                        request.getSession().setAttribute(alert_message, "Invalid feedback ID.");
+                        response.sendRedirect("feedback?action=list");
                         return;
                     }
 
                     Feedback feedback = FeedbackDAO.getSpecificFeedback(feedbackId);
 
                     if (feedback == null) {
-                        request.setAttribute(alert_message, "Feedback not found.");
-                        request.setAttribute(alert_action, list_link);
-                        request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
+                        request.getSession().setAttribute(alert_message, "Feedback not found.");
+                        response.sendRedirect("feedback?action=list");
                         return;
                     }
 
-                    // Authorization: Only admins can view feedback details.
-                    List<Integer> nonAdminRoles = Arrays.asList(3, 4);
-                    boolean isAdmin = !nonAdminRoles.contains(user.getRole().getId());
-
-                    if (!isAdmin) {
-                        request.setAttribute(alert_message, "You do not have permission to view this page.");
-                        // Redirect non-admins to the home page after the alert.
-                        request.setAttribute(alert_action, "home.jsp");
-                        request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
-                        return;
+                    // --- NEW LOGIC ---
+                    // Based on the feedback type, fetch the related entity (Course or Coach)
+                    try {
+                        if ("Course".equals(feedback.getFeedbackType()) && feedback.getCourseId() > 0) {
+                            Course course = CourseDAO.getCourseById(feedback.getCourseId());
+                            request.setAttribute("relatedCourse", course); // Pass the course object to the JSP
+                        } else if ("Coach".equals(feedback.getFeedbackType()) && feedback.getCoachId() > 0) {
+                            Coach coach = CoachDAO.getById(feedback.getCoachId());
+                            request.setAttribute("relatedCoach", coach); // Pass the coach object to the JSP
+                        }
+                    } catch (SQLException e) {
+                        throw new ServletException("Database error fetching related feedback data", e);
                     }
+                    // --- END NEW LOGIC ---
 
                     // Set feedback attribute and forward to the details page.
                     request.setAttribute("feedback", feedback);
                     request.getRequestDispatcher("feedback_details.jsp").forward(request, response);
-                    return;
+                    return; // Important to stop further execution
                 }
                 case "list" -> {
                     listMode(request, response);
@@ -116,14 +121,69 @@ public class FeedbackServlet extends HttpServlet {
         // Existing code for handling id parameter
         String urlId = request.getParameter("id");
         if (!Utils.CheckIfEmpty(urlId)) {
+            User user = (User) request.getSession().getAttribute("user");
+
+            // User must be logged in to view details
+            if (user == null) {
+                response.sendRedirect(login_link);
+                return;
+            }
+
+            // Authorization: Only admins can view feedback details.
+            // Assuming roles 3 (Coach) and 4 (Customer) are non-admins
+            List<Integer> nonAdminRoles = Arrays.asList(3, 4);
+            boolean isAdmin = !nonAdminRoles.contains(user.getRole().getId());
+
+            if (!isAdmin) {
+                request.getSession().setAttribute(alert_message, "You do not have permission to view this page.");
+                response.sendRedirect("home.jsp"); // Redirect non-admins to home
+                return;
+            }
+
             int id = Integer.parseInt(urlId);
             Feedback f = FeedbackDAO.getSpecificFeedback(id);
             request.setAttribute("feedback", f);
             return;
         }
 
-        // If no specific action or id is provided, just forward to the feedback.jsp
-        response.sendRedirect(list_link); // for feedback form use: /feedback?action=create
+        response.sendRedirect("feedback?action=create"); // for feedback form use: /feedback?action=create
+    }
+
+    // In your FeedbackServlet.java
+
+    // This method should be called when action is "create" or "edit"
+    private void showFeedbackForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Your existing security check for logged-in user...
+        User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        try {
+            // If editing, load the existing feedback object
+            String action = request.getParameter("action");
+            if ("edit".equals(action)) {
+                // Your logic to load the feedback object and set it as a request attribute
+                // request.setAttribute("feedback", loadedFeedback);
+            }
+
+            // --- NEW LOGIC ---
+            // Fetch lists for the dropdowns from your DAOs
+            List<Course> courses = CourseDAO.getAllCourses();
+            List<Coach> coaches = CoachDAO.getAll();
+
+            // Set the lists as request attributes so the JSP can access them
+            request.setAttribute("courses", courses);
+            request.setAttribute("coaches", coaches);
+
+        } catch (SQLException e) {
+            // Handle database errors
+            throw new ServletException("Database error fetching data for feedback form", e);
+        }
+
+        // Forward to the JSP
+        request.getRequestDispatcher("feedback.jsp").forward(request, response);
     }
 
     //region Actions
@@ -292,33 +352,52 @@ public class FeedbackServlet extends HttpServlet {
     //endregion
 
     //region DoGet Method
+// In FeedbackServlet.java
+
     private void listMode(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
 
         if (user == null) {
-            request.setAttribute(alert_message, "Bạn cần đăng nhập để xem phản hồi.");
-            request.setAttribute(alert_action, login_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
+            response.sendRedirect(login_link);
             return;
         }
 
-        Integer[] show_all_banned_role = new Integer[]{3, 4};
-        boolean is_admin = !Arrays.asList(show_all_banned_role).contains(user.getRole().getId());
-
-        if (!is_admin) {
-            request.setAttribute(alert_message, "Bạn không có quyền xem tất cả phản hồi.");
-            request.setAttribute(alert_action, login_link);
-            request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
+        // Authorization check: Only non-customers can view the feedback list.
+        // Adjust role IDs as needed.
+        if (user.getRole().getId() == 4) { // Assuming 4 is Customer role
+            request.getSession().setAttribute(alert_message, "You do not have permission to view this page.");
+            response.sendRedirect("home.jsp");
             return;
         }
-        else
-        {
-            // Load both personal and all feedback for admins
+
+        try {
+            // 1. Fetch all feedback entries
             List<Feedback> allFeedback = FeedbackDAO.getAllFeedbacks();
-            request.setAttribute("feedback_list", allFeedback);
-        }
 
-        request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
+            // 2. Fetch all courses and coaches to easily look up their names
+            List<Course> allCourses = CourseDAO.getAllCourses();
+            List<Coach> allCoaches = CoachDAO.getAll();
+
+            // 3. Convert lists to Maps for efficient O(1) lookups in the JSP
+            // This prevents multiple database calls inside a loop
+            Map<Integer, Course> courseMap = allCourses.stream()
+                    .collect(Collectors.toMap(Course::getId, course -> course));
+
+            Map<Integer, Coach> coachMap = allCoaches.stream()
+                    .collect(Collectors.toMap(Coach::getId, coach -> coach));
+
+            // 4. Set all the necessary data as request attributes
+            request.setAttribute("feedbackList", allFeedback);
+            request.setAttribute("courseMap", courseMap);
+            request.setAttribute("coachMap", coachMap);
+
+            // 5. Forward to the new history/list page
+            request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
+
+        } catch (SQLException e) {
+            log("Database error while fetching feedback list and related data.", e);
+            throw new ServletException("Could not retrieve feedback data.", e);
+        }
     }
 
     private boolean isSameSorting(FeedbackSorting f_sort, String feedBackType, Integer coachId, Integer courseId, String generalFeedbackType, String sortBy, boolean sortOrder) {
