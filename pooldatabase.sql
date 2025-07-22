@@ -1,4 +1,4 @@
-Drop database swimming_pool_management;
+-- Drop database swimming_pool_management;
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
@@ -71,26 +71,6 @@ CREATE TABLE UserCode (
     created_at datetime,
     foreign key (user_id) references users(id)
 );
-CREATE TABLE Inventory_Request (
-    request_id INT PRIMARY KEY AUTO_INCREMENT,
-    inventory_id INT NOT NULL,
-    requested_quantity INT NOT NULL,
-    reason TEXT,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    approved_at DATETIME,
-    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
-);
-CREATE TABLE Repair_request (
-    request_id INT AUTO_INCREMENT PRIMARY KEY,
-    inventory_id INT,
-    reason TEXT,
-    request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'pending',
-    FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
-);
-
-
 
 -- Complaints
 CREATE TABLE Complaints (
@@ -114,109 +94,6 @@ CREATE TABLE Maintenance_Requests (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES Users(id)
-);
-
--- Bảng cho thuê thiết bị
-CREATE TABLE Equipment_Rentals (
-    rental_id INT PRIMARY KEY AUTO_INCREMENT,
-    customer_name VARCHAR(100) NOT NULL,
-    customer_id_card VARCHAR(20) NOT NULL COMMENT 'CCCD thế chấp',
-    staff_id INT NOT NULL,
-    inventory_id INT NOT NULL,
-    quantity INT NOT NULL,
-    rental_date DATE NOT NULL,
-    rent_price DECIMAL(10,2) NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
-    status ENUM('active', 'returned', 'damaged', 'lost', 'overdue', 'compensated', 'cancelled') DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    return_time TIMESTAMP NULL COMMENT 'Thời gian trả thực tế',
-    due_date DATE NULL,
-    notes TEXT NULL,
-    FOREIGN KEY (staff_id) REFERENCES Users(id),
-    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
-);
-
-
--- Bảng bán thiết bị
-CREATE TABLE Equipment_Sales (
-    sale_id INT PRIMARY KEY AUTO_INCREMENT,
-    customer_name VARCHAR(100) NOT NULL,
-    staff_id INT NOT NULL,
-    inventory_id INT NOT NULL,
-    quantity INT NOT NULL,
-    sale_price DECIMAL(10,2) NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (staff_id) REFERENCES Users(id),
-    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
-);
-
-
--- Bảng bồi thường thiết bị (SỬA: dùng import_price_total thay vì original_price)
-CREATE TABLE Equipment_Compensations (
-    compensation_id INT PRIMARY KEY AUTO_INCREMENT,
-    rental_id INT NOT NULL,
-    compensation_type ENUM('damaged', 'lost', 'overdue_fee') NOT NULL,
-    damage_description TEXT NULL,
-    import_price_total DECIMAL(10,2) NOT NULL COMMENT 'Tổng giá nhập = import_price × quantity',
-    compensation_rate DECIMAL(5,2) NOT NULL COMMENT 'Tỷ lệ bồi thường (0.0 - 1.0)',
-    total_amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền phải bồi thường',
-    paid_amount DECIMAL(10,2) DEFAULT 0,
-    payment_status ENUM('pending', 'partial', 'paid', 'waived') DEFAULT 'pending',
-    can_repair BOOLEAN NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    resolved_at TIMESTAMP NULL,
-    FOREIGN KEY (rental_id) REFERENCES Equipment_Rentals(rental_id)
-);
-
-CREATE TABLE Payments (
-    payment_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    customer_name VARCHAR(100),
-    customer_id_card VARCHAR(20),
-    amount DECIMAL(10, 2) NOT NULL,
-    payment_method VARCHAR(50),
-    payment_for VARCHAR(50) NOT NULL,
-    reference_id INT NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending',
-    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    staff_id INT,
-    FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (staff_id) REFERENCES Users(id)
-);
-
-CREATE TABLE TicketType (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,
-    price DECIMAL(10,2) NOT NULL
-);
-INSERT INTO TicketType (type_name, price) VALUES
-  ('Single',        50000.00),
-  ('Monthly',      300000.00),
-  ('ThreeMonthly', 850000.00),
-  ('SixMonthly',  1600000.00),
-  ('Year',         3000000.00);
-
--- Ticket
-CREATE TABLE Ticket (
-    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    ticket_type_id INT,
-    quantity INT,
-    start_date DATE,
-    end_date DATE,
-    ticket_status ENUM('Active', 'Expired', 'Cancelled'),
-    payment_status ENUM('Paid', 'Unpaid'),
-    payment_id INT NULL,
-    total DECIMAL(10,2),
-    created_at DATETIME,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    customer_name VARCHAR(255) NULL,  -- Thêm: Tên khách hàng (nullable cho vãng lai hoặc extra info)
-    customer_id_card VARCHAR(50) NULL,  -- Thêm: CMND/CCCD khách hàng (nullable)
-    FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (payment_id) REFERENCES Payments(payment_id),
-    FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
 
 
@@ -262,16 +139,6 @@ INSERT INTO UserCode (user_id, user_code, created_at) VALUES
 (7, 'DEF67890', '2023-05-16 11:45:00'),
 (8, 'GHI13579', '2023-05-17 09:15:00');
 
--- Insert fake data for Inventory table
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status) VALUES
-(2, 'Swimming Goggles', 'Equipment', 50, 'Piece', 'Available'),
-(2, 'Swimming Caps', 'Equipment', 75, 'Piece', 'Available'),
-(2, 'Kickboards', 'Training', 30, 'Piece', 'Available'),
-(2, 'Pull Buoys', 'Training', 25, 'Piece', 'Available'),
-(2, 'Swim Fins', 'Training', 20, 'Pair', 'In Use'),
-(2, 'Lane Ropes', 'Facility', 10, 'Piece', 'Available'),
-(2, 'Cleaning Chemicals', 'Maintenance', 15, 'Bottle', 'Available');
-
 -- Insert fake data for Feedbacks table
 -- INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating) VALUES
 -- (6, 'Course', NULL, 1, NULL, 'Great course for beginners! I learned a lot.', 5),
@@ -302,14 +169,6 @@ INSERT INTO Maintenance_Requests (description, status, created_by) VALUES
 -- (10, 149.99, 'Cash', 'Course', 5, 'Completed'),
 -- (6, 299.99, 'Credit Card', 'Course', 3, 'Completed');
 
-
--- Insert fake data for Blogs table
-INSERT INTO Blogs (title, content, author_id) VALUES
-('Benefits of Swimming', 'Swimming is one of the best full-body workouts...', 3),
-('Preparing for Your First Competition', 'Tips and tricks to prepare for your first swimming competition...', 4),
-('Water Safety Tips for Summer', 'As summer approaches, it\'s important to remember these water safety tips...', 2),
-('Nutrition for Swimmers', 'What to eat before and after swimming sessions for optimal performance...', 3),
-('Improving Your Freestyle Technique', 'Step-by-step guide to perfecting your freestyle swimming technique...', 4);
 
 -- Insert fake data for Ticket table
 -- INSERT INTO Ticket (user_id, ticket_type_id, quantity, start_date, end_date, ticket_status, payment_status, payment_id, total, created_at) VALUES
@@ -465,14 +324,7 @@ CREATE TABLE Inventory_Request (
     approved_at DATETIME,
     FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
 );
-CREATE TABLE Repair_request (
-    request_id INT AUTO_INCREMENT PRIMARY KEY,
-    inventory_id INT,
-    reason TEXT,
-    request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'pending',
-    FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id)
-);
+
 
 INSERT INTO Inventory_usage(usage_name)
 VALUES 
@@ -490,24 +342,26 @@ VALUES
   ('Hóa chất hồ bơi', 10),          -- id = 4
   ('Thiết bị an toàn', 9);         -- id = 5
 
-INSERT INTO Inventory (manager_id, item_name, category_id, quantity, unit, status, rent_price, sale_price, usage_id)
-VALUES
--- Thiết bị chỉ cho thuê (usage_id = 2)
-(2, 'Đai bơi', 1, 40, 'cái', 'Available', 10000, 0, 2),
-(2, 'Tạ nước', 2, 25, 'cái', 'Available', 15000, 0, 2),
-(2, 'Ván tập bơi', 1, 60, 'cái', 'Available', 12000, 0, 2),
-(2, 'Chân vịt tập bơi', 1, 30, 'đôi', 'Available', 18000, 0, 2),
--- Thiết bị chỉ để bán (usage_id = 4)
-(2, 'Bộ kiểm tra độ pH', 3, 60, 'bộ', 'Available', 0, 80000, 4),
-(2, 'Dung dịch diệt rêu', 4, 35, 'chai', 'Available', 0, 115000, 4),
-(2, 'Viên clo', 4, 100, 'hộp', 'Available', 0, 95000, 4),
-(2, 'Nhiệt kế điện tử', 3, 20, 'cái', 'Available', 0, 135000, 4),
+INSERT INTO Inventory (manager_id, item_name, category_id, quantity, unit, status, rent_price, sale_price, import_price, usage_id) VALUES 
+-- Category 1: Đồ bơi trẻ em (3 items: 2 rental, 1 sale)
+(1, 'Kính bơi trẻ em chống sương mù', 1, 20, 'cái', 'Available', 50000.00, 0.00, 30000.00, 1),  -- Rental Only
+(1, 'Phao bơi hình thú dễ thương', 1, 15, 'cái', 'Available', 80000.00, 0.00, 50000.00, 1),  -- Rental Only
+(1, 'Áo bơi trẻ em chống UV', 1, 10, 'cái', 'Available', 0.00, 150000.00, 100000.00, 2),  -- Sale Only
 
--- Thiết bị vừa cho thuê vừa bán (usage_id = 1)
-(2, 'Phao bơi hơi', 2, 70, 'cái', 'Available', 12000, 75000, 1),
-(2, 'Máy ảnh dưới nước', 1, 10, 'cái', 'Available', 50000, 2500000, 1),
-(2, 'Áo phao an toàn', 5, 50, 'cái', 'Available', 20000, 180000, 1),
-(2, 'Loa chống nước', 2, 15, 'cái', 'Available', 40000, 550000, 1);
+-- Category 2: Đồ bơi người lớn (3 items: 2 rental, 1 sale)
+(1, 'Mũ bơi silicone người lớn', 2, 25, 'cái', 'Available', 30000.00, 0.00, 20000.00, 1),  -- Rental Only
+(1, 'Chân vịt bơi lội chuyên nghiệp', 2, 12, 'đôi', 'Available', 100000.00, 0.00, 70000.00, 1),  -- Rental Only
+(1, 'Kính bơi người lớn polarized', 2, 18, 'cái', 'Available', 0.00, 200000.00, 150000.00, 2),  -- Sale Only
+
+-- Category 3: Dụng cụ bơi (3 items: 1 rental, 2 sale)
+(1, 'Vợt vớt rác hồ bơi dài', 3, 8, 'cái', 'Available', 0.00, 250000.00, 180000.00, 2),  -- Sale Only
+(1, 'Ván bơi tập luyện foam', 3, 10, 'cái', 'Available', 70000.00, 0.00, 50000.00, 1),  -- Rental Only
+(1, 'Bơm hơi điện cho phao', 3, 5, 'cái', 'Available', 0.00, 300000.00, 220000.00, 2),  -- Sale Only
+
+-- Category 4: Thiết bị an toàn (3 items: 1 rental, 2 sale)
+(1, 'Áo phao cứu hộ chuyên dụng', 4, 20, 'cái', 'Available', 0.00, 200000.00, 150000.00, 2),  -- Sale Only
+(1, 'Dây cứu hộ bể bơi 10m', 4, 15, 'cuộn', 'Available', 0.00, 150000.00, 100000.00, 2),  -- Sale Only
+(1, 'Còi cứu hộ khẩn cấp', 4, 30, 'cái', 'Available', 20000.00, 0.00, 15000.00, 1);  -- Rental Only
 
 -- tach (NGOC)--
 
@@ -584,3 +438,118 @@ CREATE TABLE Feedbacks (
     FOREIGN KEY (coach_id) REFERENCES Users(id),
     FOREIGN KEY (course_id) REFERENCES Courses(id)
 );
+
+-- Huy
+
+
+-- Bảng cho thuê thiết bị
+CREATE TABLE Equipment_Rentals (
+    rental_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    customer_id_card VARCHAR(20) NOT NULL COMMENT 'CCCD thế chấp',
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    rental_date DATE NOT NULL,
+    rent_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('active', 'returned', 'damaged', 'lost', 'overdue', 'compensated', 'cancelled') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_time TIMESTAMP NULL COMMENT 'Thời gian trả thực tế',
+    due_date DATE NULL,
+    notes TEXT NULL,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+
+
+-- Bảng bán thiết bị
+CREATE TABLE Equipment_Sales (
+    sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    sale_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+
+
+-- Bảng bồi thường thiết bị (SỬA: dùng import_price_total thay vì original_price)
+CREATE TABLE Equipment_Compensations (
+    compensation_id INT PRIMARY KEY AUTO_INCREMENT,
+    rental_id INT NOT NULL,
+    compensation_type ENUM('damaged', 'lost', 'overdue_fee') NOT NULL,
+    damage_description TEXT NULL,
+    import_price_total DECIMAL(10,2) NOT NULL COMMENT 'Tổng giá nhập = import_price × quantity',
+    compensation_rate DECIMAL(5,2) NOT NULL COMMENT 'Tỷ lệ bồi thường (0.0 - 1.0)',
+    total_amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền phải bồi thường',
+    paid_amount DECIMAL(10,2) DEFAULT 0,
+    payment_status ENUM('pending', 'partial', 'paid', 'waived') DEFAULT 'pending',
+    can_repair BOOLEAN NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    FOREIGN KEY (rental_id) REFERENCES Equipment_Rentals(rental_id)
+);
+
+CREATE TABLE Payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    customer_name VARCHAR(100),
+    customer_id_card VARCHAR(20),
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_method VARCHAR(50),
+    payment_for VARCHAR(50) NOT NULL,
+    reference_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    staff_id INT,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (staff_id) REFERENCES Users(id)
+);
+
+CREATE TABLE TicketType (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name ENUM('Single', 'Monthly', 'ThreeMonthly', 'SixMonthly', 'Year') UNIQUE,
+    price DECIMAL(10,2) NOT NULL
+);
+INSERT INTO TicketType (type_name, price) VALUES
+('Single',        50000.00),
+('Monthly',      300000.00),
+  ('ThreeMonthly', 850000.00),
+  ('SixMonthly',  1600000.00),
+  ('Year',         3000000.00);
+
+-- Ticket
+CREATE TABLE Ticket (
+    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    ticket_type_id INT,
+    quantity INT,
+    start_date DATE,
+    end_date DATE,
+    ticket_status ENUM('Active', 'Expired', 'Cancelled'),
+    payment_status ENUM('Paid', 'Unpaid'),
+    payment_id INT NULL,
+    total DECIMAL(10,2),
+    created_at DATETIME,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    customer_name VARCHAR(255) NULL,  -- Thêm: Tên khách hàng (nullable cho vãng lai hoặc extra info)
+    customer_id_card VARCHAR(50) NULL,  -- Thêm: CMND/CCCD khách hàng (nullable)
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (payment_id) REFERENCES Payments(payment_id),
+    FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
+);
+INSERT INTO Inventory_usage(usage_name)
+VALUES 
+  ('Rental Only'),  -- usage_id=1 (cho thuê)
+('Sale Only');    -- usage_id=2 (cho bán)
+INSERT INTO Inventory_category (category_name, category_quantity) VALUES 
+('Đồ bơi trẻ em', 0),
+('Đồ bơi người lớn', 0),
+('Dụng cụ bơi', 0),
+('Thiết bị an toàn', 0);
