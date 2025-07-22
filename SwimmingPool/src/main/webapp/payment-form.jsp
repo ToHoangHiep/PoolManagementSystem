@@ -188,7 +188,7 @@
       </tr>
       <c:forEach var="item" items="${cart.items}">
         <tr>
-          <td>${item.type}</td>
+          <td>${item.itemName}</td>
           <td>${item.qty}</td>
           <td><fmt:formatNumber value="${item.price}" type="currency" currencyCode="VND"/></td>
           <td><fmt:formatNumber value="${item.subtotal}" type="currency" currencyCode="VND"/></td>
