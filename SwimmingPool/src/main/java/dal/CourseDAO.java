@@ -9,6 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class CourseDAO {
 	public static List<Course> getAllCourses() throws SQLException {
@@ -130,5 +133,21 @@ public class CourseDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static Map<Integer, Integer> getCourseRegistrationCounts() throws SQLException {
+        Map<Integer, Integer> counts = new HashMap<>();
+        // This query counts how many times each course_id appears in the courseform table
+        String sql = "SELECT course_id, COUNT(*) as registration_count FROM courseform GROUP BY course_id";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                counts.put(rs.getInt("course_id"), rs.getInt("registration_count"));
+            }
+        }
+        return counts;
     }
 }

@@ -99,7 +99,7 @@
 
     <servlet>
         <servlet-name>BlogServlet</servlet-name>
-        <servlet-class>controller.BlogsServlet</servlet-class>
+        <servlet-class>controller.BlogServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

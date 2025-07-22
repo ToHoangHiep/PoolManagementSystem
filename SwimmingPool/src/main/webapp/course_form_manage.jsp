@@ -113,7 +113,7 @@
                             <% } %>
                         </td>
                         <td class="text-end">
-                            <a href="course-signup?action=view_form&formId=<%= form.getId() %>" class="btn btn-sm btn-outline-primary">
+                            <a href="course?action=view_form&formId=<%= form.getId() %>" class="btn btn-sm btn-outline-primary">
                                 <i class="fas fa-eye me-1"></i>View Details
                             </a>
                         </td>

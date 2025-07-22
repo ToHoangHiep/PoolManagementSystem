@@ -14,8 +14,8 @@ public class CoachServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
+        try {
+            CoachDAO dao = new CoachDAO();
 
             if ("add".equals(action)) {
                 request.getRequestDispatcher("/coach-form.jsp").forward(request, response);
@@ -55,8 +55,8 @@ public class CoachServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
+        try {
+            CoachDAO dao = new CoachDAO();
 
             int id = request.getParameter("id") != null && !request.getParameter("id").isEmpty()
                     ? Integer.parseInt(request.getParameter("id")) : 0;

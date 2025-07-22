@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-@WebServlet(name = "CourseSignupServlet", urlPatterns = {"/course-signup"})
 public class CourseServlet extends HttpServlet {
     private static final String alert_message = "alert_message";
     private static final String alert_action = "alert_action";
@@ -48,7 +47,7 @@ public class CourseServlet extends HttpServlet {
     private void createCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         isUserAllowed(request, response, "course_create.jsp");
 
-        request.getRequestDispatcher("course_signup.jsp").forward(request, response);
+        request.getRequestDispatcher("course_create.jsp").forward(request, response);
     }
 
     private void listCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -87,12 +86,39 @@ public class CourseServlet extends HttpServlet {
         request.getRequestDispatcher("course_delete.jsp").forward(request, response);
     }
 
+// In CourseServlet.java
+
     private void createCourseForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // Handle pre-selected course ID (from course list page)
+            String courseIdParam = request.getParameter("courseId");
+            if (courseIdParam != null) {
+                try {
+                    request.setAttribute("preselectedCourseId", Integer.parseInt(courseIdParam));
+                } catch (NumberFormatException e) {
+                    // Log or ignore invalid ID
+                    log("Invalid pre-selected courseId: " + courseIdParam);
+                }
+            }
+
+            // NEW: Handle pre-selected coach ID (from coach details page)
+            String coachIdParam = request.getParameter("coachId");
+            if (coachIdParam != null) {
+                try {
+                    request.setAttribute("preselectedCoachId", Integer.parseInt(coachIdParam));
+                } catch (NumberFormatException e) {
+                    // Log or ignore invalid ID
+                    log("Invalid pre-selected coachId: " + coachIdParam);
+                }
+            }
+
+            // Fetch all data needed for the form dropdowns
             List<Course> courses = CourseDAO.getAllCourses();
             List<Coach> coaches = CoachDAO.getAll();
             request.setAttribute("courses", courses);
             request.setAttribute("coaches", coaches);
+
+            // Forward to the registration form
             request.getRequestDispatcher("course_signup.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -208,7 +234,7 @@ public class CourseServlet extends HttpServlet {
             formId = Integer.parseInt(request.getParameter("formId"));
         } catch (NumberFormatException e) {
             request.getSession().setAttribute(alert_message, "Invalid Form ID provided.");
-            response.sendRedirect(request.getContextPath() + "/course-signup?action=list_form");
+            response.sendRedirect("course?action=list_form");
             return;
         }
 
@@ -297,7 +323,7 @@ public class CourseServlet extends HttpServlet {
         }
 
         // 6. Redirect back to the management page to prevent re-submission on refresh
-        response.sendRedirect(request.getContextPath() + "/course-signup?action=list_form");
+        response.sendRedirect("course?action=list_form");
     }
 
     private void createCourseFormPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

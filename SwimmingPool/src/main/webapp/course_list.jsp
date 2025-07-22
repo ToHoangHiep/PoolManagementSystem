@@ -72,10 +72,10 @@
         <%-- Admin-only buttons --%>
         <% if (isAdmin) { %>
         <div class="d-flex gap-2">
-            <a href="course-signup?action=list_form" class="btn btn-outline-primary">
+            <a href="course?action=list_form" class="btn btn-outline-primary">
                 <i class="fas fa-tasks me-2"></i>Manage Registrations
             </a>
-            <a href="course-signup?action=create" class="btn btn-primary">
+            <a href="course?action=create" class="btn btn-primary">
                 <i class="fas fa-plus-circle me-2"></i>Create New Course
             </a>
         </div>
@@ -108,12 +108,12 @@
                     </ul>
                 </div>
                 <div class="card-footer d-grid gap-2 d-md-flex justify-content-end">
-                    <a href="course-signup?action=view&courseId=<%= course.getId() %>" class="btn btn-outline-secondary btn-sm">
+                    <a href="course?action=view&courseId=<%= course.getId() %>" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-info-circle me-1"></i>Details
                     </a>
                     <%-- The Register button is only active if the course is available --%>
                     <% if ("Active".equals(course.getStatus())) { %>
-                    <a href="course-signup?action=create_form&courseId=<%= course.getId() %>" class="btn btn-primary btn-sm">
+                    <a href="course?action=create_form&courseId=<%= course.getId() %>" class="btn btn-primary btn-sm">
                         <i class="fas fa-user-plus me-1"></i>Register Now
                     </a>
                     <% } else { %>
