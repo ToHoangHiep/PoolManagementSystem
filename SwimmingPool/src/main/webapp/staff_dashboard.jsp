@@ -15,17 +15,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- FontAwesome Icon -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #f2f5f7;
-            color: #333;
         }
 
         /* Topbar */
@@ -37,7 +32,6 @@
             justify-content: space-between;
             align-items: center;
             height: 60px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
         .topbar h1 {
@@ -73,15 +67,18 @@
             color: #003d6a;
         }
 
+        .main-wrapper {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
         /* Sidebar */
         .sidebar {
-            position: fixed;
-            top: 60px;
-            left: 0;
             width: 220px;
-            height: calc(100vh - 60px);
-            background-color: #ffffff;
-            border-right: 1px solid #ddd;
+            background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-right: 1px solid rgba(255,255,255,0.4);
             box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
             padding-top: 20px;
         }
@@ -98,7 +95,7 @@
         }
 
         .sidebar a:hover {
-            background-color: #e6f2ff;
+            background-color: rgba(255, 255, 255, 0.4);
             color: #0078d7;
         }
 
@@ -107,6 +104,14 @@
             min-width: 20px;
         }
 
+        /* Background */
+        .hero-section {
+            flex: 1;
+            background-image: url('https://images.pexels.com/photos/6437583/pexels-photo-6437583.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 <body>
@@ -122,13 +127,19 @@
     </div>
 </div>
 
-<!-- Sidebar -->
-<div class="sidebar">
-    <a href="equipment-rental"><i class="fas fa-toolbox"></i> Thiết bị</a>
-    <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
-    <a href="product"><i class="fas fa-box-open"></i> Sản phẩm</a>
-    <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>
-    <a href="feedback?mode=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>
+<!-- Layout -->
+<div class="main-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="equipment-rental"><i class="fas fa-toolbox"></i> Thiết bị</a>
+        <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
+        <a href="product"><i class="fas fa-box-open"></i> Sản phẩm</a>
+        <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>
+        <a href="feedback?mode=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>
+    </div>
+
+    <!-- Background bên phải -->
+    <div class="hero-section"></div>
 </div>
 
 </body>

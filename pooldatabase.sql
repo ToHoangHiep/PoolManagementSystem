@@ -1,4 +1,4 @@
-
+Drop database swimming_pool_management;
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
@@ -519,8 +519,17 @@ CREATE TABLE Coaches (
     gender ENUM('Male', 'Female', 'Other'),
     bio TEXT,
     profile_picture VARCHAR(255),
+    active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture, active)
+VALUES
+('Lê Văn Cường', 'cuong@example.com', '0908000001', 'Male', '10 năm kinh nghiệm dạy bơi cơ bản và nâng cao.', 'coach1.jpg', TRUE),
+('Nguyễn Thị Mai', 'mai@example.com', '0908000002', 'Female', 'Chuyên về phục hồi chức năng dưới nước.', 'coach2.jpg', TRUE),
+('Trần Quốc Toản', 'toan@example.com', '0908000003', 'Male', 'Hơn 5 năm đào tạo kỹ năng bơi thi đấu.', 'coach3.jpg', TRUE);
+
+
 
 CREATE TABLE Courses (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -534,11 +543,16 @@ CREATE TABLE Courses (
     status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+INSERT INTO Courses (name, description, price, duration, estimated_session_time, student_description, schedule_description, status)
+VALUES
+('Bơi cơ bản', 'Dành cho người mới bắt đầu, học cách nổi và di chuyển trong nước.', 1000000, 10, '60 phút', '5 học viên/lớp', 'Thứ 2 - 4 - 6', 'Active'),
+('Bơi nâng cao', 'Nâng cao kỹ thuật bơi ếch, bơi sải và tăng sức bền.', 1500000, 12, '75 phút', '4 học viên/lớp', 'Thứ 3 - 5 - 7', 'Active'),
+('Bơi phục hồi chức năng', 'Chương trình hỗ trợ phục hồi sau chấn thương.', 1800000, 8, '45 phút', '3 học viên/lớp', 'Linh hoạt', 'Inactive'),
+('Bơi thi đấu', 'Huấn luyện cường độ cao cho học viên thi đấu chuyên nghiệp.', 2500000, 15, '90 phút', '1-2 học viên/lớp', 'Thứ 2 đến Thứ 7', 'Active');
 
 
 -- MINH
 
-USE swimming_pool_management;
 CREATE TABLE CourseForm(
 id INT PRIMARY KEY AUTO_INCREMENT,
 user_id INT  , -- nối đến bảng user
