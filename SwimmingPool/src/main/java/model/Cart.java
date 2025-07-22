@@ -4,32 +4,30 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Model cho giỏ hàng (Cart). Lưu danh sách các item vé, tổng tiền, và thông tin khách hàng chung.
- * Sử dụng để lưu tạm trong session.
- */
 public class Cart {
     private List<CartItem> items;
     private BigDecimal total;
     private String customerName;
     private String customerIdCard;
 
-    // Constructor mặc định
     public Cart() {
         this.items = new ArrayList<>();
         this.total = BigDecimal.ZERO;
     }
 
-    // Thêm item vào giỏ
     public void addItem(CartItem item) {
-        // Kiểm tra nếu item với type tương tự đã tồn tại, thì update qty thay vì add mới
         boolean found = false;
-        for (CartItem existingItem : items) {
-            if (existingItem.getType() == item.getType()) {
-                existingItem.setQty(existingItem.getQty() + item.getQty());
-                existingItem.updateSubtotal();
-                found = true;
-                break;
+        for (CartItem existing : items) {
+            if (existing.getType().equals(item.getType())) {
+                if (item.getType().startsWith("Ticket_") && existing.getType().equals(item.getType())) {
+                    // Tăng qty cho ticket cùng type
+                    existing.setQty(existing.getQty() + item.getQty());
+                    found = true;
+                } else if (item.getType().equals("EquipmentRental") && existing.getInventoryId() == item.getInventoryId()) {
+                    // Tăng qty cho equipment cùng inventoryId
+                    existing.setQty(existing.getQty() + item.getQty());
+                    found = true;
+                }
             }
         }
         if (!found) {
@@ -38,7 +36,13 @@ public class Cart {
         updateTotal();
     }
 
-    // Xóa item theo index (hoặc type nếu cần)
+    private void updateTotal() {
+        total = items.stream()
+                .map(CartItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // Các method khác giữ nguyên (removeItem, updateItemQty, clear, getters/setters)
     public void removeItem(int index) {
         if (index >= 0 && index < items.size()) {
             items.remove(index);
@@ -46,31 +50,21 @@ public class Cart {
         }
     }
 
-    // Update qty của item theo index
     public void updateItemQty(int index, int newQty) {
         if (index >= 0 && index < items.size() && newQty > 0) {
             CartItem item = items.get(index);
             item.setQty(newQty);
-            item.updateSubtotal();
             updateTotal();
         }
     }
 
-    // Cập nhật tổng tiền giỏ
-    private void updateTotal() {
-        total = items.stream()
-                .map(CartItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public void clear() {
+        items.clear();
+        total = BigDecimal.ZERO;
     }
 
-    // Getters và Setters
     public List<CartItem> getItems() {
         return items;
-    }
-
-    public void setItems(List<CartItem> items) {
-        this.items = items;
-        updateTotal();
     }
 
     public BigDecimal getTotal() {
@@ -93,14 +87,7 @@ public class Cart {
         this.customerIdCard = customerIdCard;
     }
 
-    // Kiểm tra giỏ rỗng
     public boolean isEmpty() {
         return items.isEmpty();
-    }
-
-    // Xóa toàn bộ giỏ sau checkout
-    public void clear() {
-        items.clear();
-        total = BigDecimal.ZERO;
     }
 }

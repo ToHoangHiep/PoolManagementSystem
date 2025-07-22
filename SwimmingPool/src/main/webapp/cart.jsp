@@ -1,3 +1,4 @@
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -180,6 +181,7 @@
 
     <c:if test="${cart != null && !cart.isEmpty()}">
         <table>
+            <thead>
             <tr>
                 <th>Type</th>
                 <th>Quantity</th>
@@ -187,14 +189,28 @@
                 <th>Subtotal</th>
                 <th>Action</th>
             </tr>
+            </thead>
+            <tbody>
             <c:forEach var="item" items="${cart.items}" varStatus="status">
                 <tr>
-                    <td>${item.type}</td>
                     <td>
-                        <form action="cart" method="post">
+                        <c:choose>
+                            <c:when test="${fn:startsWith(item.type, 'Ticket_')}">
+                                Ticket: ${fn:replace(item.type, 'Ticket_', '')}
+                            </c:when>
+                            <c:when test="${item.type == 'EquipmentRental'}">
+                                Equipment rental (${item.itemName})
+                            </c:when>
+                            <c:when test="${item.type == 'EquipmentBuy'}">
+                                Equipment buy (${item.itemName})
+                            </c:when>
+                        </c:choose>
+                    </td>
+                    <td>
+                        <form action="cart" method="post" style="display:flex; justify-content:center; align-items:center; gap:6px;">
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="index" value="${status.index}">
-                            <input type="number" name="newQty" value="${item.qty}" min="1">
+                            <input type="number" name="newQty" value="${item.qty}" min="1" style="width: 60px;">
                             <button type="submit" class="btn-update">Update</button>
                         </form>
                     </td>
@@ -209,14 +225,13 @@
                     </td>
                 </tr>
             </c:forEach>
-            <tr>
-                <td colspan="3"><strong>Total</strong></td>
-                <td colspan="2"><fmt:formatNumber value="${cart.total}" type="currency" currencyCode="VND"/></td>
-            </tr>
+            </tbody>
         </table>
 
-        <form action="cart" method="post">
-            <input type="hidden" name="action" value="checkout">
+        <!-- Checkout form -->
+        <form action="payment" method="get">
+            <input type="hidden" name="action" value="confirm">
+            <input type="hidden" name="for" value="mixed">
             <button type="submit" class="btn-checkout">Checkout</button>
         </form>
     </c:if>

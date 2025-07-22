@@ -250,25 +250,6 @@
                 display: none;
             }
         }
-
-        .qr-code {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .qr-placeholder {
-            display: inline-block;
-            width: 150px;
-            height: 150px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6c757d;
-        }
-
         .footer-note {
             text-align: center;
             font-size: 12px;
@@ -412,19 +393,7 @@
                 Total Amount Due: <strong><fmt:formatNumber value="${compensation.totalAmount}" type="currency" currencyCode="VND"/></strong><br>
                 Please proceed to payment counter or use the payment options below.
             </div>
-        </div>
 
-        <!-- QR Code for Payment -->
-        <div class="qr-code">
-            <h4>Scan to Pay</h4>
-            <div class="qr-placeholder">
-                QR Code<br>
-                (Payment)
-            </div>
-            <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                Scan this QR code with your mobile banking app
-            </p>
-        </div>
 
         <!-- Footer Note -->
         <div class="footer-note">
@@ -439,14 +408,19 @@
         <button class="btn btn-primary" onclick="window.print()">
             🖨️ Print Invoice
         </button>
-        <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"
+<%--        <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"--%>
+<%--           class="btn btn-success">--%>
+<%--            💳 Proceed to Payment--%>
+<%--        </a>--%>
+        <!-- THÊM BACK TO RENTALS BUTTON: -->
+        <a href="${pageContext.request.contextPath}/equipment?mode=rental"
            class="btn btn-success">
-            💳 Proceed to Payment
+            🔙 Back to Rentals
         </a>
-        <a href="${pageContext.request.contextPath}/compensation?action=view&id=${compensation.compensationId}"
-           class="btn btn-secondary">
-            📋 View Details
-        </a>
+<%--        <a href="${pageContext.request.contextPath}/compensation?action=view&id=${compensation.compensationId}"--%>
+<%--           class="btn btn-secondary">--%>
+<%--            📋 View Details--%>
+<%--        </a>--%>
     </div>
 </div>
 
@@ -470,34 +444,6 @@
         }
     }, 10000);
 
-    // Generate simple QR code placeholder (in real app, use QR library)
-    function generateQRPlaceholder() {
-        const qrData = {
-            invoiceNo: '${invoiceNumber}',
-            amount: '${compensation.totalAmount}',
-            compensationId: '${compensation.compensationId}'
-        };
-        console.log('QR Data:', qrData);
-    }
-
-    // Download invoice as PDF (requires additional library in real implementation)
-    function downloadPDF() {
-        alert('PDF download feature will be implemented with a PDF library like jsPDF');
-    }
-
-    // Email invoice
-    function emailInvoice() {
-        const email = prompt('Enter email address:');
-        if (email) {
-            alert('Invoice will be sent to: ' + email);
-            // In real app, make AJAX call to send email
-        }
-    }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        generateQRPlaceholder();
-    });
 </script>
 </body>
 </html>

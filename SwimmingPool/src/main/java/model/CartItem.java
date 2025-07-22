@@ -2,35 +2,54 @@ package model;
 
 import java.math.BigDecimal;
 
-/**
- * Model cho từng item trong giỏ hàng. Đại diện cho một loại vé với số lượng.
- * Liên kết với Ticket.TicketTypeName từ model Ticket của bạn.
- */
 public class CartItem {
-    private Ticket.TicketTypeName type; // Loại vé (Single, Monthly, ...)
-    private int qty;                     // Số lượng
-    private BigDecimal price;            // Giá đơn vị (lấy từ DAO)
-    private BigDecimal subtotal;         // Tiền phụ = price * qty
+    private String type;
+    private String itemName;
+    private int qty;
+    private BigDecimal price;
+    private BigDecimal subtotal;
+    private int inventoryId = -1;
 
-    // Constructor
+    // Constructor for ticket (giữ nguyên)
     public CartItem(Ticket.TicketTypeName type, int qty, BigDecimal price) {
-        this.type = type;
+        this.type = "Ticket_" + type.name();
+        this.itemName = "Ticket " + type.name();
         this.qty = qty;
         this.price = price;
         updateSubtotal();
     }
 
-    // Cập nhật subtotal khi qty thay đổi
-    public void updateSubtotal() {
+    // *** XÓA 2 constructor cũ, CHỈ GIỮ Universal constructor ***
+    // Universal constructor for equipment (rental hoặc buy)
+    public CartItem(int inventoryId, int qty, BigDecimal price, String type, String itemName) {
+        this.inventoryId = inventoryId;
+        this.qty = qty;
+        this.price = price;
+        this.type = type;  // "EquipmentRental" hoặc "EquipmentBuy"
+        this.itemName = itemName;
+        updateSubtotal();
+
+        System.out.println("[DEBUG CartItem] Universal constructor - Type: " + type + ", Name: " + itemName);
+    }
+
+    private void updateSubtotal() {
         this.subtotal = price.multiply(BigDecimal.valueOf(qty));
     }
 
-    // Getters và Setters
-    public Ticket.TicketTypeName getType() {
+    // Getters/Setters (giữ nguyên)
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getType() {
         return type;
     }
 
-    public void setType(Ticket.TicketTypeName type) {
+    public void setType(String type) {
         this.type = type;
     }
 
@@ -56,5 +75,13 @@ public class CartItem {
 
     public BigDecimal getSubtotal() {
         return subtotal;
+    }
+
+    public int getInventoryId() {
+        return inventoryId;
+    }
+
+    public void setInventoryId(int inventoryId) {
+        this.inventoryId = inventoryId;
     }
 }

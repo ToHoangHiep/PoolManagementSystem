@@ -277,50 +277,6 @@
             font-size: 18px;
         }
 
-        .photo-upload-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border: 2px dashed #dee2e6;
-        }
-
-        .photo-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .photo-item {
-            position: relative;
-            aspect-ratio: 1;
-            background: #e9ecef;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .photo-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-remove {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(220, 53, 69, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            font-size: 16px;
-            line-height: 1;
-        }
-
         footer {
             background: #003e73;
             color: white;
@@ -347,13 +303,6 @@
 <!-- Header -->
 <nav class="navbar">
     <div class="logo">🏊‍♂️ Swimming Pool</div>
-    <div class="nav-links">
-        <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-        <a href="${pageContext.request.contextPath}/equipment">Equipment</a>
-        <a href="${pageContext.request.contextPath}/compensation">Compensations</a>
-        <a href="${pageContext.request.contextPath}/blacklist">Blacklist</a>
-        <a href="${pageContext.request.contextPath}/reports">Reports</a>
-    </div>
     <div class="auth">
         <a href="${pageContext.request.contextPath}/profile" class="login-btn">Profile</a>
         <a href="${pageContext.request.contextPath}/logout" class="register-btn">Logout</a>
@@ -472,13 +421,6 @@
                           placeholder="Describe the damage, loss circumstances, or overdue details...">${param.damageDescription}</textarea>
             </div>
 
-            <!-- Photo Upload Section -->
-            <div class="photo-upload-section">
-                <h4>📸 Upload Damage Photos (Optional)</h4>
-                <input type="file" id="photoUpload" name="photos" multiple accept="image/*" onchange="previewPhotos()">
-                <div class="photo-preview" id="photoPreview"></div>
-            </div>
-
             <!-- Server Calculation Result -->
             <c:if test="${not empty calculationResult}">
                 <div class="calculation-box">
@@ -595,46 +537,9 @@
         form.submit();
     }
 
-    // Preview uploaded photos
-    function previewPhotos() {
-        const input = document.getElementById('photoUpload');
-        const preview = document.getElementById('photoPreview');
-        preview.innerHTML = '';
 
-        if (input.files) {
-            Array.from(input.files).forEach((file, index) => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const photoItem = document.createElement('div');
-                        photoItem.className = 'photo-item';
-                        photoItem.innerHTML = `
-                            <img src="${e.target.result}" alt="Damage photo ${index + 1}">
-                            <button type="button" class="photo-remove" onclick="removePhoto(${index})">&times;</button>
-                        `;
-                        preview.appendChild(photoItem);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-    }
 
-    // Remove photo from preview
-    function removePhoto(index) {
-        const input = document.getElementById('photoUpload');
-        const dt = new DataTransfer();
-        const files = Array.from(input.files);
 
-        files.forEach((file, i) => {
-            if (i !== index) {
-                dt.items.add(file);
-            }
-        });
-
-        input.files = dt.files;
-        previewPhotos();
-    }
 
     // Form validation
     document.getElementById('compensationForm').addEventListener('submit', function(e) {
