@@ -26,7 +26,6 @@ public class CourseServlet extends HttpServlet {
     private static final String alert_action = "alert_action";
     private static final String error = "error";
 
-    private static final String blogs_link = "blogs";
     private static final String error_link = "error.jsp";
     private static final String login_link = "login";
 

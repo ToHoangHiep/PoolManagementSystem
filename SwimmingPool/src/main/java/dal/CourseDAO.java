@@ -12,12 +12,12 @@ import java.util.List;
 
 public class CourseDAO {
 	public static List<Course> getAllCourses() throws SQLException {
+        List<Course> courses = new ArrayList<>();
         String sql = "SELECT * FROM Courses";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
 
-			List<Course> courses = new ArrayList<>();
             ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
@@ -33,11 +33,12 @@ public class CourseDAO {
                 course.setCreated_at(rs.getDate("created_at"));
 				courses.add(course);
 			}
-            return courses;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+
+        return courses;
     }
 
     public static Course getCourseById(int courseId) {

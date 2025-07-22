@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import model.CourseForm;
@@ -11,10 +12,12 @@ import utils.DBConnect;
 
 public class CourseFormDAO {
     public static List<CourseForm> getAll() {
+        List<CourseForm> list = new ArrayList<>();
         String sql = "SELECT * FROM courseform";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
+
 
             while (rs.next()) {
                 CourseForm courseForm = new CourseForm();
@@ -28,13 +31,13 @@ public class CourseFormDAO {
                 courseForm.setRequest_date(rs.getDate("request_date"));
                 courseForm.setHas_processed(rs.getBoolean("has_processed"));
 
-                return List.of(courseForm);
+                list.add(courseForm);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        return null;
+        return list;
     }
 
     public static CourseForm getById(int id) {
