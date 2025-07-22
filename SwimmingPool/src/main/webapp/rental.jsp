@@ -648,20 +648,6 @@
             border-left-color: #dc3545;
         }
 
-        /* Debug section */
-        .debug-section {
-            background: #f8f9fa;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-        }
-
-        .debug-item {
-            margin: 5px 0;
-            font-size: 12px;
-            font-family: monospace;
-        }
 
         /* ===== FOOTER STYLES ===== */
         footer {
@@ -847,7 +833,6 @@
 
                                 <div class="equipment-content">
                                     <h4 class="equipment-name">${item.itemName}</h4>
-                                    <p style="color:red; font-size:12px;">Debug ID: ${item.inventoryId}</p>
                                     <div class="equipment-category">${item.category}</div>
 
                                     <div class="equipment-details">
