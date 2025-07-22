@@ -23,8 +23,9 @@ public class TicketPurchaseServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-        if (user == null || user.getRole().getId() != 5) {  // Chỉ staff (role_id=2) được truy cập
-            request.setAttribute("error", "Chức năng chỉ dành cho nhân viên!");
+        // Cho phép admin (roleId = 1) và staff (roleId = 5) truy cập
+        if (user == null || (user.getRole().getId() != 1 && user.getRole().getId() != 5)) {
+            request.setAttribute("error", "Chức năng chỉ dành cho admin và nhân viên!");
             response.sendRedirect("home.jsp");
             return;
         }
@@ -40,7 +41,6 @@ public class TicketPurchaseServlet extends HttpServlet {
             String customerName = request.getParameter("customerName");
             String customerIdCard = request.getParameter("customerIdCard");
 
-            System.out.println("Debug: doPost TicketPurchaseServlet - Input: ticketType=" + typeStr + ", quantity=" + quantityStr + ", customerName=" + customerName + ", customerIdCard=" + customerIdCard);
 
             if (typeStr == null || quantityStr == null || customerName == null || customerIdCard == null ||
                     typeStr.isEmpty() || quantityStr.isEmpty() || customerName.isEmpty() || customerIdCard.isEmpty()) {
@@ -74,14 +74,15 @@ public class TicketPurchaseServlet extends HttpServlet {
                 return;
             }
 
+
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
-            if (user == null || user.getRole().getId() != 5) {  // Chỉ staff được add
-                request.setAttribute("error", "Chức năng chỉ dành cho nhân viên!");
+            // Cho phép admin (roleId = 1) và staff (roleId = 5) thực hiện mua vé
+            if (user == null || (user.getRole().getId() != 1 && user.getRole().getId() != 5)) {
+                request.setAttribute("error", "Chức năng chỉ dành cho admin và nhân viên!");
                 response.sendRedirect("home.jsp");
                 return;
             }
-
             CartItem cartItem = new CartItem(ticketType, quantity, price);
 
             Cart cart = (Cart) session.getAttribute("cart");

@@ -283,36 +283,7 @@
             font-weight: bold;
         }
 
-        .photo-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
 
-        .photo-item {
-            position: relative;
-            background: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #dee2e6;
-        }
-
-        .photo-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .photo-placeholder {
-            color: #6c757d;
-            text-align: center;
-            padding: 20px;
-        }
 
         .alert {
             padding: 15px;
@@ -358,9 +329,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .photo-gallery {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
+
         }
     </style>
 </head>
@@ -368,13 +337,6 @@
 <!-- Header -->
 <nav class="navbar">
     <div class="logo">🏊‍♂️ Swimming Pool</div>
-    <div class="nav-links">
-        <a href="${pageContext.request.contextPath}/dashboard">Dashboard</a>
-        <a href="${pageContext.request.contextPath}/equipment">Equipment</a>
-        <a href="${pageContext.request.contextPath}/compensation">Compensations</a>
-        <a href="${pageContext.request.contextPath}/blacklist">Blacklist</a>
-        <a href="${pageContext.request.contextPath}/reports">Reports</a>
-    </div>
     <div class="auth">
         <a href="${pageContext.request.contextPath}/profile" class="login-btn">Profile</a>
         <a href="${pageContext.request.contextPath}/logout" class="register-btn">Logout</a>
@@ -554,33 +516,6 @@
                             </c:choose>
                         </div>
 
-                        <!-- Damage Photos -->
-                        <div class="card">
-                            <h3>📸 Damage Photos</h3>
-                            <c:choose>
-                                <c:when test="${not empty photos}">
-                                    <div class="photo-gallery">
-                                        <c:forEach var="photo" items="${photos}">
-                                            <div class="photo-item">
-                                                <img src="${pageContext.request.contextPath}/${photo.photoPath}"
-                                                     alt="Damage Photo"
-                                                     title="${photo.photoDescription}">
-                                            </div>
-                                        </c:forEach>
-                                    </div>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="photo-gallery">
-                                        <div class="photo-item">
-                                            <div class="photo-placeholder">
-                                                📷<br>No photos<br>uploaded
-                                            </div>
-                                        </div>
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-
                         <!-- Repair Information -->
                         <c:if test="${compensation.compensationType == 'damaged'}">
                             <div class="card">
@@ -645,8 +580,7 @@
                                    class="btn btn-success">💳 Add Payment</a>
                             </c:if>
 
-                            <a href="${pageContext.request.contextPath}/compensation?action=photos&compensationId=${compensation.compensationId}"
-                               class="btn btn-info">📸 Manage Photos</a>
+
 
                             <c:if test="${compensation.compensationType == 'damaged' && compensation.canRepair}">
                                 <a href="${pageContext.request.contextPath}/repair?action=create&compensationId=${compensation.compensationId}"
@@ -693,8 +627,6 @@
                                 <a href="${pageContext.request.contextPath}/customer/history?idCard=${rental.customerIdCard}"
                                    class="btn btn-info" style="width: 100%;">📋 View History</a>
 
-                                <a href="${pageContext.request.contextPath}/blacklist?action=check&customerIdCard=${rental.customerIdCard}"
-                                   class="btn btn-warning" style="width: 100%; margin-top: 10px;">🚫 Check Blacklist</a>
                             </div>
                         </c:if>
 
@@ -718,9 +650,6 @@
                                         </c:choose>
                                     </span>
                             </div>
-
-
-
                             <div class="info-item">
                                 <strong>Actions Available</strong>
                                 <div style="margin-top: 8px;">
@@ -736,7 +665,6 @@
                                     <c:if test="${compensation.canRepair}">
                                         🔧 Repairable<br>
                                     </c:if>
-                                    📸 Photo Upload Available
                                 </div>
                             </div>
                         </div>
@@ -808,31 +736,7 @@
         });
     });
 
-    // Photo gallery lightbox effect (simple)
-    document.querySelectorAll('.photo-item img').forEach(img => {
-        img.addEventListener('click', function() {
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.9); z-index: 1000; display: flex;
-                    align-items: center; justify-content: center; cursor: pointer;
-                `;
 
-            const enlargedImg = document.createElement('img');
-            enlargedImg.src = this.src;
-            enlargedImg.style.cssText = `
-                    max-width: 90%; max-height: 90%; border-radius: 8px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                `;
-
-            overlay.appendChild(enlargedImg);
-            document.body.appendChild(overlay);
-
-            overlay.addEventListener('click', function() {
-                document.body.removeChild(overlay);
-            });
-        });
-    });
 
     // Refresh page every 30 seconds to update payment status
     setInterval(function() {

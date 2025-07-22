@@ -1,12 +1,8 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: LAPTOP
-  Date: 30-May-25
-  Time: 10:28
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page import="model.User" %>
 <%@ page import="model.Feedback" %>
+<%@ page import="model.Course" %>
+<%@ page import="model.Coach" %>
+<%@ page import="java.util.List" %>
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
@@ -15,6 +11,10 @@
     }
     Feedback feedback = (Feedback) request.getAttribute("feedback");
     boolean existing = feedback != null;
+
+    // --- Data for Dropdowns (from Servlet) ---
+    List<Course> courses = (List<Course>) request.getAttribute("courses");
+    List<Coach> coaches = (List<Coach>) request.getAttribute("coaches");
 %>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
@@ -56,14 +56,14 @@
                 <div class="card-body">
                     <%-- Display any alert messages passed from the servlet --%>
                     <% if (request.getAttribute("alert_message") != null) { %>
-                        <script>
-                            alert('<%= request.getAttribute("alert_message") %>');
-                        </script>
+                    <script>
+                        alert('<%= request.getAttribute("alert_message") %>');
+                    </script>
                     <% } %>
 
                     <form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">
                         <% if (existing) { %>
-                            <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
+                        <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
                         <% } %>
 
                         <!-- Feedback Category -->
@@ -74,8 +74,13 @@
                                 <option value="General" <%= existing && "General".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
                                     General Feedback
                                 </option>
-                                <option value="Coach" disabled>Coach Feedback (Coming Soon)</option>
-                                <option value="Course" disabled>Course Feedback (Coming Soon)</option>
+                                <%-- UPDATED: Enabled Course and Coach options --%>
+                                <option value="Course" <%= existing && "Course".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
+                                    Course Feedback
+                                </option>
+                                <option value="Coach" <%= existing && "Coach".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
+                                    Coach Feedback
+                                </option>
                             </select>
                         </div>
 
@@ -88,6 +93,32 @@
                                 <option value="Service" <%= existing && "Service".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Customer Service</option>
                                 <option value="Facility" <%= existing && "Facility".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Facilities & Amenities</option>
                                 <option value="Other" <%= existing && "Other".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Other</option>
+                            </select>
+                        </div>
+
+                        <%-- NEW: Dropdown for Course Feedback --%>
+                        <div class="mb-3 d-none" id="course_feedback_group">
+                            <label for="course_id" class="form-label">Select Course</label>
+                            <select name="course_id" id="course_id" class="form-select">
+                                <option value="" disabled selected>-- Choose a course --</option>
+                                <% if (courses != null) {
+                                    for (Course c : courses) { %>
+                                <option value="<%= c.getId() %>" <%= existing && feedback.getCourseId() != null && feedback.getCourseId() == c.getId() ? "selected" : "" %>><%= c.getName() %></option>
+                                <%  }
+                                } %>
+                            </select>
+                        </div>
+
+                        <%-- NEW: Dropdown for Coach Feedback --%>
+                        <div class="mb-3 d-none" id="coach_feedback_group">
+                            <label for="coach_id" class="form-label">Select Coach</label>
+                            <select name="coach_id" id="coach_id" class="form-select">
+                                <option value="" disabled selected>-- Choose a coach --</option>
+                                <% if (coaches != null) {
+                                    for (Coach c : coaches) { %>
+                                <option value="<%= c.getId() %>" <%= existing && feedback.getCoachId() != null && feedback.getCoachId() == c.getId() ? "selected" : "" %>><%= c.getFullName() %></option>
+                                <%  }
+                                } %>
                             </select>
                         </div>
 
@@ -122,20 +153,39 @@
 <script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Get all the elements we need to interact with
         const feedbackTypeSelect = document.getElementById('feedback_type');
         const generalGroup = document.getElementById('general_feedback_type_group');
         const generalSelect = document.getElementById('general_feedback_type');
+        const courseGroup = document.getElementById('course_feedback_group');
+        const courseSelect = document.getElementById('course_id');
+        const coachGroup = document.getElementById('coach_feedback_group');
+        const coachSelect = document.getElementById('coach_id');
         const ratingSlider = document.getElementById('rating');
         const ratingValueDisplay = document.getElementById('ratingValueDisplay');
 
-        // Function to show/hide the specific category dropdown
+        // Function to show/hide the specific category dropdowns
         window.showHideFields = function() {
-            if (feedbackTypeSelect.value === 'General') {
+            const selectedType = feedbackTypeSelect.value;
+
+            // Hide all groups first and remove their 'required' attribute
+            generalGroup.classList.add('d-none');
+            generalSelect.required = false;
+            courseGroup.classList.add('d-none');
+            courseSelect.required = false;
+            coachGroup.classList.add('d-none');
+            coachSelect.required = false;
+
+            // Show the relevant group based on selection and make it required
+            if (selectedType === 'General') {
                 generalGroup.classList.remove('d-none');
                 generalSelect.required = true;
-            } else {
-                generalGroup.classList.add('d-none');
-                generalSelect.required = false;
+            } else if (selectedType === 'Course') {
+                courseGroup.classList.remove('d-none');
+                courseSelect.required = true;
+            } else if (selectedType === 'Coach') {
+                coachGroup.classList.remove('d-none');
+                coachSelect.required = true;
             }
         };
 
@@ -159,7 +209,7 @@
         // Add event listener for the slider
         ratingSlider.addEventListener('input', updateRating);
 
-        // Initial setup on page load
+        // Initial setup on page load to ensure correct fields are shown
         showHideFields();
         updateRating();
     });
