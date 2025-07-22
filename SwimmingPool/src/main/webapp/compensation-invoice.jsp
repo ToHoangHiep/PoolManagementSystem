@@ -276,7 +276,6 @@
         <!-- Success Message -->
         <div class="success-box">
             <strong>✅ Compensation Record Created Successfully!</strong><br>
-            Please review the details below and proceed with payment.
         </div>
 
         <!-- Customer Information -->
