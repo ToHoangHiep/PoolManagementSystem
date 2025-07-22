@@ -25,7 +25,15 @@ public class EquipmentServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Code gốc của bạn ở đây (không sửa)
+
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null || (user.getRole().getId() != 1 && user.getRole().getId() != 5)) {
+            request.setAttribute("error", "Chức năng chỉ dành cho admin và nhân viên!");
+            response.sendRedirect("home.jsp");
+            return;
+        }
+
         String mode = request.getParameter("mode");
         if (mode == null || mode.isEmpty()) mode = "rental";  // Default rental
 
@@ -64,17 +72,20 @@ public class EquipmentServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null || (user.getRole().getId() != 1 && user.getRole().getId() != 5)) {
+            request.setAttribute("error", "Chức năng chỉ dành cho admin và nhân viên!");
+            response.sendRedirect("home.jsp");
+            return;
+        }
+
+
+
         String action = request.getParameter("action");
         String mode = request.getParameter("mode");  // Giữ mode từ form
 
-        // DEBUG: In ra các tham số để kiểm tra
-        System.out.println("[DEBUG] Action received: " + action);
-        System.out.println("[DEBUG] Mode received: " + mode);
-        System.out.println("[DEBUG] All parameters:");
-
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
-        int staffId = (user != null) ? user.getId() : 1;  // Fallback nếu chưa login
+        int staffId = user.getId();
 
         try {
             if ("rental".equals(action) || "sale".equals(action) || "add".equals(action)) {
