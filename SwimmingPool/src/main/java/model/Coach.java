@@ -8,8 +8,8 @@ public class Coach {
     private String gender;
     private String bio;
     private String profilePicture;
+    private String status; // New field
 
-    // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -30,4 +30,16 @@ public class Coach {
 
     public String getProfilePicture() { return profilePicture; }
     public void setProfilePicture(String profilePicture) { this.profilePicture = profilePicture; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public boolean isActive() {
+        return "Active".equalsIgnoreCase(status);
+    }
+
+    public void setActive(boolean isActive) {
+        this.status = isActive ? "Active" : "Inactive";
+    }
+
 }

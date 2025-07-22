@@ -1,4 +1,3 @@
-
 -- Tạo database
 CREATE DATABASE swimming_pool_management;
 USE swimming_pool_management;
@@ -73,23 +72,6 @@ CREATE TABLE UserCode (
 );
 
 
--- Feedbacks
--- CREATE TABLE Feedbacks (
---     id INT PRIMARY KEY AUTO_INCREMENT,
---     user_id INT,
---     feedback_type ENUM('Course', 'Coach', 'General'),
---     coach_id INT,
---     course_id INT,
---     general_feedback_type ENUM('Food', 'Service', 'Facility', 'Other'),
---     content TEXT,
---     rating INT,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     FOREIGN KEY (user_id) REFERENCES Users(id),
---     FOREIGN KEY (coach_id) REFERENCES Users(id),
---     FOREIGN KEY (course_id) REFERENCES Courses(id)
--- );
-
 -- Complaints
 CREATE TABLE Complaints (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -114,28 +96,22 @@ CREATE TABLE Maintenance_Requests (
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
 
--- Payments
+
+
 CREATE TABLE Payments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
-    amount DECIMAL(10, 2),
-    method VARCHAR(50),
-    payment_for ENUM('Course', 'Service'),
-    reference_id INT,
-    status ENUM('Pending', 'Completed', 'Failed'),
+    customer_name VARCHAR(100),
+    customer_id_card VARCHAR(20),amount DECIMAL(10, 2) NOT NULL,
+    payment_method VARCHAR(50),
+    payment_for VARCHAR(50) NOT NULL,
+    reference_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
     payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id)
-);
-
-
--- Blogs
-CREATE TABLE Blogs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200),
-    content TEXT,
-    author_id INT,
-    published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES Users(id)
+    notes TEXT,
+    staff_id INT,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (staff_id) REFERENCES Users(id)
 );
 
 CREATE TABLE TicketType (
@@ -164,8 +140,10 @@ CREATE TABLE Ticket (
     total DECIMAL(10,2),
     created_at DATETIME,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    customer_name VARCHAR(255) NULL,  -- Thêm: Tên khách hàng (nullable cho vãng lai hoặc extra info)
+    customer_id_card VARCHAR(50) NULL,  -- Thêm: CMND/CCCD khách hàng (nullable)
     FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (payment_id) REFERENCES Payments(id),
+    FOREIGN KEY (payment_id) REFERENCES Payments(payment_id),
     FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
 
@@ -189,8 +167,7 @@ INSERT INTO Users (full_name, email, password_hash, phone_number, address, dob, 
 -- ('Mike Coach', 'coach1@pool.com', 'hashed_password_789', '3456789012', '789 Coach Blvd, City', '1990-03-10', 'Male', 3, 'Active'),
 -- ('Lisa Coach', 'coach2@pool.com', 'hashed_password_101', '4567890123', '101 Coach Lane, City', '1992-07-25', 'Female', 3, 'Active'),
 ('Tom Staff', 'staff@pool.com', 'hashed_password_112', '5678901234', '112 Staff Rd, City', '1995-11-05', 'Male', 5, 'Active'),
-('Emma Customer', 'customer1@example.com', 'hashed_password_131', '6789012345', '131 Customer St, City', '1998-01-30', 'Female', 4, 'Active'),
-('David Customer', 'customer2@example.com', 'hashed_password_415', '7890123456', '415 Customer Ave, City', '2000-09-12', 'Male', 4, 'Active'),
+('Emma Customer', 'customer1@example.com', 'hashed_password_131', '6789012345', '131 Customer St, City', '1998-01-30', 'Female', 4, 'Active'),('David Customer', 'customer2@example.com', 'hashed_password_415', '7890123456', '415 Customer Ave, City', '2000-09-12', 'Male', 4, 'Active'),
 ('Sophia Customer', 'customer3@example.com', 'hashed_password_617', '8901234567', '617 Customer Blvd, City', '1997-04-18', 'Female', 4, 'Active'),
 ('James Customer', 'customer4@example.com', 'hashed_password_819', '9012345678', '819 Customer Lane, City', '1999-12-05', 'Male', 4, 'Active'),
 ('Olivia Customer', 'customer5@example.com', 'hashed_password_921', '0123456789', '921 Customer Rd, City', '2001-06-22', 'Female', 4, 'Active');
@@ -212,15 +189,6 @@ INSERT INTO UserCode (user_id, user_code, created_at) VALUES
 (7, 'DEF67890', '2023-05-16 11:45:00'),
 (8, 'GHI13579', '2023-05-17 09:15:00');
 
--- Insert fake data for Inventory table
-INSERT INTO Inventory (manager_id, item_name, category, quantity, unit, status) VALUES
-(2, 'Swimming Goggles', 'Equipment', 50, 'Piece', 'Available'),
-(2, 'Swimming Caps', 'Equipment', 75, 'Piece', 'Available'),
-(2, 'Kickboards', 'Training', 30, 'Piece', 'Available'),
-(2, 'Pull Buoys', 'Training', 25, 'Piece', 'Available'),
-(2, 'Swim Fins', 'Training', 20, 'Pair', 'In Use'),
-(2, 'Lane Ropes', 'Facility', 10, 'Piece', 'Available'),
-(2, 'Cleaning Chemicals', 'Maintenance', 15, 'Bottle', 'Available');
 
 -- Insert fake data for Feedbacks table
 -- INSERT INTO Feedbacks (user_id, feedback_type, coach_id, course_id, general_feedback_type, content, rating) VALUES
@@ -249,17 +217,8 @@ INSERT INTO Maintenance_Requests (description, status, created_by) VALUES
 -- (7, 249.99, 'PayPal', 'Course', 2, 'Completed'),
 -- (8, 299.99, 'Bank Transfer', 'Course', 3, 'Pending'),
 -- (9, 349.99, 'Credit Card', 'Course', 4, 'Completed'),
--- (10, 149.99, 'Cash', 'Course', 5, 'Completed'),
--- (6, 299.99, 'Credit Card', 'Course', 3, 'Completed');
+-- (10, 149.99, 'Cash', 'Course', 5, 'Completed'),-- (6, 299.99, 'Credit Card', 'Course', 3, 'Completed');
 
-
--- Insert fake data for Blogs table
-INSERT INTO Blogs (title, content, author_id) VALUES
-('Benefits of Swimming', 'Swimming is one of the best full-body workouts...', 3),
-('Preparing for Your First Competition', 'Tips and tricks to prepare for your first swimming competition...', 4),
-('Water Safety Tips for Summer', 'As summer approaches, it\'s important to remember these water safety tips...', 2),
-('Nutrition for Swimmers', 'What to eat before and after swimming sessions for optimal performance...', 3),
-('Improving Your Freestyle Technique', 'Step-by-step guide to perfecting your freestyle swimming technique...', 4);
 
 -- Insert fake data for Ticket table
 -- INSERT INTO Ticket (user_id, ticket_type_id, quantity, start_date, end_date, ticket_status, payment_status, payment_id, total, created_at) VALUES
@@ -319,8 +278,7 @@ INSERT INTO Pool_Area (name, description) VALUES
 ('Khu thay đồ', 'Khu thay đồ và tủ gửi đồ');
 
 -- Dữ liệu Maintenance_Schedule (các nhiệm vụ định kỳ)
-INSERT INTO Maintenance_Schedule (title, description, frequency, scheduled_time, created_by)
-VALUES
+INSERT INTO Maintenance_Schedule (title, description, frequency, scheduled_time, created_by)VALUES
 ('Vệ sinh nhà vệ sinh', 'Lau chùi và khử mùi toilet', 'Daily', '08:00:00', 1),
 ('Vớt rác mặt nước', 'Dọn rác nổi và lá cây trên mặt nước', 'Daily', '07:30:00', 2),
 ('Kiểm tra thiết bị bể bơi', 'Kiểm tra phao, chân vịt, gậy chống đuối nước', 'Weekly', '09:00:00', 1),
@@ -386,9 +344,7 @@ CREATE TABLE Inventory_category(
     category_name varchar(100),
     category_quantity INT,
     last_updated datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE Inventory (
+);CREATE TABLE Inventory (
    inventory_id INT PRIMARY KEY AUTO_INCREMENT,
    manager_id INT,
    item_name VARCHAR(100),
@@ -457,9 +413,7 @@ VALUES
 (2, 'Phao bơi hơi', 2, 70, 'cái', 'Available', 12000, 75000, 1),
 (2, 'Máy ảnh dưới nước', 1, 10, 'cái', 'Available', 50000, 2500000, 1),
 (2, 'Áo phao an toàn', 5, 50, 'cái', 'Available', 20000, 180000, 1),
-(2, 'Loa chống nước', 2, 15, 'cái', 'Available', 40000, 550000, 1);
-
--- tach (NGOC)--
+(2, 'Loa chống nước', 2, 15, 'cái', 'Available', 40000, 550000, 1);-- tach (NGOC)--
 
 CREATE TABLE Coaches (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -469,8 +423,16 @@ CREATE TABLE Coaches (
     gender ENUM('Male', 'Female', 'Other'),
     bio TEXT,
     profile_picture VARCHAR(255),
+    active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture, active)
+VALUES 
+('Lê Văn Cường', 'cuong@example.com', '0909000001', 'Male', '10 năm kinh nghiệm huấn luyện.', 'coach1.jpg', TRUE),
+('Nguyễn Thị Mai', 'mai@example.com', '0909000002', 'Female', 'Chuyên phục hồi dưới nước.', 'coach2.jpg', FALSE),
+('Lê Minh Nhật', 'nhat@example.com', '0903456789', 'Other', 'Chuyên gia huấn luyện bơi cho trẻ em.', 'coach3.jpg', TRUE);
+
 
 CREATE TABLE Courses (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -483,4 +445,95 @@ CREATE TABLE Courses (
     schedule_description VARCHAR(100),
     status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO Courses (name, description, price, duration, estimated_session_time, student_description, schedule_description, status)
+VALUES
+('Bơi cơ bản', 'Dành cho người mới học bơi.', 1200000, 10, '60 phút', '5 người/lớp', 'Thứ 2 - 4 - 6', 'Active'),
+('Bơi nâng cao', 'Rèn luyện kỹ năng bơi nâng cao.', 1500000, 12, '90 phút', '4 người/lớp', 'Thứ 3 - 5 - 7', 'Active'),
+('Bơi phục hồi', 'Hỗ trợ phục hồi chức năng dưới nước.', 1800000, 8, '45 phút', '3 người/lớp', 'Linh hoạt', 'Inactive');
+
+
+
+-- MINH
+
+CREATE TABLE CourseForm(
+id INT PRIMARY KEY AUTO_INCREMENT,
+user_id INT  , -- nối đến bảng user
+FOREIGN KEY (user_id) REFERENCES Users(id),
+user_fullName varchar (50),
+user_email varchar (50),
+user_phone varchar (11) ,
+coach_id INT, -- nối đến bảng coach
+FOREIGN KEY (coach_id) REFERENCES Coaches(id),
+course_id INT, -- nối đến bảng coach
+FOREIGN KEY (course_id) REFERENCES Courses(id),
+request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+has_processed boolean DEFAULT false
+
+); 
+
+CREATE TABLE Feedbacks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    feedback_type ENUM('Course', 'Coach', 'General'),
+    coach_id INT,
+    course_id INT,
+    general_feedback_type ENUM('Food', 'Service', 'Facility', 'Other'),
+    content TEXT,
+    rating INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (coach_id) REFERENCES Users(id),
+    FOREIGN KEY (course_id) REFERENCES Courses(id)
+);
+-- huy 
+
+-- Bảng cho thuê thiết bị
+CREATE TABLE Equipment_Rentals (
+    rental_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    customer_id_card VARCHAR(20) NOT NULL COMMENT 'CCCD thế chấp',
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    rental_date DATE NOT NULL,
+    rent_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('active', 'returned', 'damaged', 'lost', 'overdue', 'compensated', 'cancelled') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_time TIMESTAMP NULL COMMENT 'Thời gian trả thực tế',
+    due_date DATE NULL,
+    notes TEXT NULL,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+-- Bảng bán thiết bị
+CREATE TABLE Equipment_Sales (
+    sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    sale_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+
+-- Bảng bồi thường thiết bị (SỬA: dùng import_price_total thay vì original_price)
+CREATE TABLE Equipment_Compensations (
+    compensation_id INT PRIMARY KEY AUTO_INCREMENT,
+    rental_id INT NOT NULL,
+    compensation_type ENUM('damaged', 'lost', 'overdue_fee') NOT NULL,
+    damage_description TEXT NULL,
+    import_price_total DECIMAL(10,2) NOT NULL COMMENT 'Tổng giá nhập = import_price × quantity',
+    compensation_rate DECIMAL(5,2) NOT NULL COMMENT 'Tỷ lệ bồi thường (0.0 - 1.0)',
+    total_amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền phải bồi thường',
+    paid_amount DECIMAL(10,2) DEFAULT 0,
+    payment_status ENUM('pending', 'partial', 'paid', 'waived') DEFAULT 'pending',
+    can_repair BOOLEAN NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    FOREIGN KEY (rental_id) REFERENCES Equipment_Rentals(rental_id)
 );

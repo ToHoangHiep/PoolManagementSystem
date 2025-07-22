@@ -3,12 +3,21 @@ package controller;
 import dal.CoachDAO;
 import model.Coach;
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.*;
+
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
 
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024,       // 1MB
+        maxFileSize = 5 * 1024 * 1024,         // 5MB
+        maxRequestSize = 10 * 1024 * 1024      // 10MB
+)
 public class CoachServlet extends HttpServlet {
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -35,11 +44,10 @@ public class CoachServlet extends HttpServlet {
                     request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
                 } else {
                     dao.delete(id);
-                    response.sendRedirect("coach");
+                    response.sendRedirect("coach-list");
                 }
 
             } else {
-                // Mặc định hiển thị danh sách
                 List<Coach> list = dao.getAll();
                 request.setAttribute("coaches", list);
                 request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
@@ -55,6 +63,7 @@ public class CoachServlet extends HttpServlet {
 
         try (Connection conn = utils.DBConnect.getConnection()) {
             CoachDAO dao = new CoachDAO(conn);
+            request.setCharacterEncoding("UTF-8");
 
             int id = request.getParameter("id") != null && !request.getParameter("id").isEmpty()
                     ? Integer.parseInt(request.getParameter("id")) : 0;
@@ -64,7 +73,22 @@ public class CoachServlet extends HttpServlet {
             String email = request.getParameter("email");
             String gender = request.getParameter("gender");
             String bio = request.getParameter("bio");
-            String picture = request.getParameter("profilePicture");
+            boolean isActive = request.getParameter("active") != null;
+
+            // 👇 Lưu ảnh vào thư mục cố định trong thư mục webapp/images
+            Part filePart = request.getPart("profilePicture");
+            String fileName = null;
+
+            if (filePart != null && filePart.getSize() > 0) {
+                fileName = System.currentTimeMillis() + "_" + filePart.getSubmittedFileName();
+
+                // Lưu vào thư mục webapp/images
+                String uploadDir = getServletContext().getRealPath("/images");
+                File dir = new File(uploadDir);
+                if (!dir.exists()) dir.mkdirs();
+
+                filePart.write(uploadDir + File.separator + fileName);
+            }
 
             Coach coach = new Coach();
             coach.setFullName(name);
@@ -72,16 +96,23 @@ public class CoachServlet extends HttpServlet {
             coach.setEmail(email);
             coach.setGender(gender);
             coach.setBio(bio);
-            coach.setProfilePicture(picture);
+            coach.setActive(isActive);
 
             if (id > 0) {
                 coach.setId(id);
+                if (fileName != null) {
+                    coach.setProfilePicture(fileName);
+                } else {
+                    coach.setProfilePicture(dao.getById(id).getProfilePicture());
+                }
                 dao.update(coach);
             } else {
+                coach.setProfilePicture(fileName != null ? fileName : "");
                 dao.insert(coach);
             }
 
-            response.sendRedirect("coach");
+            response.sendRedirect("coach-list");
+
         } catch (Exception e) {
             throw new ServletException(e);
         }
