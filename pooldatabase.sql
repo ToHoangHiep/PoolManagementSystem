@@ -116,17 +116,74 @@ CREATE TABLE Maintenance_Requests (
     FOREIGN KEY (created_by) REFERENCES Users(id)
 );
 
--- Payments
+-- Bảng cho thuê thiết bị
+CREATE TABLE Equipment_Rentals (
+    rental_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    customer_id_card VARCHAR(20) NOT NULL COMMENT 'CCCD thế chấp',
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    rental_date DATE NOT NULL,
+    rent_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('active', 'returned', 'damaged', 'lost', 'overdue', 'compensated', 'cancelled') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    return_time TIMESTAMP NULL COMMENT 'Thời gian trả thực tế',
+    due_date DATE NULL,
+    notes TEXT NULL,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+
+
+-- Bảng bán thiết bị
+CREATE TABLE Equipment_Sales (
+    sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    staff_id INT NOT NULL,
+    inventory_id INT NOT NULL,
+    quantity INT NOT NULL,
+    sale_price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES Users(id),
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
+
+
+-- Bảng bồi thường thiết bị (SỬA: dùng import_price_total thay vì original_price)
+CREATE TABLE Equipment_Compensations (
+    compensation_id INT PRIMARY KEY AUTO_INCREMENT,
+    rental_id INT NOT NULL,
+    compensation_type ENUM('damaged', 'lost', 'overdue_fee') NOT NULL,
+    damage_description TEXT NULL,
+    import_price_total DECIMAL(10,2) NOT NULL COMMENT 'Tổng giá nhập = import_price × quantity',
+    compensation_rate DECIMAL(5,2) NOT NULL COMMENT 'Tỷ lệ bồi thường (0.0 - 1.0)',
+    total_amount DECIMAL(10,2) NOT NULL COMMENT 'Số tiền phải bồi thường',
+    paid_amount DECIMAL(10,2) DEFAULT 0,
+    payment_status ENUM('pending', 'partial', 'paid', 'waived') DEFAULT 'pending',
+    can_repair BOOLEAN NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP NULL,
+    FOREIGN KEY (rental_id) REFERENCES Equipment_Rentals(rental_id)
+);
+
 CREATE TABLE Payments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
-    amount DECIMAL(10, 2),
-    method VARCHAR(50),
-    payment_for ENUM('Course', 'Service'),
-    reference_id INT,
-    status ENUM('Pending', 'Completed', 'Failed'),
+    customer_name VARCHAR(100),
+    customer_id_card VARCHAR(20),
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_method VARCHAR(50),
+    payment_for VARCHAR(50) NOT NULL,
+    reference_id INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
     payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    notes TEXT,
+    staff_id INT,
+    FOREIGN KEY (user_id) REFERENCES Users(id),
+    FOREIGN KEY (staff_id) REFERENCES Users(id)
 );
 
 CREATE TABLE TicketType (
@@ -155,8 +212,10 @@ CREATE TABLE Ticket (
     total DECIMAL(10,2),
     created_at DATETIME,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    customer_name VARCHAR(255) NULL,  -- Thêm: Tên khách hàng (nullable cho vãng lai hoặc extra info)
+    customer_id_card VARCHAR(50) NULL,  -- Thêm: CMND/CCCD khách hàng (nullable)
     FOREIGN KEY (user_id) REFERENCES Users(id),
-    FOREIGN KEY (payment_id) REFERENCES Payments(id),
+    FOREIGN KEY (payment_id) REFERENCES Payments(payment_id),
     FOREIGN KEY (ticket_type_id) REFERENCES TicketType(id)
 );
 
