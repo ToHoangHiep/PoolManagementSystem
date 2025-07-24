@@ -60,7 +60,7 @@ public class CourseDAO {
                 course.setDescription(rs.getString("description"));
                 course.setPrice(rs.getDouble("price"));
                 course.setDuration(rs.getInt("duration"));
-                course.setEstimated_session_time(rs.getString("estimated_session"));
+                course.setEstimated_session_time(rs.getString("estimated_session_time"));
                 course.setSchedule_description(rs.getString("schedule_description"));
                 course.setStatus(rs.getString("status"));
                 course.setCreated_at(rs.getDate("created_at"));
@@ -135,10 +135,26 @@ public class CourseDAO {
         }
     }
 
-    public static Map<Integer, Integer> getCourseRegistrationCounts() throws SQLException {
+    // Trong file: dal/CourseDAO.java
+
+    public boolean updateCourseStatus(int courseId, String status) {
+        String sql = "UPDATE Courses SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, courseId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static Map<Integer, Integer> getProcessedCourseRegistrationCounts() throws SQLException {
         Map<Integer, Integer> counts = new HashMap<>();
-        // This query counts how many times each course_id appears in the courseform table
-        String sql = "SELECT course_id, COUNT(*) as registration_count FROM courseform GROUP BY course_id";
+        // This query counts how many times each course_id appears in the course_form table
+        // but only for rows where the form has been processed.
+        String sql = "SELECT course_id, COUNT(*) as registration_count FROM course_form WHERE has_processed = true GROUP BY course_id";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
