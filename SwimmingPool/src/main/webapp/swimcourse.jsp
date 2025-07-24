@@ -1,168 +1,207 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, model.SwimCourse" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="java.util.*, model.SwimCourse" %>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Danh sách khóa học</title>
+    <title>Course Management</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f7fa;
-            padding: 30px;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f9f9f9;
             margin: 0;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1100px;
-            margin: 0 auto 25px;
-            padding: 0 10px;
-        }
-
-        .header a {
-            display: inline-block;
-            padding: 10px 18px;
-            border-radius: 5px;
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-
-        .btn-home {
-            background-color: #2ecc71;
-        }
-
-        .btn-home:hover {
-            background-color: #27ae60;
-        }
-
-        .btn-add {
-            background-color: #3498db;
-        }
-
-        .btn-add:hover {
-            background-color: #2980b9;
+            padding: 40px;
         }
 
         h2 {
-            color: #2c3e50;
-            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input[type="text"], select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 200px;
+            font-size: 14px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-left: auto;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .table-scroll-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.1);
         }
 
         table {
             width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
             border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            background: white;
         }
 
         th, td {
-            padding: 12px 14px;
-            border: 1px solid #ddd;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
             text-align: left;
-            vertical-align: middle;
+            font-size: 14px;
         }
 
         th {
-            background-color: #f0f2f5;
+            background-color: #f1f3f5;
+            font-weight: bold;
         }
 
-        .actions {
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .action-buttons {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .actions form {
-            display: inline;
-        }
-
-        .actions button {
+        .action-buttons button {
+            background-color: #6c757d;
+            font-size: 13px;
             padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
         }
 
-        .btn-edit {
-            background-color: #3498db;
+        .action-buttons button:hover {
+            background-color: #5a6268;
         }
 
-        .btn-edit:hover {
-            background-color: #2980b9;
+        .action-buttons a button:first-child {
+            background-color: #28a745;
         }
 
-        .btn-delete {
-            background-color: #e74c3c;
+        .action-buttons a button:first-child:hover {
+            background-color: #218838;
         }
 
-        .btn-delete:hover {
-            background-color: #c0392b;
+        .action-buttons a button:last-child {
+            background-color: #dc3545;
         }
 
-        .no-data {
-            text-align: center;
-            color: #999;
+        .action-buttons a button:last-child:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <a href="admin_dashboard.jsp" class="btn-home">🏠 Trang chủ</a>
-    <a href="swimcourse?action=add" class="btn-add">➕ Thêm khóa học</a>
+<h2>Admin - Course Management</h2>
+
+<%
+    String keyword = request.getParameter("keyword");
+    String status = request.getParameter("status");
+    if (keyword == null) keyword = "";
+    if (status == null) status = "";
+%>
+
+<form class="filter-form" method="get" action="swimcourse">
+    <div class="filter-group">
+        <label for="keyword">Course Name</label>
+        <input type="text" id="keyword" name="keyword" value="<%= keyword %>" placeholder="Enter course name...">
+    </div>
+
+    <div class="filter-group">
+        <label for="status">Status</label>
+        <select name="status" id="status" onchange="this.form.submit()">
+            <option value="">All</option>
+            <option value="Active" <%= "Active".equals(status) ? "selected" : "" %>>Active</option>
+            <option value="Inactive" <%= "Inactive".equals(status) ? "selected" : "" %>>Inactive</option>
+        </select>
+    </div>
+
+    <div class="header-controls">
+        <button type="submit">Filter</button>
+        <button type="button" onclick="window.location.href='swimcourse'">Refresh</button>
+    </div>
+</form>
+
+<div class="table-scroll-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Course Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Duration (min)</th>
+            <th>Status</th>
+            <th>Coach</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <%
+            List<SwimCourse> courses = (List<SwimCourse>) request.getAttribute("courses");
+            if (courses != null && !courses.isEmpty()) {
+                for (SwimCourse course : courses) {
+        %>
+        <tr>
+            <td><%= course.getName() %></td>
+            <td><%= course.getDescription() %></td>
+            <td>$<%= course.getPrice() %></td>
+            <td><%= course.getDuration() %></td>
+            <td><%= course.getStatus() %></td>
+            <td><%= course.getCoach() != null ? course.getCoach() : "---" %></td>
+            <td class="action-buttons">
+                <a href="swimcourse?action=toggleStatus&id=<%= course.getId() %>">
+                    <button type="button">
+                        <%= "Active".equals(course.getStatus()) ? "Deactivate" : "Activate" %>
+                    </button>
+                </a>
+                <a href="swimcourse?action=delete&id=<%= course.getId() %>" onclick="return confirm('Are you sure to delete this course?')">
+                    <button type="button">Delete</button>
+                </a>
+            </td>
+        </tr>
+        <%
+            }
+        } else {
+        %>
+        <tr><td colspan="7" style="text-align: center; color: #777;">No courses found.</td></tr>
+        <%
+            }
+        %>
+        </tbody>
+    </table>
 </div>
-
-<h2>Danh sách khóa học</h2>
-
-<table>
-    <tr>
-        <th>Tên</th>
-        <th>Mô tả</th>
-        <th>Giá (VNĐ)</th>
-        <th>Số lượng học viên</th>
-        <th>Lịch học</th>
-        <th>Thời gian hoàn thành</th>
-        <th>Thời lượng</th>
-        <th>Hành động</th>
-    </tr>
-    <%
-        List<SwimCourse> list = (List<SwimCourse>) request.getAttribute("courses");
-        if (list != null && !list.isEmpty()) {
-            for (SwimCourse c : list) {
-    %>
-    <tr>
-        <td><%= c.getName() %></td>
-        <td><%= c.getDescription() %></td>
-        <td><%= String.format("%,.0f", c.getPrice()) %></td>
-        <td><%= c.getStudentDescription() %></td>
-        <td><%= c.getScheduleDescription() %></td>
-        <td><%= c.getDuration() %></td>
-        <td><%= c.getEstimatedSessionTime() %></td>
-        <td class="actions">
-            <form action="swimcourse" method="get">
-                <input type="hidden" name="action" value="edit">
-                <input type="hidden" name="id" value="<%= c.getId() %>">
-                <button class="btn-edit" type="submit">✏️ Sửa</button>
-            </form>
-            <form action="swimcourse" method="get" onsubmit="return confirm('Bạn có chắc chắn muốn xóa?');">
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="id" value="<%= c.getId() %>">
-                <button class="btn-delete" type="submit">🗑️ Xóa</button>
-            </form>
-        </td>
-    </tr>
-    <% }} else { %>
-    <tr><td colspan="8" class="no-data">Không có dữ liệu</td></tr>
-    <% } %>
-</table>
 
 </body>
 </html>

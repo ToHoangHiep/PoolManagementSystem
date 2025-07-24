@@ -1,178 +1,142 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, model.MaintenanceSchedule, model.PoolArea, model.User" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
-<%
-  List<MaintenanceSchedule> templates = (List<MaintenanceSchedule>) request.getAttribute("templates");
-  List<PoolArea> areas = (List<PoolArea>) request.getAttribute("areas");
-  List<User> staffs = (List<User>) request.getAttribute("staffs");
-%>
+<%@ page import="model.User" %>
+<%@ page import="java.util.List" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Create Maintenance Task</title>
-  <link rel="stylesheet" href="Resources/CSS/style.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-      background: #f9f9f9;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h2 { text-align: center; margin-bottom: 20px; }
-    .btn {
-      display: inline-block;
-      padding: 8px 16px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      color: white;
-    }
-    .btn-back { background: #6c757d; }
-    .btn-create { background: #28a745; float: right; }
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .form-row label {
-      width: 150px;
-      padding: 6px 0;
-    }
-    .form-row .input-wrap {
-      flex: 1;
-    }
-    input[type=text], input[type=time], select, textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    @media (max-width: 600px) {
-      .form-row { flex-direction: column; }
-      .form-row label { width: 100%; padding-bottom: 4px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Maintenance Schedule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .card {
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem 1.25rem;
+            border-bottom: none;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+        }
+        .card-header h2 i {
+            margin-right: 0.5rem;
+        }
+        .card-body {
+            padding: 1.25rem;
+        }
+        .form-label {
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+    </style>
 </head>
 <body>
+
+<% if (request.getAttribute("error") != null) { %>
+<div class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-circle"></i> <%= request.getAttribute("error") %>
+</div>
+<% } %>
+
+
 <div class="container">
-  <h2>Tạo nhiệm vụ bảo trì</h2>
-  <a href="MaintenanceServlet?action=list" class="btn btn-back">Quay lại trang bảo trì</a>
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fas fa-plus-circle"></i> Add Maintenance Schedule</h2>
+            <a href="maintenance" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+        </div>
+        <div class="card-body">
+            <form action="maintenance?action=insert" method="post">
+                <div class="mb-3">
+                    <label for="title" class="form-label"><i class="fas fa-heading"></i> Title:</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label"><i class="fas fa-file-alt"></i> Description:</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="frequency" class="form-label"><i class="fas fa-redo-alt"></i> Frequency:</label>
+                    <select class="form-select" id="frequency" name="frequency" required>
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                    </select>
+                </div>
 
-  <form action="MaintenanceServlet" method="post">
-    <input type="hidden" name="action" value="create"/>
-
-    <div class="form-row">
-      <label for="templateId">Sử dụng mẫu:</label>
-      <div class="input-wrap">
-        <select name="templateId" id="templateId">
-          <option value="">-- None --</option>
-          <c:forEach var="t" items="${templates}">
-            <option value="${t.id}"
-                    data-title="${t.title}"
-                    data-description="${t.description}"
-                    data-frequency="${t.frequency}"
-                    data-time="${t.scheduledTime}">
-                ${t.title} (${t.frequency} @ ${t.scheduledTime})
-            </option>
-          </c:forEach>
-        </select>
-      </div>
+                <div class="mb-3">
+                    <label for="assignedStaffId" class="form-label"><i class="fas fa-user-tie"></i> Assigned Staff:</label>
+                    <select class="form-select" id="assignedStaffId" name="assignedStaffId" required>
+                        <option value="">Select staff</option>
+                        <%
+                            List<User> staffList = (List<User>) request.getAttribute("staffList");
+                            if (staffList != null) {
+                                for (User staff : staffList) {
+                        %>
+                        <option value="<%= staff.getId() %>"><%= staff.getFullName() %></option>
+                        <%
+                                }
+                            }
+                        %>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="scheduledTime" class="form-label"><i class="fas fa-clock"></i> Time:</label>
+                    <input type="time" class="form-control" id="scheduledTime" name="scheduledTime" required>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label"><i class="fas fa-info-circle"></i> Status:</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Missed">Missed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+            </form>
+        </div>
     </div>
-
-    <div class="form-row">
-      <label for="title">Tiêu đề:</label>
-      <div class="input-wrap">
-        <input type="text" name="title" id="title" required/>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label for="description">Mô tả:</label>
-      <div class="input-wrap">
-        <textarea name="description" id="description" rows="4" required></textarea>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label for="frequency">Tần suất:</label>
-      <div class="input-wrap">
-        <select name="frequency" id="frequency" required>
-          <option value="Daily">Daily</option>
-          <option value="Weekly">Weekly</option>
-          <option value="Monthly">Monthly</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label for="scheduledTime">Thời gian làm:</label>
-      <div class="input-wrap">
-        <input type="time" name="scheduledTime" id="scheduledTime" required/>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label for="areaId">Khu vực:</label>
-      <div class="input-wrap">
-        <select name="areaId" id="areaId" required>
-          <c:forEach var="a" items="${areas}">
-            <option value="${a.id}">${a.name}</option>
-          </c:forEach>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-row">
-      <label for="staffId">Giao cho nhân viên:</label>
-      <div class="input-wrap">
-        <select name="staffId" id="staffId" required>
-          <c:forEach var="u" items="${staffs}">
-            <option value="${u.id}">${u.fullName}</option>
-          </c:forEach>
-        </select>
-      </div>
-    </div>
-
-    <button type="submit" class="btn btn-create">Tạo lịch trình</button>
-  </form>
 </div>
 
-<script>
-  const templateSel = document.getElementById('templateId');
-  const titleInput = document.getElementById('title');
-  const descInput = document.getElementById('description');
-  const freqSel = document.getElementById('frequency');
-  const timeInput = document.getElementById('scheduledTime');
-
-  templateSel.addEventListener('change', function() {
-    const opt = this.options[this.selectedIndex];
-    if (opt.value) {
-      titleInput.value = opt.dataset.title || '';
-      descInput.value = opt.dataset.description || '';
-      freqSel.value = opt.dataset.frequency || 'Daily';
-      timeInput.value = opt.dataset.time || '';
-      titleInput.readOnly = true;
-      descInput.readOnly = true;
-    } else {
-      titleInput.value = '';
-      descInput.value = '';
-      freqSel.value = 'Daily';
-      timeInput.value = '';
-      titleInput.readOnly = false;
-      descInput.readOnly = false;
-    }
-  });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

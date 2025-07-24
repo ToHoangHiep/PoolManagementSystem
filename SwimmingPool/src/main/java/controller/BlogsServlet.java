@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class OldBlogsServlet extends HttpServlet {
+public class BlogsServlet extends HttpServlet {
 
     private static final String alert_message = "alert_message";
     private static final String alert_action = "alert_action";
@@ -478,7 +478,7 @@ public class OldBlogsServlet extends HttpServlet {
             comment.setBlogId(blogId);
             comment.setUserId(user.getId());
             comment.setContent(content);
-
+            
             if (!BlogsCommentDAO.addComment(comment)) {
                 request.setAttribute(alert_message, "Failed to add comment. Please try again.");
             }

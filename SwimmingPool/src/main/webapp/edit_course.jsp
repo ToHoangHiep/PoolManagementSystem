@@ -1,214 +1,126 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="model.SwimCourse" %>
 <%
   SwimCourse course = (SwimCourse) request.getAttribute("course");
 %>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Sửa khóa học</title>
+  <title>Edit Course</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background-color: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fb;
+      padding: 50px;
       margin: 0;
-      padding: 0;
     }
 
-    .header {
-      padding: 15px 25px;
-      background-color: #2ecc71;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .header a {
-      text-decoration: none;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      background-color: #27ae60;
-      padding: 10px 20px;
-      border-radius: 6px;
-      transition: 0.2s ease-in-out;
-    }
-
-    .header a:hover {
-      background-color: #219150;
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     h2 {
       text-align: center;
-      margin-top: 30px;
       color: #2c3e50;
+      margin-bottom: 30px;
     }
 
-    .form-container {
-      background-color: #ffffff;
-      max-width: 700px;
-      margin: 20px auto;
-      padding: 35px;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    .form-group {
+      margin-bottom: 20px;
     }
 
     label {
       display: block;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
       font-weight: 600;
-      color: #34495e;
+      color: #333;
     }
 
     input[type="text"],
     input[type="number"],
     textarea {
       width: 100%;
-      padding: 12px 14px;
+      padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-top: 6px;
-      box-sizing: border-box;
+      border-radius: 6px;
       font-size: 14px;
+      box-sizing: border-box;
     }
 
     textarea {
-      height: 90px;
+      resize: vertical;
     }
 
-    .button-group {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-    }
-
-    .button-group a,
-    .button-group button {
-      padding: 12px 24px;
-      text-decoration: none;
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
       border: none;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
-      color: white;
-      transition: 0.2s ease-in-out;
+      transition: background-color 0.2s ease;
     }
 
-    .btn-home {
-      background-color: #2ecc71;
-    }
-
-    .btn-cancel {
-      background-color: #e74c3c;
-    }
-
-    .btn-submit {
-      background-color: #3498db;
-    }
-
-    .btn-home:hover {
-      background-color: #27ae60;
-    }
-
-    .btn-cancel:hover {
-      background-color: #c0392b;
-    }
-
-    .btn-submit:hover {
-      background-color: #2980b9;
-    }
-
-    @media screen and (max-width: 600px) {
-      .button-group {
-        flex-direction: column;
-        gap: 10px;
-      }
+    button:hover {
+      background-color: #0056b3;
     }
   </style>
-
-  <script>
-    function kiemTraForm() {
-      var ten = document.getElementById("name").value.trim();
-      var moTa = document.getElementById("description").value.trim();
-      var gia = document.getElementById("price").value.trim();
-      var soBuoi = document.getElementById("duration").value.trim();
-      var thoiLuong = document.getElementById("estimatedSessionTime").value.trim();
-      var soLuongHV = document.getElementById("studentDescription").value.trim();
-      var lichHoc = document.getElementById("scheduleDescription").value.trim();
-
-      if (!ten || !moTa || !gia || !soBuoi || !thoiLuong || !soLuongHV || !lichHoc) {
-        alert("Vui lòng điền đầy đủ tất cả các trường.");
-        return false;
-      }
-
-      if (parseFloat(gia) <= 0) {
-        alert("Giá tiền phải lớn hơn 0.");
-        return false;
-      }
-
-      if (parseInt(soBuoi) <= 0) {
-        alert("Số buổi phải lớn hơn 0.");
-        return false;
-      }
-
-      return true;
-    }
-  </script>
 </head>
 <body>
 
-<div class="header">
-  <a href="home.jsp">🏠 Trang chủ</a>
-</div>
-
-<h2>Sửa khóa học</h2>
-
 <div class="form-container">
-  <form method="post" action="swimcourse" onsubmit="return kiemTraForm();">
+  <h2>Edit Course</h2>
+
+  <form action="coachcourse" method="post" onsubmit="return validateEditForm();">
+    <input type="hidden" name="action" value="edit">
     <input type="hidden" name="id" value="<%= course.getId() %>">
+    <input type="hidden" name="status" value="<%= course.getStatus() %>">
 
-    <label>
-      Tên khóa học:
-      <input type="text" name="name" id="name" value="<%= course.getName() %>">
-    </label>
-
-    <label>
-      Mô tả:
-      <textarea name="description" id="description"><%= course.getDescription() %></textarea>
-    </label>
-
-    <label>
-      Giá tiền:
-      <input type="number" name="price" id="price" value="<%= course.getPrice() %>" min="0">
-    </label>
-
-    <label>
-      Thời gian dự kiến hoàn thành (số buổi):
-      <input type="number" name="duration" id="duration" value="<%= course.getDuration() %>" min="1">
-    </label>
-
-    <label>
-      Thời lượng học mỗi buổi:
-      <input type="text" name="estimatedSessionTime" id="estimatedSessionTime" value="<%= course.getEstimatedSessionTime() %>">
-    </label>
-
-    <label>
-      Số lượng học viên:
-      <input type="text" name="studentDescription" id="studentDescription" value="<%= course.getStudentDescription() %>">
-    </label>
-
-    <label>
-      Lịch học:
-      <input type="text" name="scheduleDescription" id="scheduleDescription" value="<%= course.getScheduleDescription() %>">
-    </label>
-
-    <div class="button-group">
-      <a class="btn-cancel" href="swimcourse">❌ Hủy</a>
-      <button type="submit" class="btn-submit">💾 Cập nhật</button>
+    <div class="form-group">
+      <label for="name">Course Name</label>
+      <input type="text" name="name" id="name" value="<%= course.getName() %>" required>
     </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea name="description" id="description" rows="4" required><%= course.getDescription() %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="price">Price ($)</label>
+      <input type="number" step="0.01" name="price" id="price" value="<%= course.getPrice() %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="duration">Duration (minutes)</label>
+      <input type="number" name="duration" id="duration" value="<%= course.getDuration() %>" required>
+    </div>
+
+    <button type="submit">Save Changes</button>
   </form>
 </div>
+
+<script>
+  function validateEditForm() {
+    const name = document.getElementById("name").value.trim();
+    const description = document.getElementById("description").value.trim();
+    const price = document.getElementById("price").value.trim();
+    const duration = document.getElementById("duration").value.trim();
+
+    if (!name || !description || isNaN(price) || price <= 0 || isNaN(duration) || duration <= 0) {
+      alert("Please fill all fields correctly.");
+      return false;
+    }
+    return true;
+  }
+</script>
 
 </body>
 </html>

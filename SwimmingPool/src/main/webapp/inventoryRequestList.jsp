@@ -4,62 +4,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-  <title>Danh sách yêu cầu nhập kho</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      padding: 12px 15px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-
-    th {
-      background-color: #f0f0f0;
-      color: #333;
-    }
-
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    button {
-      background-color: #4CAF50;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      margin: 2px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    button[name="statusUD"][value="reject"] {
-      background-color: #f44336;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-  </style>
+    <title>Title</title>
 </head>
-
 <body>
 <!-- inventoryRequestList.jsp -->
 <h2>Danh sách yêu cầu nhập kho</h2>
@@ -87,10 +33,6 @@
     </tr>
   </c:forEach>
 </table>
-<div style="text-align: center;">
-  <a href="inventory">Quay lại danh sách</a>
-  <a href="inventory?action=approvedRequestHistory">Lịch sử nhập</a>
-</div>
 
 </body>
 </html>

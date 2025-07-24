@@ -1,176 +1,125 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="model.User" %>
+<%-- Quyền truy cập đã được kiểm tra trong CoachCourseServlet --%>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Thêm khóa học</title>
+    <title>Add New Course</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f9;
             margin: 0;
-            padding: 0;
+            padding: 40px;
         }
 
-        .header {
-            padding: 15px 25px;
-            background-color: #2ecc71;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .header a {
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            background-color: #27ae60;
-            padding: 10px 20px;
-            border-radius: 6px;
-            transition: 0.2s ease-in-out;
-        }
-
-        .header a:hover {
-            background-color: #219150;
+        .form-container {
+            background-color: #fff;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
         h2 {
             text-align: center;
-            margin-top: 30px;
             color: #2c3e50;
+            margin-bottom: 30px;
         }
 
-        .form-container {
-            background-color: #ffffff;
-            max-width: 700px;
-            margin: 20px auto;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        .form-group {
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            margin-bottom: 15px;
             font-weight: 600;
-            color: #34495e;
+            margin-bottom: 8px;
+            color: #333;
         }
 
-        input[type="text"], input[type="number"], textarea {
+        input[type="text"],
+        input[type="number"],
+        textarea {
             width: 100%;
-            padding: 12px 14px;
+            padding: 10px 12px;
             border: 1px solid #ccc;
-            border-radius: 8px;
-            margin-top: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 15px;
         }
 
         textarea {
-            height: 90px;
+            resize: vertical;
         }
 
-        .btn {
-            padding: 12px 24px;
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
             border: none;
             border-radius: 6px;
-            font-size: 15px;
             cursor: pointer;
-            color: white;
-            text-decoration: none;
-            transition: 0.2s ease-in-out;
+            transition: background-color 0.3s ease;
         }
 
-        .btn-green { background-color: #2ecc71; }
-        .btn-red { background-color: #e74c3c; }
-        .btn-blue { background-color: #3498db; }
-
-        .btn:hover {
-            opacity: 0.92;
-        }
-
-        .form-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-
-        @media screen and (max-width: 600px) {
-            .form-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
-
-    <script>
-        function kiemTraForm() {
-            var ten = document.getElementById("name").value.trim();
-            var moTa = document.getElementById("description").value.trim();
-            var gia = document.getElementById("price").value.trim();
-            var soBuoi = document.getElementById("duration").value.trim();
-            var thoiLuong = document.getElementById("estimatedSessionTime").value.trim();
-            var soLuongHV = document.getElementById("studentDescription").value.trim();
-            var lichHoc = document.getElementById("scheduleDescription").value.trim();
-
-            if (!ten || !moTa || !gia || !soBuoi || !thoiLuong || !soLuongHV || !lichHoc) {
-                alert("Vui lòng điền đủ thông tin.");
-                return false;
-            }
-
-            if (parseFloat(gia) <= 0) {
-                alert("Giá tiền phải lớn hơn 0.");
-                return false;
-            }
-
-            if (parseInt(soBuoi) <= 0) {
-                alert("Số buổi phải lớn hơn 0.");
-                return false;
-            }
-
-            return true;
-        }
-    </script>
 </head>
 <body>
 
-<div class="header">
-    <a href="home.jsp">🏠 Trang chủ</a>
-</div>
-
-<h2>Thêm khóa học</h2>
-
 <div class="form-container">
-    <form method="post" action="swimcourse" onsubmit="return kiemTraForm();">
-        <label>Tên khóa học:
-            <input type="text" name="name" id="name">
-        </label>
-        <label>Mô tả:
-            <textarea name="description" id="description"></textarea>
-        </label>
-        <label>Giá tiền:
-            <input type="number" name="price" id="price" min="0">
-        </label>
-        <label>Thời gian dự kiến hoàn thành (số buổi):
-            <input type="number" name="duration" id="duration" min="1">
-        </label>
-        <label>Thời lượng học:
-            <input type="text" name="estimatedSessionTime" id="estimatedSessionTime">
-        </label>
-        <label>Số lượng học viên:
-            <input type="text" name="studentDescription" id="studentDescription">
-        </label>
-        <label>Lịch học:
-            <input type="text" name="scheduleDescription" id="scheduleDescription">
-        </label>
+    <h2>Add New Course</h2>
 
-        <div class="form-buttons">
-            <a href="swimcourse" class="btn btn-red">❌ Hủy</a>
-            <button type="submit" class="btn btn-blue">💾 Lưu</button>
+    <form action="coachcourse" method="post" onsubmit="return validateCourseForm();">
+        <input type="hidden" name="action" value="add" />
+
+        <div class="form-group">
+            <label for="name">Course Name</label>
+            <input type="text" name="name" id="name" required>
         </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price ($)</label>
+            <input type="number" step="0.01" name="price" id="price" required>
+        </div>
+
+        <div class="form-group">
+            <label for="duration">Duration (minutes)</label>
+            <input type="number" name="duration" id="duration" required>
+        </div>
+
+        <button type="submit">Add Course</button>
     </form>
 </div>
+
+<script>
+    function validateCourseForm() {
+        const name = document.getElementById("name").value.trim();
+        const description = document.getElementById("description").value.trim();
+        const price = document.getElementById("price").value.trim();
+        const duration = document.getElementById("duration").value.trim();
+
+        if (!name || !description || isNaN(price) || price <= 0 || isNaN(duration) || duration <= 0) {
+            alert("Please fill all fields correctly.");
+            return false;
+        }
+        return true;
+    }
+</script>
 
 </body>
 </html>

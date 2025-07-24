@@ -39,6 +39,7 @@ public class InventoryDAO {
         }
     }
 
+
     public static List<Inventory> getAllInventories() {
         List<Inventory> list = new ArrayList<>();
         String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
@@ -261,6 +262,7 @@ public class InventoryDAO {
         return list;
     }
 
+
     public static List<InventoryCategory> getAllCategories() {
         List<InventoryCategory> list = new ArrayList<>();
         String sql = "SELECT * FROM inventory_category";
@@ -281,6 +283,10 @@ public class InventoryDAO {
         }
         return list;
     }
+
+
+
+
 
     public static List<Inventory> filterInventoryByStatusAndUsage(String status, String usageName) {
         List<Inventory> list = new ArrayList<>();
@@ -403,43 +409,6 @@ public class InventoryDAO {
 
         return lowStockList;
     }
-
-    public static List<Inventory> getItemsUnderMaintenance() {
-        List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
-                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
-                "JOIN inventory_category c ON c.category_id = i.category_id " +
-                "WHERE i.status = 'bảo trì'";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Inventory inv = new Inventory();
-                inv.setInventoryId(rs.getInt("inventory_id"));
-                inv.setManagerId(rs.getInt("manager_id"));
-                inv.setItemName(rs.getString("item_name"));
-                inv.setCategoryName(rs.getString("category_name"));
-                inv.setQuantity(rs.getInt("quantity"));
-                inv.setUnit(rs.getString("unit"));
-                inv.setStatus(rs.getString("status"));
-                inv.setUsageName(rs.getString("usage_name"));
-                inv.setLastUpdated(rs.getDate("last_updated"));
-
-                list.add(inv);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-
-
-
 
 
     public static void main(String[] args) {

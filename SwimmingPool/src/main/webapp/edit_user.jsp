@@ -2,12 +2,8 @@
 <%@ page import="model.User, model.Role, java.util.List" %>
 <%
   User u = (User) request.getAttribute("user");
-  // Lấy đối tượng User từ request (thường dùng trong trang edit để hiển thị thông tin người dùng cần sửa)
-
   List<Role> roles = (List<Role>) request.getAttribute("roles");
-  // Lấy danh sách các vai trò (Role) từ request để hiển thị trong dropdown lựa chọn vai trò
 %>
-
 
 <!DOCTYPE html>
 <html>
@@ -91,32 +87,17 @@
     <label for="role">Role:</label>
     <select name="roleId" id="role">
       <% for (Role r : roles) { %>
-      <!-- Lặp qua danh sách vai trò để hiển thị dropdown -->
-
       <option value="<%= r.getId() %>" <%= r.getId() == u.getRole().getId() ? "selected" : "" %>>
-        <!-- So sánh ID vai trò hiện tại với vai trò của user -->
-        <!-- Nếu trùng thì thêm selected để chọn mặc định -->
-
         <%= r.getName() %>
-        <!-- Hiển thị tên vai trò -->
       </option>
-
       <% } %>
     </select>
-    <!-- Dropdown chọn vai trò cho user -->
-
 
     <label for="status">Status:</label>
     <select name="status" id="status">
-      <!-- Dropdown chọn trạng thái người dùng -->
-
       <option value="Active" <%= "Active".equalsIgnoreCase(u.getUserStatus()) ? "selected" : "" %>>Active</option>
-      <!-- Nếu user đang có status là Active thì chọn mặc định -->
-
       <option value="Banned" <%= "Banned".equalsIgnoreCase(u.getUserStatus()) ? "selected" : "" %>>Banned</option>
-      <!-- Nếu user đang bị Banned thì chọn mặc định -->
     </select>
-
 
     <input type="submit" value="Update" />
   </form>

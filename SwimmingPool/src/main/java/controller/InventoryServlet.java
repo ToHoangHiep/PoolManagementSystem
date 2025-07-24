@@ -2,10 +2,8 @@ package controller;
 
 import dal.InventoryDAO;
 import dal.InventoryRequestDAO;
-import dal.RepairRequestDAO;
 import model.Inventory;
 import model.InventoryRequest;
-import model.RepairRequest;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -48,16 +46,6 @@ public class InventoryServlet extends HttpServlet {
             case "requestForm":
                 showRequestForm(request, response);
                 break;
-            case "repairForm":
-                showRepairForm(request, response);
-                break;
-            case "maintanence":
-                listInventoryMaintanence(request, response);
-                break;
-            case "approvedRequestHistory":
-                showApprovedRequestHistory(request, response);
-                break;
-
 
             default:
                 listInventory(request, response);
@@ -85,10 +73,6 @@ public class InventoryServlet extends HttpServlet {
             case "updateRequestStatus":
                 updateRequestStatus(request, response);
                 break;
-            case "submitRepair":
-                submitRepairRequest(request, response);
-                break;
-
             case "approveRequest":  // ✅ Thêm dòng này
             case "rejectRequest":   // (tuỳ logic nếu có)
                 handleApproveRequest(request, response);
@@ -196,13 +180,6 @@ public class InventoryServlet extends HttpServlet {
         request.getRequestDispatcher("inventoryRequestList.jsp").forward(request, response);
     }
 
-    private void listInventoryMaintanence(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Inventory> maintenanceList = InventoryDAO.getItemsUnderMaintenance();
-
-        request.setAttribute("maintenanceList", maintenanceList);
-        request.getRequestDispatcher("maintenanceInventory.jsp").forward(request, response);
-    }
-
 
 
     private void insertRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -272,32 +249,6 @@ public class InventoryServlet extends HttpServlet {
 
     }
 
-
-
-
-    private void showRepairForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Inventory> repairItems = InventoryDAO.getItemsUnderMaintenance(); // gọi đúng DAO mới
-        request.setAttribute("repairItems", repairItems);
-        request.getRequestDispatcher("repairForm.jsp").forward(request, response);
-    }
-
-
-    private void submitRepairRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int inventoryId = Integer.parseInt(request.getParameter("inventory_id"));
-        String reason = request.getParameter("reason");
-        boolean success = RepairRequestDAO.insertRepairRequest(inventoryId, reason);
-
-        HttpSession session = request.getSession();
-        session.setAttribute("message", success ? "Đã gửi yêu cầu sửa chữa!" : "Gửi yêu cầu thất bại!");
-        response.sendRedirect("inventory");
-    }
-
-    private void showApprovedRequestHistory(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        List<InventoryRequest> requestList = InventoryRequestDAO.getApprovedRequests();
-        request.setAttribute("requestList", requestList);
-        request.getRequestDispatcher("requestHistory.jsp").forward(request, response);
-    }
 
 
 

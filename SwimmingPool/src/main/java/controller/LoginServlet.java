@@ -16,6 +16,7 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // Log đầu vào
         System.out.println(">>> Đăng nhập với email = " + email + ", password = " + password);
 
         // Kiểm tra input rỗng
@@ -42,21 +43,8 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("user", user);
             System.out.println(">>> Đăng nhập thành công! Vai trò: " + user.getRole().getName());
 
-            // Phân luồng theo vai trò
-            int roleId = user.getRole().getId();
 
-            if (roleId == 4) { // Customer
-                response.sendRedirect("home.jsp");
-            } else if (roleId == 5) { // Staff
-                response.sendRedirect("staff_dashboard.jsp");
-            } else if (roleId == 2) { // Manager
-                response.sendRedirect("admin_dashboard.jsp");
-            } else if (roleId == 1) { // Admin
-                response.sendRedirect("admin_dashboard.jsp");
-            } else {
-                response.sendRedirect("error.jsp");
-            }
-
+            response.sendRedirect("home.jsp");
 
         } else {
             System.out.println(">>> Đăng nhập thất bại!");
@@ -69,6 +57,6 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        response.sendRedirect("login.jsp");
     }
 }

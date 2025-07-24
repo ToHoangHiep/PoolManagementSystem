@@ -89,39 +89,6 @@ public class InventoryRequestDAO {
         }
     }
 
-    public static List<InventoryRequest> getApprovedRequests() {
-        List<InventoryRequest> list = new ArrayList<>();
-        String sql = "SELECT r.*, i.item_name FROM Inventory_Request r " +
-                "JOIN Inventory i ON r.inventory_id = i.inventory_id " +
-                "WHERE r.status = 'approved' " +
-                "ORDER BY r.approved_at DESC";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                InventoryRequest req = new InventoryRequest();
-                req.setRequestId(rs.getInt("request_id"));
-                req.setInventoryId(rs.getInt("inventory_id"));
-                req.setItemName(rs.getString("item_name"));
-                req.setRequestedQuantity(rs.getInt("requested_quantity"));
-                req.setReason(rs.getString("reason"));
-                req.setStatus(rs.getString("status"));
-                req.setRequestedAt(rs.getTimestamp("requested_at"));
-                req.setApprovedAt(rs.getTimestamp("approved_at"));
-
-                list.add(req);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-
 
     public static void main(String[] args) {
         boolean result = updateStatusAndStock(1, "approved");

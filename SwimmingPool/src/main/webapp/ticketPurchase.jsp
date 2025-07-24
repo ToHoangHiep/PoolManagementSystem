@@ -188,7 +188,7 @@
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-        <a href="staff_dashboard.jsp">Home</a>
+        <a href="home.jsp">Home</a>
         <a href="about">About Us</a>
         <a href="home.jsp">Services</a>
         <a href="gallery">Gallery</a>

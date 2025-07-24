@@ -705,7 +705,7 @@
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-        <a href="staff_dashboard.jsp">Home</a>
+        <a href="home.jsp">Home</a>
         <a href="home.jsp#about">About Us</a>
         <a href="home.jsp#services">Services</a>
         <a href="home.jsp#gallery">Gallery</a>
@@ -746,10 +746,10 @@
 <div class="container">
     <!-- Messages -->
     <c:if test="${not empty success}">
-    <div class="message success">${success}</div>
+        <div class="message success">${success}</div>
     </c:if>
     <c:if test="${not empty error}">
-    <div class="message error">${error}</div>
+        <div class="message error">${error}</div>
     </c:if>
 
     <!-- Main Layout -->
@@ -922,9 +922,9 @@
                                     </button>
 
                                     <!-- Optional: View Details Button -->
-                                        <%--                                    <button class="btn-view" onclick="viewRentalDetails(${rental.rentalId})" title="View rental details">--%>
-                                        <%--                                        👁️ View--%>
-                                        <%--                                    </button>--%>
+<%--                                    <button class="btn-view" onclick="viewRentalDetails(${rental.rentalId})" title="View rental details">--%>
+<%--                                        👁️ View--%>
+<%--                                    </button>--%>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -933,549 +933,549 @@
                 </div>
             </div>
         </div>
-    </div>
+</div>
 
-    <!-- Footer -->
-    <footer>
-        <p>© 2025 SwimmingPool. All rights reserved.</p>
-        <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
-    </footer>
+<!-- Footer -->
+<footer>
+    <p>© 2025 SwimmingPool. All rights reserved.</p>
+    <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
+</footer>
 
-    <!-- Rental Modal -->
-    <div id="rentalModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">🔄 Rent Equipment</h3>
-                <button class="close" onclick="closeModal('rentalModal')">&times;</button>
-            </div>
-            <form action="equipment" method="post">
-                <input type="hidden" name="action" value="rental">
-                <input type="hidden" name="mode" value="rental">
-                <input type="hidden" name="inventoryId" id="rental_inventoryId">
-                <input type="hidden" name="rentPrice" id="rental_hiddenPrice">
-
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">Equipment</label>
-                        <input type="text" class="form-input" id="rental_itemName" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Customer Name *</label>
-                        <input type="text" name="customerName" class="form-input" placeholder="Enter customer name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">CCCD *</label>
-                        <input type="text" name="customerIdCard" class="form-input" placeholder="Enter CCCD number" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity *</label>
-                        <input type="number" name="quantity" class="form-input" min="1" value="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Rental Price</label>
-                        <input type="text" class="form-input" id="rental_price" readonly>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" onclick="closeModal('rentalModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add to Cart</button>
-                </div>
-            </form>
+<!-- Rental Modal -->
+<div id="rentalModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">🔄 Rent Equipment</h3>
+            <button class="close" onclick="closeModal('rentalModal')">&times;</button>
         </div>
+        <form action="equipment" method="post">
+            <input type="hidden" name="action" value="rental">
+            <input type="hidden" name="mode" value="rental">
+            <input type="hidden" name="inventoryId" id="rental_inventoryId">
+            <input type="hidden" name="rentPrice" id="rental_hiddenPrice">
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Equipment</label>
+                    <input type="text" class="form-input" id="rental_itemName" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Customer Name *</label>
+                    <input type="text" name="customerName" class="form-input" placeholder="Enter customer name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">CCCD *</label>
+                    <input type="text" name="customerIdCard" class="form-input" placeholder="Enter CCCD number" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quantity *</label>
+                    <input type="number" name="quantity" class="form-input" min="1" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Rental Price</label>
+                    <input type="text" class="form-input" id="rental_price" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeModal('rentalModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add to Cart</button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <script>
-        // Filter by category
-        function filterByCategory(categoryId) {
-            console.log('Filtering by category:', categoryId);
+<script>
+    // Filter by category
+    function filterByCategory(categoryId) {
+        console.log('Filtering by category:', categoryId);
 
-            // Remove active class from all category links
-            document.querySelectorAll('.category-link').forEach(link => {
-                link.classList.remove('active');
-            });
+        // Remove active class from all category links
+        document.querySelectorAll('.category-link').forEach(link => {
+            link.classList.remove('active');
+        });
 
-            // Add active class to clicked link
-            const activeLink = document.getElementById('filter-' + (categoryId === 'all' ? 'all' : categoryId));
-            if (activeLink) {
-                activeLink.classList.add('active');
+        // Add active class to clicked link
+        const activeLink = document.getElementById('filter-' + (categoryId === 'all' ? 'all' : categoryId));
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Filter equipment cards
+        const cards = document.querySelectorAll('.equipment-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const cardCategory = card.getAttribute('data-category');
+
+            if (categoryId === 'all' || cardCategory == categoryId) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
             }
+        });
 
-            // Filter equipment cards
-            const cards = document.querySelectorAll('.equipment-card');
-            let visibleCount = 0;
+        // Update result count display
+        updateResultCount(visibleCount);
+    }
 
-            cards.forEach(card => {
-                const cardCategory = card.getAttribute('data-category');
+    // Ẩn các category filter (chỉ giữ lại "All Categories")
+    function hideCategoryFilters() {
+        console.log('Hiding category filters, keeping only "All Categories"');
 
-                if (categoryId === 'all' || cardCategory == categoryId) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
+        const categoryItems = document.querySelectorAll('.category-item');
+        categoryItems.forEach((item, index) => {
+            // Giữ lại item đầu tiên (All Categories), ẩn các item còn lại
+            if (index > 0) {
+                item.style.display = 'none';
+            }
+        });
+
+        console.log(`Hidden ${categoryItems.length - 1} category filters`);
+    }
+
+    // ==================== SEARCH FUNCTIONS ====================
+    function searchEquipment() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        console.log('Searching for:', searchTerm);
+
+        const cards = document.querySelectorAll('.equipment-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name') || '';
+            const categoryText = card.querySelector('.equipment-category')?.textContent.toLowerCase() || '';
+            const equipmentName = card.querySelector('.equipment-name')?.textContent.toLowerCase() || '';
+
+            // Search in multiple fields
+            if (name.includes(searchTerm) ||
+                categoryText.includes(searchTerm) ||
+                equipmentName.includes(searchTerm)) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        updateResultCount(visibleCount);
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        searchEquipment();
+    }
+
+    // ==================== SORT FUNCTIONS ====================
+    function sortEquipment(sortBy) {
+        console.log('Sorting by:', sortBy);
+
+        const grid = document.getElementById('equipmentGrid');
+        const cards = Array.from(grid.querySelectorAll('.equipment-card'));
+
+        cards.sort((a, b) => {
+            switch(sortBy) {
+                case 'name':
+                    const nameA = a.getAttribute('data-name') || '';
+                    const nameB = b.getAttribute('data-name') || '';
+                    return nameA.localeCompare(nameB);
+
+                case 'price-low':
+                    const priceA = parseFloat(a.getAttribute('data-rent-price')) || Infinity;
+                    const priceB = parseFloat(b.getAttribute('data-rent-price')) || Infinity;
+                    return priceA - priceB;
+
+                case 'price-high':
+                    const priceAHigh = parseFloat(a.getAttribute('data-rent-price')) || 0;
+                    const priceBHigh = parseFloat(b.getAttribute('data-rent-price')) || 0;
+                    return priceBHigh - priceAHigh;
+
+                case 'availability':
+                    const qtyA = getQuantityFromCard(a);
+                    const qtyB = getQuantityFromCard(b);
+                    return qtyB - qtyA; // High to low availability
+
+                default:
+                    return 0;
+            }
+        });
+
+        // Clear grid and re-append sorted cards
+        grid.innerHTML = '';
+        cards.forEach(card => grid.appendChild(card));
+    }
+
+    // ==================== PRICE FILTER FUNCTIONS ====================
+    function filterByPrice() {
+        const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+
+        console.log('Filtering by price range:', minPrice, 'to', maxPrice);
+
+        const cards = document.querySelectorAll('.equipment-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const rentPrice = parseFloat(card.getAttribute('data-rent-price')) || 0;
+
+            if (rentPrice >= minPrice && rentPrice <= maxPrice) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        updateResultCount(visibleCount);
+    }
+
+    function clearPriceFilter() {
+        document.getElementById('minPrice').value = '';
+        document.getElementById('maxPrice').value = '';
+        filterByCategory('all'); // Reset to show all
+    }
+
+    // ==================== TAB FUNCTIONS ====================
+    function showTab(tabName) {
+        console.log('Switching to tab:', tabName);
+
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Remove active from all buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Show selected tab
+        const selectedTab = document.getElementById(tabName);
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+        }
+
+        // Add active to clicked button
+        event.target.classList.add('active');
+    }
+
+    // ==================== MODAL FUNCTIONS ====================
+    function openRentalModal(inventoryId, itemName, rentPrice, redirectTo) {
+        console.log('Opening rental modal:', {
+            inventoryId: inventoryId,
+            itemName: itemName,
+            rentPrice: rentPrice,
+            redirectTo: redirectTo
+        });
+
+        // Validate inputs
+        if (!inventoryId || !itemName || !rentPrice) {
+            console.error('Missing required parameters for rental modal');
+            alert('Error: Missing product information. Please try again.');
+            return;
+        }
+
+        // Set modal form values
+        document.getElementById('rental_inventoryId').value = inventoryId;
+        document.getElementById('rental_itemName').value = itemName;
+        document.getElementById('rental_price').value = formatCurrency(rentPrice);
+        document.getElementById('rental_hiddenPrice').value = rentPrice;
+
+        // Handle redirect parameter
+        let redirectInput = document.getElementById('redirectToInput');
+        if (!redirectInput) {
+            redirectInput = document.createElement('input');
+            redirectInput.type = 'hidden';
+            redirectInput.id = 'redirectToInput';
+            redirectInput.name = 'redirectTo';
+            document.querySelector('#rentalModal form').appendChild(redirectInput);
+        }
+        redirectInput.value = redirectTo || 'rental';
+
+        // Reset form fields
+        const form = document.querySelector('#rentalModal form');
+        form.querySelector('input[name="customerName"]').value = '';
+        form.querySelector('input[name="customerIdCard"]').value = '';
+        form.querySelector('input[name="quantity"]').value = '1';
+
+        // Show modal
+        document.getElementById('rentalModal').style.display = 'block';
+
+        // Focus on customer name field
+        setTimeout(() => {
+            const customerNameField = form.querySelector('input[name="customerName"]');
+            if (customerNameField) {
+                customerNameField.focus();
+            }
+        }, 100);
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // ==================== RENTAL FUNCTIONS ====================
+    function processReturn(rentalId) {
+        if (confirmAction('Are you sure you want to process this return?')) {
+            console.log('Processing return for rental ID:', rentalId);
+
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = 'equipment';
+
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'return';
+
+            const rentalIdInput = document.createElement('input');
+            rentalIdInput.type = 'hidden';
+            rentalIdInput.name = 'rentalId';
+            rentalIdInput.value = rentalId;
+
+            // Add mode to maintain page
+            const modeInput = document.createElement('input');
+            modeInput.type = 'hidden';
+            modeInput.name = 'mode';
+            modeInput.value = 'rental';
+
+            form.appendChild(actionInput);
+            form.appendChild(rentalIdInput);
+            form.appendChild(modeInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function reportIssue(rentalId) {
+        if (confirmAction('Report issue for this rental?')) {
+            console.log('Reporting issue for rental ID:', rentalId);
+            location.href = 'compensation?action=create&rentalId=' + rentalId;
+        }
+    }
+
+    function validateRentalForm(form) {
+        const customerName = form.querySelector('input[name="customerName"]').value.trim();
+        const customerIdCard = form.querySelector('input[name="customerIdCard"]').value.trim();
+        const quantity = parseInt(form.querySelector('input[name="quantity"]').value);
+
+        if (!customerName) {
+            alert('Please enter customer name');
+            return false;
+        }
+
+        if (!customerIdCard) {
+            alert('Please enter CCCD number');
+            return false;
+        }
+
+        if (!quantity || quantity < 1) {
+            alert('Please enter a valid quantity');
+            return false;
+        }
+
+        return true;
+    }
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function updateResultCount(count) {
+        const resultCountElement = document.getElementById('resultCount');
+        if (resultCountElement) {
+            resultCountElement.textContent = count;
+        }
+    }
+
+    function getQuantityFromCard(card) {
+        const stockText = card.querySelector('.stock-text');
+        if (stockText) {
+            const text = stockText.textContent;
+            const match = text.match(/Available:\s*(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        }
+        return 0;
+    }
+
+    function formatCurrency(amount) {
+        try {
+            const numAmount = parseFloat(amount);
+            if (isNaN(numAmount)) return 'N/A';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(numAmount);
+        } catch (error) {
+            console.error('Error formatting currency:', error);
+            return amount.toString();
+        }
+    }
+
+    function refreshPage() {
+        window.location.reload();
+    }
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    function confirmAction(message) {
+        return confirm(message || 'Are you sure you want to proceed?');
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initializing Equipment Rental System...');
+
+        // Ẩn category filters (chỉ giữ lại "All Categories")
+        hideCategoryFilters();
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            // Search on Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchEquipment();
                 }
             });
 
-            // Update result count display
-            updateResultCount(visibleCount);
-        }
-
-        // Ẩn các category filter (chỉ giữ lại "All Categories")
-        function hideCategoryFilters() {
-            console.log('Hiding category filters, keeping only "All Categories"');
-
-            const categoryItems = document.querySelectorAll('.category-item');
-            categoryItems.forEach((item, index) => {
-                // Giữ lại item đầu tiên (All Categories), ẩn các item còn lại
-                if (index > 0) {
-                    item.style.display = 'none';
-                }
-            });
-
-            console.log(`Hidden ${categoryItems.length - 1} category filters`);
-        }
-
-        // ==================== SEARCH FUNCTIONS ====================
-        function searchEquipment() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-            console.log('Searching for:', searchTerm);
-
-            const cards = document.querySelectorAll('.equipment-card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const name = card.getAttribute('data-name') || '';
-                const categoryText = card.querySelector('.equipment-category')?.textContent.toLowerCase() || '';
-                const equipmentName = card.querySelector('.equipment-name')?.textContent.toLowerCase() || '';
-
-                // Search in multiple fields
-                if (name.includes(searchTerm) ||
-                    categoryText.includes(searchTerm) ||
-                    equipmentName.includes(searchTerm)) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            updateResultCount(visibleCount);
-        }
-
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            searchEquipment();
-        }
-
-        // ==================== SORT FUNCTIONS ====================
-        function sortEquipment(sortBy) {
-            console.log('Sorting by:', sortBy);
-
-            const grid = document.getElementById('equipmentGrid');
-            const cards = Array.from(grid.querySelectorAll('.equipment-card'));
-
-            cards.sort((a, b) => {
-                switch(sortBy) {
-                    case 'name':
-                        const nameA = a.getAttribute('data-name') || '';
-                        const nameB = b.getAttribute('data-name') || '';
-                        return nameA.localeCompare(nameB);
-
-                    case 'price-low':
-                        const priceA = parseFloat(a.getAttribute('data-rent-price')) || Infinity;
-                        const priceB = parseFloat(b.getAttribute('data-rent-price')) || Infinity;
-                        return priceA - priceB;
-
-                    case 'price-high':
-                        const priceAHigh = parseFloat(a.getAttribute('data-rent-price')) || 0;
-                        const priceBHigh = parseFloat(b.getAttribute('data-rent-price')) || 0;
-                        return priceBHigh - priceAHigh;
-
-                    case 'availability':
-                        const qtyA = getQuantityFromCard(a);
-                        const qtyB = getQuantityFromCard(b);
-                        return qtyB - qtyA; // High to low availability
-
-                    default:
-                        return 0;
-                }
-            });
-
-            // Clear grid and re-append sorted cards
-            grid.innerHTML = '';
-            cards.forEach(card => grid.appendChild(card));
-        }
-
-        // ==================== PRICE FILTER FUNCTIONS ====================
-        function filterByPrice() {
-            const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
-            const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
-
-            console.log('Filtering by price range:', minPrice, 'to', maxPrice);
-
-            const cards = document.querySelectorAll('.equipment-card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const rentPrice = parseFloat(card.getAttribute('data-rent-price')) || 0;
-
-                if (rentPrice >= minPrice && rentPrice <= maxPrice) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            updateResultCount(visibleCount);
-        }
-
-        function clearPriceFilter() {
-            document.getElementById('minPrice').value = '';
-            document.getElementById('maxPrice').value = '';
-            filterByCategory('all'); // Reset to show all
-        }
-
-        // ==================== TAB FUNCTIONS ====================
-        function showTab(tabName) {
-            console.log('Switching to tab:', tabName);
-
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Remove active from all buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Show selected tab
-            const selectedTab = document.getElementById(tabName);
-            if (selectedTab) {
-                selectedTab.classList.add('active');
-            }
-
-            // Add active to clicked button
-            event.target.classList.add('active');
-        }
-
-        // ==================== MODAL FUNCTIONS ====================
-        function openRentalModal(inventoryId, itemName, rentPrice, redirectTo) {
-            console.log('Opening rental modal:', {
-                inventoryId: inventoryId,
-                itemName: itemName,
-                rentPrice: rentPrice,
-                redirectTo: redirectTo
-            });
-
-            // Validate inputs
-            if (!inventoryId || !itemName || !rentPrice) {
-                console.error('Missing required parameters for rental modal');
-                alert('Error: Missing product information. Please try again.');
-                return;
-            }
-
-            // Set modal form values
-            document.getElementById('rental_inventoryId').value = inventoryId;
-            document.getElementById('rental_itemName').value = itemName;
-            document.getElementById('rental_price').value = formatCurrency(rentPrice);
-            document.getElementById('rental_hiddenPrice').value = rentPrice;
-
-            // Handle redirect parameter
-            let redirectInput = document.getElementById('redirectToInput');
-            if (!redirectInput) {
-                redirectInput = document.createElement('input');
-                redirectInput.type = 'hidden';
-                redirectInput.id = 'redirectToInput';
-                redirectInput.name = 'redirectTo';
-                document.querySelector('#rentalModal form').appendChild(redirectInput);
-            }
-            redirectInput.value = redirectTo || 'rental';
-
-            // Reset form fields
-            const form = document.querySelector('#rentalModal form');
-            form.querySelector('input[name="customerName"]').value = '';
-            form.querySelector('input[name="customerIdCard"]').value = '';
-            form.querySelector('input[name="quantity"]').value = '1';
-
-            // Show modal
-            document.getElementById('rentalModal').style.display = 'block';
-
-            // Focus on customer name field
-            setTimeout(() => {
-                const customerNameField = form.querySelector('input[name="customerName"]');
-                if (customerNameField) {
-                    customerNameField.focus();
-                }
-            }, 100);
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // ==================== RENTAL FUNCTIONS ====================
-        function processReturn(rentalId) {
-            if (confirmAction('Are you sure you want to process this return?')) {
-                console.log('Processing return for rental ID:', rentalId);
-
-                const form = document.createElement('form');
-                form.method = 'post';
-                form.action = 'equipment';
-
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = 'return';
-
-                const rentalIdInput = document.createElement('input');
-                rentalIdInput.type = 'hidden';
-                rentalIdInput.name = 'rentalId';
-                rentalIdInput.value = rentalId;
-
-                // Add mode to maintain page
-                const modeInput = document.createElement('input');
-                modeInput.type = 'hidden';
-                modeInput.name = 'mode';
-                modeInput.value = 'rental';
-
-                form.appendChild(actionInput);
-                form.appendChild(rentalIdInput);
-                form.appendChild(modeInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-
-        function reportIssue(rentalId) {
-            if (confirmAction('Report issue for this rental?')) {
-                console.log('Reporting issue for rental ID:', rentalId);
-                location.href = 'compensation?action=create&rentalId=' + rentalId;
-            }
-        }
-
-        function validateRentalForm(form) {
-            const customerName = form.querySelector('input[name="customerName"]').value.trim();
-            const customerIdCard = form.querySelector('input[name="customerIdCard"]').value.trim();
-            const quantity = parseInt(form.querySelector('input[name="quantity"]').value);
-
-            if (!customerName) {
-                alert('Please enter customer name');
-                return false;
-            }
-
-            if (!customerIdCard) {
-                alert('Please enter CCCD number');
-                return false;
-            }
-
-            if (!quantity || quantity < 1) {
-                alert('Please enter a valid quantity');
-                return false;
-            }
-
-            return true;
-        }
-
-        // ==================== UTILITY FUNCTIONS ====================
-        function updateResultCount(count) {
-            const resultCountElement = document.getElementById('resultCount');
-            if (resultCountElement) {
-                resultCountElement.textContent = count;
-            }
-        }
-
-        function getQuantityFromCard(card) {
-            const stockText = card.querySelector('.stock-text');
-            if (stockText) {
-                const text = stockText.textContent;
-                const match = text.match(/Available:\s*(\d+)/);
-                return match ? parseInt(match[1]) : 0;
-            }
-            return 0;
-        }
-
-        function formatCurrency(amount) {
-            try {
-                const numAmount = parseFloat(amount);
-                if (isNaN(numAmount)) return 'N/A';
-                return new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND'
-                }).format(numAmount);
-            } catch (error) {
-                console.error('Error formatting currency:', error);
-                return amount.toString();
-            }
-        }
-
-        function refreshPage() {
-            window.location.reload();
-        }
-
-        function scrollToTop() {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+            // Real-time search (optional)
+            searchInput.addEventListener('input', function() {
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    searchEquipment();
+                }, 300);
             });
         }
 
-        function confirmAction(message) {
-            return confirm(message || 'Are you sure you want to proceed?');
-        }
+        // Price filter inputs
+        const minPriceInput = document.getElementById('minPrice');
+        const maxPriceInput = document.getElementById('maxPrice');
 
-        // ==================== EVENT LISTENERS ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing Equipment Rental System...');
-
-            // Ẩn category filters (chỉ giữ lại "All Categories")
-            hideCategoryFilters();
-
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                // Search on Enter key
-                searchInput.addEventListener('keypress', function(e) {
+        if (minPriceInput && maxPriceInput) {
+            [minPriceInput, maxPriceInput].forEach(input => {
+                input.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        searchEquipment();
+                        filterByPrice();
                     }
                 });
-
-                // Real-time search (optional)
-                searchInput.addEventListener('input', function() {
-                    clearTimeout(this.searchTimeout);
-                    this.searchTimeout = setTimeout(() => {
-                        searchEquipment();
-                    }, 300);
-                });
-            }
-
-            // Price filter inputs
-            const minPriceInput = document.getElementById('minPrice');
-            const maxPriceInput = document.getElementById('maxPrice');
-
-            if (minPriceInput && maxPriceInput) {
-                [minPriceInput, maxPriceInput].forEach(input => {
-                    input.addEventListener('keypress', function(e) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            filterByPrice();
-                        }
-                    });
-                });
-            }
-
-            // Modal event listeners
-            window.onclick = function(event) {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
-            };
-
-            // Auto-hide success/error messages
-            setTimeout(() => {
-                document.querySelectorAll('.message').forEach(msg => {
-                    msg.style.transition = 'opacity 0.3s';
-                    msg.style.opacity = '0';
-                    setTimeout(() => {
-                        if (msg.parentNode) {
-                            msg.parentNode.removeChild(msg);
-                        }
-                    }, 300);
-                });
-            }, 5000);
-
-            // Add clear filters button
-            const priceRange = document.querySelector('.price-range');
-            if (priceRange) {
-                const clearFiltersBtn = document.createElement('button');
-                clearFiltersBtn.textContent = 'Clear Filters';
-                clearFiltersBtn.className = 'btn btn-cancel';
-                clearFiltersBtn.style.width = '100%';
-                clearFiltersBtn.style.marginTop = '10px';
-                clearFiltersBtn.type = 'button';
-                clearFiltersBtn.onclick = clearPriceFilter;
-                priceRange.appendChild(clearFiltersBtn);
-            }
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function(e) {
-                // ESC to close modals
-                if (e.key === 'Escape') {
-                    document.querySelectorAll('.modal').forEach(modal => {
-                        modal.style.display = 'none';
-                    });
-                }
-
-                // Ctrl + F to focus search
-                if (e.ctrlKey && e.key === 'f') {
-                    e.preventDefault();
-                    const searchInput = document.getElementById('searchInput');
-                    if (searchInput) {
-                        searchInput.focus();
-                        searchInput.select();
-                    }
-                }
-            });
-
-            // Add tooltips to disabled buttons
-            document.querySelectorAll('.btn[disabled]').forEach(btn => {
-                btn.title = 'This item is currently out of stock';
-            });
-
-            // Form submission handling
-            document.querySelectorAll('form').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    // Validate rental form if it's the rental modal form
-                    if (this.closest('#rentalModal')) {
-                        if (!validateRentalForm(this)) {
-                            e.preventDefault();
-                            return false;
-                        }
-                    }
-
-                    // Add loading state
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        const originalText = submitBtn.textContent;
-                        submitBtn.textContent = 'Processing...';
-                        submitBtn.disabled = true;
-
-                        // Reset button state if form submission fails
-                        setTimeout(() => {
-                            submitBtn.textContent = originalText;
-                            submitBtn.disabled = false;
-                        }, 10000);
-                    }
-                });
-            });
-
-            // Initialize page state
-            const equipmentCards = document.querySelectorAll('.equipment-card');
-            updateResultCount(equipmentCards.length);
-
-            console.log('Equipment Rental System initialized successfully!');
-            console.log(`Found ${equipmentCards.length} equipment items`);
-        });
-
-        // ==================== ERROR HANDLING ====================
-        window.addEventListener('error', function(e) {
-            console.error('JavaScript Error:', e.error);
-        });
-
-        // ==================== PERFORMANCE MONITORING ====================
-        if ('performance' in window) {
-            window.addEventListener('load', function() {
-                setTimeout(() => {
-                    const perfData = performance.getEntriesByType('navigation')[0];
-                    console.log('Page Load Time:', Math.round(perfData.loadEventEnd - perfData.loadEventStart), 'ms');
-                }, 0);
             });
         }
-    </script>
+
+        // Modal event listeners
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+
+        // Auto-hide success/error messages
+        setTimeout(() => {
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.style.transition = 'opacity 0.3s';
+                msg.style.opacity = '0';
+                setTimeout(() => {
+                    if (msg.parentNode) {
+                        msg.parentNode.removeChild(msg);
+                    }
+                }, 300);
+            });
+        }, 5000);
+
+        // Add clear filters button
+        const priceRange = document.querySelector('.price-range');
+        if (priceRange) {
+            const clearFiltersBtn = document.createElement('button');
+            clearFiltersBtn.textContent = 'Clear Filters';
+            clearFiltersBtn.className = 'btn btn-cancel';
+            clearFiltersBtn.style.width = '100%';
+            clearFiltersBtn.style.marginTop = '10px';
+            clearFiltersBtn.type = 'button';
+            clearFiltersBtn.onclick = clearPriceFilter;
+            priceRange.appendChild(clearFiltersBtn);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC to close modals
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+
+            // Ctrl + F to focus search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
+
+        // Add tooltips to disabled buttons
+        document.querySelectorAll('.btn[disabled]').forEach(btn => {
+            btn.title = 'This item is currently out of stock';
+        });
+
+        // Form submission handling
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                // Validate rental form if it's the rental modal form
+                if (this.closest('#rentalModal')) {
+                    if (!validateRentalForm(this)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+
+                // Add loading state
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Processing...';
+                    submitBtn.disabled = true;
+
+                    // Reset button state if form submission fails
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, 10000);
+                }
+            });
+        });
+
+        // Initialize page state
+        const equipmentCards = document.querySelectorAll('.equipment-card');
+        updateResultCount(equipmentCards.length);
+
+        console.log('Equipment Rental System initialized successfully!');
+        console.log(`Found ${equipmentCards.length} equipment items`);
+    });
+
+    // ==================== ERROR HANDLING ====================
+    window.addEventListener('error', function(e) {
+        console.error('JavaScript Error:', e.error);
+    });
+
+    // ==================== PERFORMANCE MONITORING ====================
+    if ('performance' in window) {
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const perfData = performance.getEntriesByType('navigation')[0];
+                console.log('Page Load Time:', Math.round(perfData.loadEventEnd - perfData.loadEventStart), 'ms');
+            }, 0);
+        });
+    }
+</script>
 </body>
 </html>
