@@ -1,5 +1,6 @@
 package dal;
 import model.InventoryRequest;
+import model.RepairRequest;
 import model.Inventory;
 import java.sql.*;
 import utils.DBConnect;
@@ -50,6 +51,8 @@ public class InventoryRequestDAO {
         }
         return list;
     }
+
+
 
 
     public static boolean updateStatusAndStock(int requestId, String status) {
@@ -121,12 +124,94 @@ public class InventoryRequestDAO {
         return list;
     }
 
+    public static boolean createRepairRequest(int inventoryId, String reason) {
+        String sql = "INSERT INTO Repair_Request (inventory_id, reason) VALUES (?, ?)";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, inventoryId);
+            stmt.setString(2, reason);
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+        public static List<RepairRequest> getAllRepairRequests() {
+            List<RepairRequest> list = new ArrayList<>();
+            String sql = "SELECT rr.*, i.item_name " +
+                    "FROM Repair_Request rr " +
+                    "JOIN inventory i ON rr.inventory_id = i.inventory_id " ;
+
+            try (Connection conn = DBConnect.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    RepairRequest req = new RepairRequest();
+                    req.setRequestId(rs.getInt("request_id"));
+                    req.setInventoryId(rs.getInt("inventory_id"));
+                    req.setItemName(rs.getString("item_name"));
+                    req.setReason(rs.getString("reason"));
+                    req.setStatus(rs.getString("status"));
+                    req.setRequestedAt(rs.getTimestamp("requested_at"));
+                    req.setReviewedAt(rs.getTimestamp("reviewed_at"));
+
+                    list.add(req);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return list;
+        }
+
+    public static boolean updateStatus(int requestId, String status) {
+        String sql = "UPDATE Repair_Request SET status = ?, reviewed_at = NOW() WHERE request_id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            stmt.setInt(2, requestId);
+            int affected = stmt.executeUpdate();
+            return affected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+
 
 
     public static void main(String[] args) {
-        boolean result = updateStatusAndStock(1, "approved");
-        System.out.println("Cập nhật: " + result);
+        int testRequestId = 1; // ✅ ID của request cần cập nhật
+        String newStatus = "approved"; // hoặc "rejected", "pending", ...
+
+        boolean success = updateStatus(testRequestId, newStatus);
+
+        if (success) {
+            System.out.println("✅ Cập nhật trạng thái thành công cho request ID: " + testRequestId);
+        } else {
+            System.out.println("❌ Cập nhật thất bại. Kiểm tra request ID hoặc kết nối DB.");
+        }
+
+        // Gợi ý: gọi lại getAllRepairRequests() để kiểm tra kết quả
+        System.out.println("\n📋 Danh sách yêu cầu sửa chữa sau cập nhật:");
+        List<RepairRequest> requests = getAllRepairRequests();
+        for (RepairRequest req : requests) {
+            System.out.printf("ID: %d | Tên thiết bị: %s | Trạng thái: %s\n",
+                    req.getRequestId(), req.getItemName(), req.getStatus());
+        }
     }
+
+
 
 
 

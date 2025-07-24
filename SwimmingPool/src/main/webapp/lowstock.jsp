@@ -5,74 +5,96 @@
 <head>
   <title>Thiết bị sắp hết kho</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f7fa;
-      margin: 0;
-      padding: 20px;
-    }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 20px;
+  }
 
-    h2 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 30px;
-    }
+  h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+  }
 
-    table {
-      width: 95%;
-      margin: auto;
-      border-collapse: collapse;
-      background-color: #ffffff;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
+  table {
+    width: 95%;
+    margin: auto;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 
-    th, td {
-      padding: 12px 15px;
-      border: 1px solid #dee2e6;
-      text-align: center;
-      font-size: 14px;
-    }
+  th, td {
+    padding: 12px 14px;
+    border: 1px solid #dee2e6;
+    text-align: center;
+    font-size: 14px;
+  }
 
-    th {
-      background-color: #f0f2f5;
-      color: #333;
-      font-weight: bold;
-    }
+  thead th {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
 
-    tr:nth-child(even) {
-      background-color: #f9fbfd;
-    }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
 
-    a {
-      color: #007bff;
-      text-decoration: none;
-      font-weight: 500;
-    }
+  a {
+    text-decoration: none;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 4px;
+  }
 
-    a:hover {
-      text-decoration: underline;
-      color: #0056b3;
-    }
+  a[href*="requestForm"] {
+    background-color: #ffc107;
+    color: #000;
+    border: 1px solid #e0a800;
+  }
 
-    .back-link {
-      text-align: center;
-      margin-top: 30px;
-    }
+  a[href*="requestForm"]:hover {
+    background-color: #e0a800;
+    color: white;
+  }
 
-    .back-link a {
-      padding: 8px 16px;
-      background-color: #3498db;
-      color: #fff;
-      border-radius: 5px;
-      display: inline-block;
-      text-decoration: none;
-      transition: background-color 0.2s;
-    }
+  .back-link {
+    text-align: center;
+    margin-top: 30px;
+  }
 
-    .back-link a:hover {
-      background-color: #2980b9;
-    }
+  .back-link a {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    display: inline-block;
+    transition: background-color 0.2s;
+  }
+
+  .back-link a:hover {
+    background-color: #0056b3;
+  }
+
+  .message-box {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 12px 20px;
+    background-color: #e0f7fa;
+    color: #00796b;
+    border-left: 5px solid #00796b;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
   </style>
+
+
 
 </head>
 <body>
@@ -116,8 +138,17 @@
 
 <br/>
 <div style="text-align: center;">
-  <a href="inventory">Quay lại danh sách</a>
+  <a href="staff_dashboard.jsp">Quay lại </a>
 </div>
+<%
+  String message = (String) session.getAttribute("message");
+  if (message != null) {
+%>
+<div class="message-box"><%= message %></div>
+<%
+    session.removeAttribute("message"); // Xoá sau khi hiển thị 1 lần
+  }
+%>
 
 </body>
 </html>

@@ -2,14 +2,13 @@ package controller;
 
 import dal.InventoryDAO;
 import dal.InventoryRequestDAO;
-import dal.RepairRequestDAO;
 import model.Inventory;
 import model.InventoryRequest;
-import model.RepairRequest;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import model.RepairRequest;
 
 import java.io.IOException;
 import java.util.Date;
@@ -48,15 +47,16 @@ public class InventoryServlet extends HttpServlet {
             case "requestForm":
                 showRequestForm(request, response);
                 break;
-            case "repairForm":
-                showRepairForm(request, response);
-                break;
-            case "maintanence":
-                listInventoryMaintanence(request, response);
+            case "broken":
+                listInventoryBroken(request, response);
                 break;
             case "approvedRequestHistory":
                 showApprovedRequestHistory(request, response);
                 break;
+            case "repairRequestList":
+                showRepairHistory(request, response);
+                break;
+
 
 
             default:
@@ -85,6 +85,9 @@ public class InventoryServlet extends HttpServlet {
             case "updateRequestStatus":
                 updateRequestStatus(request, response);
                 break;
+            case "updateRepairStatus":
+                updateRepairStatus(request, response);
+                break;
             case "submitRepair":
                 submitRepairRequest(request, response);
                 break;
@@ -97,25 +100,15 @@ public class InventoryServlet extends HttpServlet {
     }
 
     private void listInventory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int page = 1;
-        int recordsPerPage = 5;
-
-        if (request.getParameter("page") != null) {
-            page = Integer.parseInt(request.getParameter("page"));
-        }
-
+        // Lấy danh sách thiết bị sắp hết kho
         List<Inventory> lowStockItems = InventoryDAO.getLowStockItems();
-        request.setAttribute("lowStockItems", lowStockItems); // luôn set, kể cả khi rỗng
+        request.setAttribute("lowStockItems", lowStockItems); // luôn set kể cả khi rỗng
 
+        // Lấy toàn bộ danh sách thiết bị (không phân trang)
+        List<Inventory> inventoryList = InventoryDAO.getAllInventories();
+        request.setAttribute("inventoryList", inventoryList);
 
-        List<Inventory> list = InventoryDAO.getInventoriesByPage((page - 1) * recordsPerPage, recordsPerPage);
-        int totalRecords = InventoryDAO.getTotalInventoryCount();
-        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
-
-        request.setAttribute("inventoryList", list);
-        request.setAttribute("currentPage", page);
-        request.setAttribute("totalPages", totalPages);
-
+        // Không cần set currentPage hoặc totalPages nữa
         request.getRequestDispatcher("inventory.jsp").forward(request, response);
     }
 
@@ -196,12 +189,6 @@ public class InventoryServlet extends HttpServlet {
         request.getRequestDispatcher("inventoryRequestList.jsp").forward(request, response);
     }
 
-    private void listInventoryMaintanence(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Inventory> maintenanceList = InventoryDAO.getItemsUnderMaintenance();
-
-        request.setAttribute("maintenanceList", maintenanceList);
-        request.getRequestDispatcher("maintenanceInventory.jsp").forward(request, response);
-    }
 
 
 
@@ -218,7 +205,7 @@ public class InventoryServlet extends HttpServlet {
         System.out.println("inventory_id = " + inventoryId); // Thêm dòng này để debug
 
 
-        response.sendRedirect("inventory?action=requestList");
+        response.sendRedirect("inventory?action=lowstock");
 
     }
     private void updateRequestStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -273,31 +260,56 @@ public class InventoryServlet extends HttpServlet {
     }
 
 
-
-
-    private void showRepairForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Inventory> repairItems = InventoryDAO.getItemsUnderMaintenance(); // gọi đúng DAO mới
-        request.setAttribute("repairItems", repairItems);
-        request.getRequestDispatcher("repairForm.jsp").forward(request, response);
-    }
-
-
-    private void submitRepairRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int inventoryId = Integer.parseInt(request.getParameter("inventory_id"));
-        String reason = request.getParameter("reason");
-        boolean success = RepairRequestDAO.insertRepairRequest(inventoryId, reason);
-
-        HttpSession session = request.getSession();
-        session.setAttribute("message", success ? "Đã gửi yêu cầu sửa chữa!" : "Gửi yêu cầu thất bại!");
-        response.sendRedirect("inventory");
-    }
-
     private void showApprovedRequestHistory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<InventoryRequest> requestList = InventoryRequestDAO.getApprovedRequests();
         request.setAttribute("requestList", requestList);
         request.getRequestDispatcher("requestHistory.jsp").forward(request, response);
     }
+
+    private void listInventoryBroken(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<Inventory> brokenList = InventoryDAO.getItemsUnderBroken();
+
+        request.setAttribute("brokenList", brokenList);
+        request.getRequestDispatcher("maintenanceInventory.jsp").forward(request, response);
+    }
+
+
+
+
+    private void submitRepairRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int inventoryId = Integer.parseInt(request.getParameter("inventoryId"));
+        String reason = request.getParameter("reason");
+
+        boolean success = InventoryRequestDAO.createRepairRequest(inventoryId, reason);
+        HttpSession session = request.getSession();
+        session.setAttribute("message", success ? "Gửi yêu cầu sửa chữa thành công!" : "Gửi yêu cầu thất bại!");
+
+        response.sendRedirect("inventory?action=lowstock");
+
+    }
+
+    private void showRepairHistory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<RepairRequest> repairRequests = InventoryRequestDAO.getAllRepairRequests();
+        request.setAttribute("repairRequests", repairRequests);
+        request.getRequestDispatcher("repairHistory.jsp").forward(request, response);
+    }
+
+    private void updateRepairStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int requestId = Integer.parseInt(request.getParameter("requestId"));
+        String status = request.getParameter("status");
+
+        System.out.println(">> Gửi cập nhật: requestId = " + requestId + ", status = " + status);
+
+        boolean updated = InventoryRequestDAO.updateStatus(requestId, status);
+        System.out.println(">> Kết quả cập nhật: " + updated);
+
+        response.sendRedirect("inventory?action=repairRequestList");
+    }
+
+
+
+
 
 
 

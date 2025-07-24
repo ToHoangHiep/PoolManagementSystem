@@ -404,12 +404,12 @@ public class InventoryDAO {
         return lowStockList;
     }
 
-    public static List<Inventory> getItemsUnderMaintenance() {
+    public static List<Inventory> getItemsUnderBroken() {
         List<Inventory> list = new ArrayList<>();
         String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
                 "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
                 "JOIN inventory_category c ON c.category_id = i.category_id " +
-                "WHERE i.status = 'bảo trì'";
+                "WHERE i.status = 'Broken'";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -443,26 +443,12 @@ public class InventoryDAO {
 
 
     public static void main(String[] args) {
-        Inventory newItem = new Inventory();
-
-        newItem.setManagerId(2);  // Giả sử manager ID là 2
-        newItem.setItemName("Phao bơi trẻ em");
-        newItem.setCategoryID(1); // ✅ Vì ID 1 = "Thiết bị cá nhân", đã có trong DB
-        newItem.setQuantity(50);
-        newItem.setUnit("cái");
-        newItem.setStatus("Available");
-        newItem.setImportPrice(120000); // VND hoặc theo đơn vị bạn chọ
-        newItem.setLastUpdated(new java.util.Date());
-        newItem.setUsageId(1); // Giả sử là thiết bị cho thuê
-
-        boolean inserted = insertInventory(newItem);
-
-        if (inserted) {
-            System.out.println("✅ Thiết bị đã được thêm thành công!");
-        } else {
-            System.out.println("❌ Thêm thiết bị thất bại.");
+        List<Inventory> brokenItems = getItemsUnderBroken();
+        for (Inventory i : brokenItems) {
+            System.out.println(i.getItemName() + " - " + i.getStatus());
         }
     }
+
 
 
 

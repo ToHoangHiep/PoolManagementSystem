@@ -103,6 +103,58 @@
             min-width: 20px;
         }
 
+        /* Dropdown container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Nút chính */
+        .dropbtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 18px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* Nội dung dropdown */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 210px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        /* Các link trong dropdown */
+        .dropdown-content a {
+            color: black;
+            padding: 10px 14px;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+        }
+
+        /* Hover */
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Hiển thị dropdown khi hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #3e8e41;
+        }
+
+
         /* Background */
         .hero-section {
             flex: 1;
@@ -137,7 +189,14 @@
         <a href="purchase"><i class="fas fa-ticketpurchase"></i> Vé bơi
         </a>
         <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
-        <a href="product"><i class="fas fa-box-open"></i> Sản phẩm</a>
+        <div class="dropdown">
+            <button class="dropbtn"><i class="fas fa-box"></i> Danh mục thiết bị</button>
+            <div class="dropdown-content">
+                <a href="inventory?action=lowstock"><i class="fas fa-box-open"></i> Sản phẩm sắp hết</a>
+                <a href="inventory?action=broken"><i class="fas fa-tools"></i> Sản phẩm hỏng</a>
+            </div>
+        </div>
+
         <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>
         <a href="feedback?mode=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>
     </div>
