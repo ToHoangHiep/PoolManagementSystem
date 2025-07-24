@@ -1,229 +1,277 @@
 package controller;
-
 import dal.MaintenanceDAO;
+import model.MaintenanceLog;
+import model.MaintenanceRequest;
 import model.MaintenanceSchedule;
 import model.User;
-import dal.UserDAO;
-
-import jakarta.servlet.*;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Time;
+import java.util.*;
 
-@WebServlet("/maintenance")
+
+@WebServlet("/MaintenanceServlet")
+
 public class MaintenanceServlet extends HttpServlet {
 
-    private MaintenanceDAO maintenanceDAO;
-    private UserDAO userDAO;
+    private MaintenanceDAO dao;
 
     @Override
-    public void init() {
-        maintenanceDAO = new MaintenanceDAO();
-        userDAO = new UserDAO();
+
+    public void init() throws ServletException {
+
+        dao = new MaintenanceDAO();
+
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
 
-        // Kiểm tra xem người dùng đã đăng nhập chưa
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("user") == null) {
-            // Nếu chưa đăng nhập, chuyển hướng về trang login
-            response.sendRedirect("login.jsp");
+    @Override
+
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            resp.sendRedirect("login.jsp");
             return;
         }
-
-        String action = request.getParameter("action");
-        if (action == null) action = "list";
+        String role = user.getRole().getName();
+        String action = req.getParameter("action");
+        if (action == null) {
+            action = role.equalsIgnoreCase("Staff") ? "staffView" : "list";
+        }
 
         switch (action) {
-            case "new":
-                showAddForm(request, response);  // Hiển thị form thêm lịch bảo trì
+
+            case "list":
+                if (role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Manager")) {
+                    List<MaintenanceSchedule> templates = dao.getAllTemplates();
+                    List<MaintenanceRequest> requests = dao.getAllRequests();
+                    List<User> staffs = dao.getAllStaff();
+                    // Lấy tất cả các MaintenanceLog
+                    List<MaintenanceLog> allLogs = dao.getAllMaintenanceLogs(); // <-- Dòng này gọi phương thức đã cập nhật trong DAO
+
+                    req.setAttribute("schedules", templates);
+                    req.setAttribute("requests", requests);
+                    req.setAttribute("staffs", staffs);
+                    req.setAttribute("allMaintenanceLogs", allLogs); // <-- Truyền danh sách logs sang JSP
+
+                    req.getRequestDispatcher("maintenance.jsp").forward(req, resp);
+
+                } else {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
                 break;
-            case "edit":
-                showEditForm(request, response);  // Hiển thị form chỉnh sửa lịch bảo trì
+
+            case "showForm":
+                if (role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Manager")) {
+                    req.setAttribute("templates", dao.getAllTemplates());
+                    req.setAttribute("areas", dao.getAllPoolAreas());
+                    req.setAttribute("staffs", dao.getAllStaff());
+
+                    req.getRequestDispatcher("maintenance-form.jsp").forward(req, resp);
+                } else {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
                 break;
-            case "delete":
-                deleteSchedule(request, response);  // Xử lý xoá lịch bảo trì
+
+            case "showRequestForm":
+                if (role.equalsIgnoreCase("Staff")) {
+                    req.setAttribute("areas", dao.getAllPoolAreas());
+
+                    req.getRequestDispatcher("request-form.jsp").forward(req, resp);
+                } else {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
                 break;
-            case "update":
-                updateSchedule(request, response);  // Xử lý cập nhật lịch bảo trì
-                break;
-            default:
-                listSchedules(request, response);  // Hiển thị danh sách lịch bảo trì
-        }
-    }
 
-
-
-    private void listSchedules(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        int pageNo = 1;
-        int pageSize = 10;
-        String status = request.getParameter("searchStatus");
-        String title = request.getParameter("searchTitle");
-
-        try {
-            pageNo = Integer.parseInt(request.getParameter("pageNo"));
-        } catch (NumberFormatException e) {
-            pageNo = 1;
-        }
-
-        try {
-            pageSize = Integer.parseInt(request.getParameter("pageSize"));
-        } catch (NumberFormatException e) {
-            pageSize = 10;
-        }
-
-        // Lấy danh sách lịch bảo trì theo trạng thái và tiêu đề nếu có
-        List<MaintenanceSchedule> schedules = maintenanceDAO.getSchedulesWithSearch(status, title, pageNo, pageSize);
-        request.setAttribute("schedules", schedules);
-
-        // Truyền trạng thái và tiêu đề tìm kiếm về JSP
-        request.setAttribute("searchStatus", status);
-        request.setAttribute("searchTitle", title);
-
-        // Lấy tổng số bản ghi và tính tổng số trang
-        int totalRecords = maintenanceDAO.getTotalSchedules(status, title);
-        int totalPages = (int) Math.ceil((double) totalRecords / pageSize);
-
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("currentPage", pageNo);
-
-        RequestDispatcher dispatcher = request.getRequestDispatcher("maintenance.jsp");
-        dispatcher.forward(request, response);
-    }
-
-    private void showAddForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        List<User> staffList = userDAO.getAllStaff();  // Lấy danh sách nhân viên
-        if (staffList == null) {
-            staffList = new ArrayList<>();  // Đảm bảo không null nếu không có nhân viên
-        }
-        request.setAttribute("staffList", staffList);  // Truyền danh sách nhân viên vào request
-        RequestDispatcher dispatcher = request.getRequestDispatcher("maintenance-form.jsp");
-        dispatcher.forward(request, response);
-    }
-
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        MaintenanceSchedule schedule = maintenanceDAO.getScheduleById(id);  // Lấy lịch bảo trì theo ID
-        List<User> staffList = userDAO.getAllStaff();  // Lấy danh sách nhân viên
-        request.setAttribute("schedule", schedule);
-        request.setAttribute("staffList", staffList);  // Truyền danh sách nhân viên vào request
-        request.getRequestDispatcher("maintenance-edit.jsp").forward(request, response);  // Chuyển đến trang sửa
-    }
-
-    // Xử lý thêm lịch bảo trì
-    private void insertSchedule(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        try {
-            String title = request.getParameter("title");
-            String description = request.getParameter("description");
-            String frequency = request.getParameter("frequency");
-            int staffId = Integer.parseInt(request.getParameter("assignedStaffId"));
-
-            String scheduledTimeStr = request.getParameter("scheduledTime");
-            java.sql.Time scheduledTime = null;
-
-            if (scheduledTimeStr != null && !scheduledTimeStr.isEmpty()) {
-                // Kiểm tra định dạng thời gian và chuyển thành java.sql.Time
-                scheduledTime = java.sql.Time.valueOf(scheduledTimeStr + ":00");  // Thêm :00 để tạo định dạng đầy đủ HH:mm:ss
+            case "staffView":
+            if (!role.equalsIgnoreCase("Staff")) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             }
 
-            String status = request.getParameter("status");
+            // Lấy danh sách các thông báo CHƯA ĐỌC cho staff hiện tại
+            List<String> unreadNotifications = dao.getUnreadNotifications(user.getId());
+            req.setAttribute("unreadNotifications", unreadNotifications);
+            if (!unreadNotifications.isEmpty()) {
+                dao.markNotificationsAsRead(user.getId()); // Đánh dấu đã đọc sau khi lấy
+            }
 
-            HttpSession session = request.getSession();
-            User user = (User) session.getAttribute("user");
+            // Lấy danh sách MaintenanceLog (BAO GỒM CẢ CÁC LOG TẠO TỪ YÊU CẦU ĐÃ CHẤP NHẬN)
+            List<MaintenanceLog> logs = dao.getLogsByStaff(user.getId());
+            req.setAttribute("logs", logs);
 
-            MaintenanceSchedule schedule = new MaintenanceSchedule();
-            schedule.setTitle(title);
-            schedule.setDescription(description);
-            schedule.setFrequency(frequency);
-            schedule.setAssignedStaffId(staffId);
-            schedule.setScheduledTime(scheduledTime);
-            schedule.setStatus(status);
-            schedule.setCreatedBy(user.getId());
+            // Lấy TẤT CẢ request mà staff hiện tại đã gửi
+            List<MaintenanceRequest> mySentRequests = dao.getMySentRequests(user.getId());
 
-            // Thêm lịch bảo trì vào cơ sở dữ liệu
-            maintenanceDAO.insertSchedule(schedule);
+            // Khởi tạo các danh sách để phân loại các yêu cầu đã gửi
+            List<MaintenanceRequest> myProcessingRequests = new ArrayList<>();
+            List<MaintenanceRequest> myAcceptedRequests = new ArrayList<>();
+            List<MaintenanceRequest> myRejectedRequests = new ArrayList<>();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Truyền thông báo lỗi về phía JSP
-            request.setAttribute("error", "Có lỗi xảy ra khi thêm lịch bảo trì. Vui lòng thử lại.");
-            request.getRequestDispatcher("maintenance-form.jsp").forward(request, response);
-            return;
+            // Phân loại các yêu cầu đã gửi dựa trên trạng thái của chúng
+            for (MaintenanceRequest requestItem : mySentRequests) {
+                // Trạng thái 'Processing' được map từ 'Open' trong DAO
+                if ("Processing".equals(requestItem.getStatus())) {
+                    myProcessingRequests.add(requestItem);
+                }
+                // Trạng thái 'Transferred' trong DB tương ứng với 'Accepted' hiển thị cho người dùng
+                else if ("Transferred".equals(requestItem.getStatus())) {
+                    // Có thể set lại status cho mục đích hiển thị trong JSP nếu muốn
+                    requestItem.setStatus("Accepted"); // Ví dụ: hiển thị "Đã chấp nhận"
+                    myAcceptedRequests.add(requestItem);
+                }
+                // Trạng thái 'Rejected' trong DB
+                else if ("Rejected".equals(requestItem.getStatus())) {
+                    myRejectedRequests.add(requestItem);
+                }
+                // Các trạng thái khác (nếu có), bạn có thể thêm logic ở đây
+            }
+
+            // Đặt các danh sách đã phân loại vào request attribute để truyền sang JSP
+            req.setAttribute("myProcessingRequests", myProcessingRequests);
+            req.setAttribute("myAccepted", myAcceptedRequests);
+            req.setAttribute("myRejected", myRejectedRequests);
+
+            // KHÔNG CẦN DÙNG NỮA: Yêu cầu được phân công cho tôi (assignedRequests)
+            // Vì các yêu cầu được chấp nhận và phân công giờ đây đã trở thành MaintenanceLog
+            // và được hiển thị trong phần "Công việc định kỳ" (biến 'logs').
+            // List<MaintenanceRequest> assignedRequests = dao.getAssignedRequestsForStaff(user.getId());
+            // req.setAttribute("assigned", assignedRequests);
+
+            req.getRequestDispatcher("maintenance-staff.jsp").forward(req, resp);
+            break;
+
+            case "listRequests": // Hành động này có thể bị loại bỏ vì `maintenance.jsp` đã hiển thị requests
+                if (role.equalsIgnoreCase("Admin") || role.equalsIgnoreCase("Manager")) {
+                    List<MaintenanceRequest> requests = dao.getAllRequests();
+                    req.setAttribute("requests", requests);
+                    req.getRequestDispatcher("maintenance-requests.jsp").forward(req, resp);
+                } else {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
+                break;
+
+            default:
+                resp.sendRedirect("MaintenanceServlet");
         }
 
-        response.sendRedirect("maintenance");  // Sau khi thêm thành công, chuyển về trang danh sách
     }
 
 
-
-    // Xử lý cập nhật lịch bảo trì
-    private void updateSchedule(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            String title = request.getParameter("title");
-            String description = request.getParameter("description");
-            String frequency = request.getParameter("frequency");
-            int staffId = Integer.parseInt(request.getParameter("assignedStaffId"));
-            java.sql.Time scheduledTime = java.sql.Time.valueOf(request.getParameter("scheduledTime"));
-            String status = request.getParameter("status");
-
-            MaintenanceSchedule schedule = new MaintenanceSchedule();
-            schedule.setId(id);
-            schedule.setTitle(title);
-            schedule.setDescription(description);
-            schedule.setFrequency(frequency);
-            schedule.setAssignedStaffId(staffId);
-            schedule.setScheduledTime(scheduledTime);
-            schedule.setStatus(status);
-
-            maintenanceDAO.updateSchedule(schedule);  // Gọi DAO để cập nhật lịch bảo trì
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        response.sendRedirect("maintenance");  // Sau khi cập nhật thành công, chuyển về trang danh sách
-    }
-
-    // Xử lý xoá lịch bảo trì
-    private void deleteSchedule(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            maintenanceDAO.deleteSchedule(id);  // Gọi DAO để xoá lịch bảo trì
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        response.sendRedirect("maintenance");  // Sau khi xoá thành công, chuyển về trang danh sách
-    }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (action == null) action = "list";
 
-        switch (action) {
-            case "insert":
-                insertSchedule(request, response);
-                break;
-            case "update":
-                updateSchedule(request, response);
-                break;
-            default:
-                listSchedules(request, response);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        User user = (User) req.getSession().getAttribute("user");
+        String role = user.getRole().getName();
+        String action = req.getParameter("action");
+
+        try {
+            switch (action) {
+                case "create":
+                    if (!role.equalsIgnoreCase("Admin") && !role.equalsIgnoreCase("Manager")) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                    String tplIdStr = req.getParameter("templateId");
+                    String title, desc, freq;
+                    Time schedTime;
+                    if (tplIdStr != null && !tplIdStr.isEmpty()) {
+                        int tplId = Integer.parseInt(tplIdStr);
+                        MaintenanceSchedule tpl = dao.getTemplateById(tplId);
+                        title = tpl.getTitle();
+                        desc  = tpl.getDescription();
+                        freq  = tpl.getFrequency();
+                        schedTime = tpl.getScheduledTime();
+                    } else {
+                        title = req.getParameter("title");
+                        desc  = req.getParameter("description");
+                        freq  = req.getParameter("frequency");
+                        String t = req.getParameter("scheduledTime");
+
+                        // FIX START: Ensure scheduledTime is in "hh:mm:ss" format
+                        if (t != null && !t.isEmpty()) {
+                            // Check if seconds are missing (e.g., "10:30")
+                            if (t.matches("^\\d{2}:\\d{2}$")) { // Regex to check for HH:MM format
+                                t += ":00"; // Append ":00" for seconds
+                            }
+                            schedTime = Time.valueOf(t);
+                        } else {
+                            schedTime = new Time(System.currentTimeMillis()); // Default to current time if empty
+                        }
+                        // FIX END
+
+                    }
+                    int newArea = Integer.parseInt(req.getParameter("areaId"));
+                    int staff  = Integer.parseInt(req.getParameter("staffId"));
+                    int newId = dao.insertSchedule(title, desc, freq, schedTime, user.getId());
+                    if (newId > 0) dao.insertLog(newId, staff, newArea);
+                    break;
+
+                case "complete":
+                    dao.updateLogStatus(
+                            Integer.parseInt(req.getParameter("logId")), "Done"
+                    );
+                    break;
+
+
+                case "request":
+                    if (!role.equalsIgnoreCase("Staff")) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                    int areaReq = Integer.parseInt(req.getParameter("areaId"));
+                    String rdesc = req.getParameter("description");
+                    dao.insertRequest(new MaintenanceRequest(user.getId(), rdesc, areaReq));
+                    break;
+
+                case "acceptRequest":
+                    if (!role.equalsIgnoreCase("Admin") && !role.equalsIgnoreCase("Manager")) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                    int requestId = Integer.parseInt(req.getParameter("id"));
+                    String staffIdParam = req.getParameter("staffId");
+                    if (staffIdParam == null || staffIdParam.isEmpty()) {
+                        req.setAttribute("error", "Bạn phải chọn nhân viên trước khi chấp nhận.");
+                        doGet(req, resp);
+                        return;
+                    }
+                    int staffId = Integer.parseInt(staffIdParam);
+                    dao.acceptRequest(requestId, staffId); // Tên phương thức vẫn là acceptRequest nhưng logic đã thay đổi trong DAO
+                    resp.sendRedirect("MaintenanceServlet?action=list");
+                    return;
+
+                case "rejectRequest":
+                    if (!role.equalsIgnoreCase("Admin") && !role.equalsIgnoreCase("Manager")) {
+                        resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                        return;
+                    }
+                    int rejectId = Integer.parseInt(req.getParameter("id"));
+                    dao.rejectRequest(rejectId);
+                    resp.sendRedirect("MaintenanceServlet?action=list");
+                    return;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            req.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
+            doGet(req, resp);
+            return;
+
         }
+
+// Sau khi xử lý POST, redirect về trang view phù hợp với vai trò
+        if (role.equalsIgnoreCase("Staff")) {
+            resp.sendRedirect("MaintenanceServlet?action=staffView");
+        } else {
+            resp.sendRedirect("MaintenanceServlet?action=list");
+
+        }
+
     }
+
 }

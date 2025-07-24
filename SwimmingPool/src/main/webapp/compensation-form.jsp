@@ -653,7 +653,7 @@
         form.submit();
     }
 
-   <%--Cải thiện UX:--%>
+    <%--Cải thiện UX:--%>
     document.addEventListener('DOMContentLoaded', function() {
         const rentalId = document.getElementById('rentalId');
         const compensationType = document.getElementById('compensationType');

@@ -156,7 +156,7 @@ public class EquipmentCompensation {
     }
 
 
-//     Kiểm tra xem compensation đã được thanh toán đầy đủ chưa
+    //     Kiểm tra xem compensation đã được thanh toán đầy đủ chưa
     public boolean isFullyPaid() {
         // Kiểm tra null safety
         if (totalAmount == null || paidAmount == null) {

@@ -392,7 +392,7 @@
                 Total Amount Due: <strong><fmt:formatNumber value="${compensation.totalAmount}" type="currency" currencyCode="VND"/></strong><br>
                 Please proceed to payment counter or use the payment options below.
             </div>
-
+        </div> <!-- 🛠️ THÊM THẺ ĐÓNG DIV Ở ĐÂY -->
 
         <!-- Footer Note -->
         <div class="footer-note">
@@ -407,19 +407,19 @@
         <button class="btn btn-primary" onclick="window.print()">
             🖨️ Print Invoice
         </button>
-<%--        <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"--%>
-<%--           class="btn btn-success">--%>
-<%--            💳 Proceed to Payment--%>
-<%--        </a>--%>
+        <%--        <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"--%>
+        <%--           class="btn btn-success">--%>
+        <%--            💳 Proceed to Payment--%>
+        <%--        </a>--%>
         <!-- THÊM BACK TO RENTALS BUTTON: -->
         <a href="${pageContext.request.contextPath}/equipment?mode=rental"
            class="btn btn-success">
             🔙 Back to Rentals
         </a>
-<%--        <a href="${pageContext.request.contextPath}/compensation?action=view&id=${compensation.compensationId}"--%>
-<%--           class="btn btn-secondary">--%>
-<%--            📋 View Details--%>
-<%--        </a>--%>
+        <%--        <a href="${pageContext.request.contextPath}/compensation?action=view&id=${compensation.compensationId}"--%>
+        <%--           class="btn btn-secondary">--%>
+        <%--            📋 View Details--%>
+        <%--        </a>--%>
     </div>
 </div>
 

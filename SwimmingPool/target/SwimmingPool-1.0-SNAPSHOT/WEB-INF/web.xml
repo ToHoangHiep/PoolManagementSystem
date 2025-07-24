@@ -99,7 +99,7 @@
 
     <servlet>
         <servlet-name>BlogServlet</servlet-name>
-        <servlet-class>controller.BlogsServlet</servlet-class>
+        <servlet-class>controller.BlogServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
@@ -117,14 +117,24 @@
     </servlet-mapping>
 
     <servlet>
+        <servlet-name>CoachServlet</servlet-name>
+        <servlet-class>controller.CoachServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CoachServlet</servlet-name>
+        <url-pattern>/coach-list</url-pattern>
+    </servlet-mapping>
+
+    <!-- TODO - ERROR HANDLER -->
+    <servlet>
         <servlet-name>CourseServlet</servlet-name>
         <servlet-class>controller.CourseServlet</servlet-class>
     </servlet>
 
-
     <servlet-mapping>
         <servlet-name>CourseServlet</servlet-name>
-        <url-pattern>/coachcourse</url-pattern>
+        <url-pattern>/course</url-pattern>
     </servlet-mapping>
-    <!-- TODO - ERROR HANDLER -->
 </web-app>
+
