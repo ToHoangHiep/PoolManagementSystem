@@ -406,7 +406,7 @@ VALUES
 
 -- MINH
 
-CREATE TABLE CourseForm(
+CREATE TABLE Course_Form(
 id INT PRIMARY KEY AUTO_INCREMENT,
 user_id INT  , -- nối đến bảng user
 FOREIGN KEY (user_id) REFERENCES Users(id),
@@ -552,3 +552,19 @@ INSERT INTO Inventory_category (category_name, category_quantity) VALUES
 ('Đồ bơi người lớn', 0),
 ('Dụng cụ bơi', 0),
 ('Thiết bị an toàn', 0);
+
+-- hiep
+ALTER TABLE Pool_Area
+ADD COLUMN type VARCHAR(50) DEFAULT 'Standard',          -- loại khu (Trẻ em / VIP / Tập luyện)
+ADD COLUMN water_depth DECIMAL(5,2),                     -- độ sâu nước (m)
+ADD COLUMN length DECIMAL(5,2),                          -- chiều dài (m)
+ADD COLUMN width DECIMAL(5,2),                           -- chiều rộng (m)
+ADD COLUMN max_capacity INT;                             -- sức chứa tối đa
+
+
+CREATE TABLE StaffInitialSetup (
+    user_id INT PRIMARY KEY,
+    is_setup_complete BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
