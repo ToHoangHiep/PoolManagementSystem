@@ -406,7 +406,7 @@ VALUES
 
 -- MINH
 
-CREATE TABLE CourseForm(
+CREATE TABLE Course_Form(
 id INT PRIMARY KEY AUTO_INCREMENT,
 user_id INT  , -- nối đến bảng user
 FOREIGN KEY (user_id) REFERENCES Users(id),
