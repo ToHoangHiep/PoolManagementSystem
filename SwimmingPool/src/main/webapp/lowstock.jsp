@@ -108,7 +108,7 @@
     <th>Tên thiết bị</th>
     <th>Danh mục</th>
     <th>Số lượng</th>
-    <th>Danh mục SL</th>
+    <th>Số lượng Min</th>
     <th>Trạng thái</th>
     <th>Cách sử dụng</th>
     <th>Cập nhật</th>

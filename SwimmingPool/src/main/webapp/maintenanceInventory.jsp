@@ -110,7 +110,7 @@
     </tbody>
 </table>
 <div style="text-align: center;">
-    <a href="staff_dashboard.jsp">Quay lại danh sách</a>
+    <a href="staff_dashboard.jsp">Quay lại </a>
 </div>
 <%
     String message = request.getParameter("message");
