@@ -3,15 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
-    <!-- Servlet for login -->
-    <servlet>
-        <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>controller.LoginServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>LoginServlet</servlet-name>
-        <url-pattern>/login</url-pattern>
-    </servlet-mapping>
+
 
     <!-- Servlet for Register -->
     <servlet>
