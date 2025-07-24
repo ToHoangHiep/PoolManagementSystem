@@ -5,7 +5,7 @@
     if (user == null) {
 %>
 <h2 style="text-align:center; color:red;">User information not found</h2>
-<p style="text-align:center;"><a href="home.jsp">Back to home</a></p>r
+<p style="text-align:center;"><a href="home.jsp">Back to home</a></p>
 <%
         return;
     }
