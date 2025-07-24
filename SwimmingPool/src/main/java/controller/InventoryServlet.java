@@ -54,6 +54,10 @@ public class InventoryServlet extends HttpServlet {
             case "maintanence":
                 listInventoryMaintanence(request, response);
                 break;
+            case "approvedRequestHistory":
+                showApprovedRequestHistory(request, response);
+                break;
+
 
             default:
                 listInventory(request, response);
@@ -287,6 +291,14 @@ public class InventoryServlet extends HttpServlet {
         session.setAttribute("message", success ? "Đã gửi yêu cầu sửa chữa!" : "Gửi yêu cầu thất bại!");
         response.sendRedirect("inventory");
     }
+
+    private void showApprovedRequestHistory(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<InventoryRequest> requestList = InventoryRequestDAO.getApprovedRequests();
+        request.setAttribute("requestList", requestList);
+        request.getRequestDispatcher("requestHistory.jsp").forward(request, response);
+    }
+
 
 
 
