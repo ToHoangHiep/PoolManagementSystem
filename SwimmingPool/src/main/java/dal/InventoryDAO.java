@@ -1,9 +1,12 @@
 package dal;
 
 import model.Inventory;
+import model.InventoryCategory;
+
 import utils.DBConnect;
 
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,18 +14,21 @@ import java.util.List;
 public class InventoryDAO {
 
     public static boolean insertInventory(Inventory inventory) {
-        String sql = "INSERT INTO inventory (manager_id, item_name, category, quantity, unit, status, last_updated, usage_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO inventory (manager_id, item_name, category_id, quantity, unit, status,  import_price, last_updated, usage_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, inventory.getManagerId());
             stmt.setString(2, inventory.getItemName());
-            stmt.setString(3, inventory.getCategory());
+            stmt.setInt(3, inventory.getCategoryID());
             stmt.setInt(4, inventory.getQuantity());
             stmt.setString(5, inventory.getUnit());
             stmt.setString(6, inventory.getStatus());
-            stmt.setDate(7, new java.sql.Date(inventory.getLastUpdated().getTime()));
-            stmt.setInt(8, inventory.getUsageId());
+            stmt.setBigDecimal(7, BigDecimal.valueOf(inventory.getImportPrice())); // mới thêm
+            stmt.setDate(8, new java.sql.Date(inventory.getLastUpdated().getTime()));
+            stmt.setInt(9, inventory.getUsageId());
 
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -35,8 +41,9 @@ public class InventoryDAO {
 
     public static List<Inventory> getAllInventories() {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
-                "JOIN inventory_usage u ON i.usage_id = u.usage_id ";
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
+                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                 "JOIN inventory_category c ON c.category_id = i.category_id ";
 
         try (Connection conn = DBConnect.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -44,7 +51,7 @@ public class InventoryDAO {
                 inv.setInventoryId(rs.getInt("inventory_id"));
                 inv.setManagerId(rs.getInt("manager_id"));
                 inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
+                inv.setCategoryName(rs.getString("category_name"));
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
@@ -61,8 +68,9 @@ public class InventoryDAO {
     }
 
     public static Inventory getInventoryById(int id) {
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
                 "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "JOIN inventory_category c ON c.category_id = i.category_id " +
                 "WHERE i.inventory_id = ?";
         Inventory inv = null;
 
@@ -75,7 +83,7 @@ public class InventoryDAO {
                 inv.setInventoryId(rs.getInt("inventory_id"));
                 inv.setManagerId(rs.getInt("manager_id"));
                 inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
+                inv.setCategoryName(rs.getString("category_name"));
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
@@ -90,13 +98,13 @@ public class InventoryDAO {
     }
 
     public static boolean updateInventory(Inventory inventory) {
-        String sql = "UPDATE inventory SET manager_id = ?, item_name = ?, category = ?, quantity = ?, unit = ?, status = ?, last_updated = ?, usage_id = ? WHERE inventory_id = ?";
+        String sql = "UPDATE inventory SET manager_id = ?, item_name = ?, category_id = ?, quantity = ?, unit = ?, status = ?, last_updated = ?, usage_id = ? WHERE inventory_id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, inventory.getManagerId());
             stmt.setString(2, inventory.getItemName());
-            stmt.setString(3, inventory.getCategory());
+            stmt.setInt(3, inventory.getCategoryID());
             stmt.setInt(4, inventory.getQuantity());
             stmt.setString(5, inventory.getUnit());
             stmt.setString(6, inventory.getStatus());
@@ -131,8 +139,9 @@ public class InventoryDAO {
 
     public static List<Inventory> searchInventory(String keyword) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
                 "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "JOIN inventory_category c ON c.category_id = i.category_id " +
                 "WHERE i.item_name LIKE ?";
 
         try (Connection conn = DBConnect.getConnection();
@@ -145,7 +154,7 @@ public class InventoryDAO {
                 item.setInventoryId(rs.getInt("inventory_id"));
                 item.setManagerId(rs.getInt("manager_id"));
                 item.setItemName(rs.getString("item_name"));
-                item.setCategory(rs.getString("category"));
+                item.setCategoryName(rs.getString("category_name"));
                 item.setQuantity(rs.getInt("quantity"));
                 item.setUnit(rs.getString("unit"));
                 item.setStatus(rs.getString("status"));
@@ -164,8 +173,9 @@ public class InventoryDAO {
 
     public static List<Inventory> getInventoriesByPage(int offset, int limit) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.* , u.usage_name FROM inventory i "+
+        String sql = "SELECT i.* , u.usage_name, c.category_name FROM inventory i "+
                 "JOIN inventory_usage u ON i.usage_id = u.usage_id "+
+                "JOIN inventory_category c ON c.category_id = i.category_id "+
                 "ORDER BY inventory_id LIMIT ? OFFSET ?";
 
         try (Connection conn = DBConnect.getConnection();
@@ -180,7 +190,7 @@ public class InventoryDAO {
                 inv.setInventoryId(rs.getInt("inventory_id"));
                 inv.setManagerId(rs.getInt("manager_id"));
                 inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
+                inv.setCategoryName(rs.getString("category_name"));
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setUsageName(rs.getString("usage_name"));
@@ -219,8 +229,9 @@ public class InventoryDAO {
 
     public static List<Inventory> searchInventoryByUsage(String keyword, String usageName) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
                 "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "JOIN inventory_category c ON c.category_id = i.category_id " +
                 "WHERE i.item_name LIKE ? AND u.usage_name = ?";
 
         try (Connection conn = DBConnect.getConnection();
@@ -234,7 +245,7 @@ public class InventoryDAO {
                 item.setInventoryId(rs.getInt("inventory_id"));
                 item.setManagerId(rs.getInt("manager_id"));
                 item.setItemName(rs.getString("item_name"));
-                item.setCategory(rs.getString("category"));
+                item.setCategoryName(rs.getString("category_name"));
                 item.setQuantity(rs.getInt("quantity"));
                 item.setUnit(rs.getString("unit"));
                 item.setStatus(rs.getString("status"));
@@ -250,99 +261,32 @@ public class InventoryDAO {
         return list;
     }
 
-
-
-
-
-
-//    public List<Inventory> getLowStockItems() {
-//        List<Inventory> lowStockItems = new ArrayList<>();
-//        String sql = "SELECT * FROM Inventory WHERE quantity < threshold_quantity";
-//        try (Connection conn = DBConnect.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(sql);
-//             ResultSet rs = stmt.executeQuery()) {
-//            while (rs.next()) {
-//                Inventory item = new Inventory();
-//                item.setInventoryId(rs.getInt("inventory_id"));
-//                item.setItemName(rs.getString("item_name"));
-//                item.setQuantity(rs.getInt("quantity"));
-//                item.setThresholdQuantity(rs.getInt("threshold_quantity"));
-//                lowStockItems.add(item);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return lowStockItems;
-//    }
-
-
-
-    public static List<Inventory> getRentableItems() {
-        List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
-                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
-                "WHERE u.usage_name = 'item for rent'";
+    public static List<InventoryCategory> getAllCategories() {
+        List<InventoryCategory> list = new ArrayList<>();
+        String sql = "SELECT * FROM inventory_category";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Inventory inv = new Inventory();
-                inv.setInventoryId(rs.getInt("inventory_id"));
-                inv.setManagerId(rs.getInt("manager_id"));
-                inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
-                inv.setQuantity(rs.getInt("quantity"));
-                inv.setUnit(rs.getString("unit"));
-                inv.setStatus(rs.getString("status"));
-                inv.setLastUpdated(rs.getTimestamp("last_updated"));
-                inv.setUsageName(rs.getString("usage_name"));
-
-                list.add(inv);
+                InventoryCategory cat = new InventoryCategory();
+                cat.setCategoryId(rs.getInt("category_id"));
+                cat.setCategoryName(rs.getString("category_name"));
+                list.add(cat);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return list;
-    }
-
-    public static List<Inventory> getSellableItems() {
-        List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
-                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
-                "WHERE u.usage_name = 'item for sold'";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Inventory inv = new Inventory();
-                inv.setInventoryId(rs.getInt("inventory_id"));
-                inv.setManagerId(rs.getInt("manager_id"));
-                inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
-                inv.setQuantity(rs.getInt("quantity"));
-                inv.setUnit(rs.getString("unit"));
-                inv.setStatus(rs.getString("status"));
-                inv.setLastUpdated(rs.getTimestamp("last_updated"));
-                inv.setUsageName(rs.getString("usage_name"));
-
-                list.add(inv);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
         return list;
     }
 
     public static List<Inventory> filterInventoryByStatusAndUsage(String status, String usageName) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
-                "LEFT JOIN inventory_usage u ON i.usage_id = u.usage_id WHERE 1=1";
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
+                "JOIN inventory_category c ON i.category_id = c.category_id " +
+                "LEFT JOIN inventory_usage u ON i.usage_id = u.usage_id WHERE 1=1" ;
 
         if (status != null && !status.isEmpty()) {
             sql += " AND i.status = ?";
@@ -368,7 +312,7 @@ public class InventoryDAO {
                 inv.setInventoryId(rs.getInt("inventory_id"));
                 inv.setManagerId(rs.getInt("manager_id"));
                 inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
+                inv.setCategoryName(rs.getString("category_name"));
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
@@ -386,8 +330,9 @@ public class InventoryDAO {
 
     public static List<Inventory> searchInventoryByUsageAndStatus(String usageName, String status) {
         List<Inventory> list = new ArrayList<>();
-        String sql = "SELECT i.*, u.usage_name FROM inventory i " +
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
                 "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "JOIN inventory_category c ON c.category_id = i.category_id " +
                 "WHERE u.usage_name = ?";
 
         if (status != null && !status.isEmpty()) {
@@ -408,7 +353,7 @@ public class InventoryDAO {
                 inv.setInventoryId(rs.getInt("inventory_id"));
                 inv.setManagerId(rs.getInt("manager_id"));
                 inv.setItemName(rs.getString("item_name"));
-                inv.setCategory(rs.getString("category"));
+                inv.setCategoryName(rs.getString("category_name"));
                 inv.setQuantity(rs.getInt("quantity"));
                 inv.setUnit(rs.getString("unit"));
                 inv.setStatus(rs.getString("status"));
@@ -423,6 +368,103 @@ public class InventoryDAO {
 
         return list;
     }
+
+    public static List<Inventory> getLowStockItems() {
+        List<Inventory> lowStockList = new ArrayList<>();
+
+        String sql = "SELECT i.*, c.category_name, c.category_quantity, u.usage_name " +
+                "FROM inventory i " +
+                "JOIN inventory_category c ON i.category_id = c.category_id " +
+                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "WHERE i.quantity <= c.category_quantity";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setInventoryId(rs.getInt("inventory_id"));
+                inv.setItemName(rs.getString("item_name"));
+                inv.setQuantity(rs.getInt("quantity"));
+                inv.setCategoryName(rs.getString("category_name"));
+                inv.setCategoryQuantity(rs.getInt("category_quantity"));
+                inv.setUsageName(rs.getString("usage_name"));
+                inv.setStatus(rs.getString("status"));
+                inv.setLastUpdated(rs.getDate("last_updated"));
+                // add other fields if needed
+
+                lowStockList.add(inv);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lowStockList;
+    }
+
+    public static List<Inventory> getItemsUnderMaintenance() {
+        List<Inventory> list = new ArrayList<>();
+        String sql = "SELECT i.*, u.usage_name, c.category_name FROM inventory i " +
+                "JOIN inventory_usage u ON i.usage_id = u.usage_id " +
+                "JOIN inventory_category c ON c.category_id = i.category_id " +
+                "WHERE i.status = 'bảo trì'";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Inventory inv = new Inventory();
+                inv.setInventoryId(rs.getInt("inventory_id"));
+                inv.setManagerId(rs.getInt("manager_id"));
+                inv.setItemName(rs.getString("item_name"));
+                inv.setCategoryName(rs.getString("category_name"));
+                inv.setQuantity(rs.getInt("quantity"));
+                inv.setUnit(rs.getString("unit"));
+                inv.setStatus(rs.getString("status"));
+                inv.setUsageName(rs.getString("usage_name"));
+                inv.setLastUpdated(rs.getDate("last_updated"));
+
+                list.add(inv);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+
+
+
+
+
+    public static void main(String[] args) {
+        Inventory newItem = new Inventory();
+
+        newItem.setManagerId(2);  // Giả sử manager ID là 2
+        newItem.setItemName("Phao bơi trẻ em");
+        newItem.setCategoryID(1); // ✅ Vì ID 1 = "Thiết bị cá nhân", đã có trong DB
+        newItem.setQuantity(50);
+        newItem.setUnit("cái");
+        newItem.setStatus("Available");
+        newItem.setImportPrice(120000); // VND hoặc theo đơn vị bạn chọ
+        newItem.setLastUpdated(new java.util.Date());
+        newItem.setUsageId(1); // Giả sử là thiết bị cho thuê
+
+        boolean inserted = insertInventory(newItem);
+
+        if (inserted) {
+            System.out.println("✅ Thiết bị đã được thêm thành công!");
+        } else {
+            System.out.println("❌ Thêm thiết bị thất bại.");
+        }
+    }
+
+
 
 
 

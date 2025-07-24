@@ -1,14 +1,31 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="model.User" %>
 <%@ page import="model.Feedback" %>
+<%@ page import="model.Course" %>
+<%@ page import="model.Coach" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 
 <%
-    User user = (User) session.getAttribute("user");
-    if (user == null) {
+    // --- Security & Data Retrieval ---
+    User adminUser = (User) session.getAttribute("user");
+    if (adminUser == null) {
         response.sendRedirect("login.jsp");
         return;
     }
+    // Example: Role 4 (Customer) cannot manage feedback.
+    if (adminUser.getRole().getId() == 4) {
+        session.setAttribute("alert_message", "You do not have permission to access this page.");
+        response.sendRedirect("home.jsp");
+        return;
+    }
+
+    // Data from Servlet
+    List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedbackList");
+    Map<Integer, Course> courseMap = (Map<Integer, Course>) request.getAttribute("courseMap");
+    Map<Integer, Coach> coachMap = (Map<Integer, Coach>) request.getAttribute("coachMap");
+    SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, yyyy");
 %>
 
 <!DOCTYPE html>
@@ -16,415 +33,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback History - Swimming Pool Management</title>
+    <title>Manage Feedback</title>
+    <!-- Bootstrap CSS -->
+    <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="Resources/CSS/FeedbackHistory.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .table-hover tbody tr:hover { background-color: #e9ecef; }
+        .rating-star { color: #ffc107; }
+    </style>
 </head>
-
 <body>
+
+<%-- Session-based alert message handler --%>
 <%
-    if (request.getAttribute("alert_message") != null) {
-        String alertMessage = (String) request.getAttribute("alert_message");
-        String alertAction = (String) request.getAttribute("alert_action");
-        boolean existPostAction = request.getAttribute("alert_action") != null;
+    String alertMessage = (String) session.getAttribute("alert_message");
+    if (alertMessage != null) {
+        session.removeAttribute("alert_message");
 %>
 <script>
-    alert("<%= alertMessage %>");
-
-    if (<%= existPostAction %>) {
-        window.location.href = "${pageContext.request.contextPath}<%= alertAction %>";
-    }
+    alert('<%= alertMessage.replace("'", "\\'") %>');
 </script>
 <%
     }
 %>
 
-<div class="container">
-    <!-- Header Section -->
-    <div class="header">
-        <h1><i class="fas fa-comments"></i>Feedback History</h1>
-        <p>View and manage your feedback submissions</p>
-
-        <%
-            // Check if user is admin (not roles 3 or 4)
-            boolean isAdmin = !java.util.Arrays.asList(3, 4).contains(user.getRole().getId());
-            boolean showAll = request.getParameter("show_all") != null && request.getParameter("show_all").equals("true");
-
-            if (isAdmin) {
-        %>
-        <!-- Admin Toggle Section -->
-        <div class="admin-toggle">
-            <div class="toggle-container">
-                <span class="toggle-label <%= !showAll ? "active" : "" %>">
-                    <i class="fas fa-user"></i> Personal
-                </span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="viewToggle" <%= showAll ? "checked" : "" %> 
-                           onchange="toggleView(this.checked)">
-                    <span class="slider"></span>
-                </label>
-                <span class="toggle-label <%= showAll ? "active" : "" %>">
-                    <i class="fas fa-users"></i> All Users
-                </span>
-            </div>
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h2 class="mb-0 h4">
+                <i class="fas fa-comments me-2 text-primary"></i>Manage User Feedback
+            </h2>
         </div>
-        <% } %>
-    </div>
-
-    <div class="content">
-        <!-- Filter Section -->
-        <form action="feedback?action=sort" method="post" class="filters">
-            <!-- Hidden field to maintain show_all state during filtering -->
-            <% if (isAdmin) { %>
-            <input type="hidden" name="show_all" value="<%= showAll ? "true" : "false" %>">
-            <% } %>
-
-            <div class="filter-row">
-                <!-- Feedback Type Filter -->
-                <div class="form-group">
-                    <label for="feedback_type">Feedback Type</label>
-                    <select name="feedback_type" id="feedback_type" onchange="toggleFilterFields()">
-                        <option value="all">All Types</option>
-                        <option value="General">General</option>
-                        <option value="Coach">Coach</option>
-                        <option value="Course">Course</option>
-                    </select>
-                </div>
-
-                <!-- General Type Filter (Hidden by default) -->
-                <div class="form-group hidden" id="general_type_group">
-                    <label for="general_feedback_type">General Type</label>
-                    <select name="general_feedback_type" id="general_feedback_type">
-                        <option value="all">All</option>
-                        <option value="Food">Food</option>
-                        <option value="Service">Service</option>
-                        <option value="Facility">Facility</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <!-- Coach Filter (Hidden by default) -->
-                <div class="form-group hidden" id="coach_group">
-                    <label for="coach_id">Coach</label>
-                    <select name="coach_id" id="coach_id">
-                        <option value="all">All Coaches</option>
-                        <!-- Dynamic coach options would go here -->
-                    </select>
-                </div>
-
-                <!-- Course Filter (Hidden by default) -->
-                <div class="form-group hidden" id="course_group">
-                    <label for="course_id">Course</label>
-                    <select name="course_id" id="course_id">
-                        <option value="all">All Courses</option>
-                        <!-- Dynamic course options would go here -->
-                    </select>
-                </div>
-
-                <!-- Sort By Filter -->
-                <div class="form-group">
-                    <label for="sort_by">Sort By</label>
-                    <select name="sort_by" id="sort_by">
-                        <option value="created_at">Date Created</option>
-                        <option value="updated_at">Date Updated</option>
-                        <option value="rating">Rating</option>
-                    </select>
-                </div>
-
-                <!-- Sort Order Filter -->
-                <div class="form-group">
-                    <label for="sort_order">Order</label>
-                    <select name="sort_order" id="sort_order">
-                        <option value="DESC">Newest First</option>
-                        <option value="ASC">Oldest First</option>
-                    </select>
-                </div>
-
-                <!-- Apply Filters Button -->
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Apply Filters
-                    </button>
-                </div>
+        <div class="card-body">
+            <% if (feedbackList == null || feedbackList.isEmpty()) { %>
+            <div class="alert alert-info text-center">
+                There is no feedback to display at the moment.
             </div>
-
-            <div class="filter-row">
-                <div class="form-group" id="error_message"
-                     style="color: red; display: <%= request.getAttribute("error") != null ? "block" : "none" %>;">
-                    <p><%= request.getAttribute("error")%>
-                    </p>
-                </div>
-            </div>
-        </form>
-
-        <!-- Controls Section -->
-        <div class="controls">
-            <div class="checkbox-container">
-                <input type="checkbox" id="selectAll">
-                <label for="selectAll">Select All</label>
-            </div>
-            <button id="deleteSelectedBtn" class="btn btn-danger" disabled>
-                <i class="fas fa-trash"></i> Delete Selected
-            </button>
-        </div>
-
-        <!-- Feedback Table -->
-        <div class="table-container">
-            <form id="deleteForm" action="feedback?action=delete_multiple" method="post">
-                <table class="feedback-table">
-                    <!-- Table Header -->
-                    <thead>
+            <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
                     <tr>
-                        <th style="width: 5%;"></th>
-                        <th style="width: 12%;">User</th>
-                        <th style="width: 12%;">Type</th>
-                        <th style="width: 12%;">Rating</th>
-                        <th style="width: 29%;">Content</th>
-                        <th style="width: 15%;">Date</th>
-                        <th style="width: 15%;">Actions</th>
+                        <th>ID</th>
+                        <th>Submitted By</th>
+                        <th class="text-center">Type</th>
+                        <th>Target</th>
+                        <th class="text-center">Rating</th>
+                        <th>Date</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                     </thead>
-
-                    <!-- Table Body -->
-                    <tbody id="feedbackTableBody">
-                    <%
-                        // Determine which feedback list to display based on admin status and toggle
-                        List<Feedback> feedbackToDisplay = null;
-
-                        if (isAdmin) {
-                            // For admins: choose between personal and all feedback based on toggle
-                            List<Feedback> personalFeedback = (List<Feedback>) request.getAttribute("personal_feedback_list");
-                            List<Feedback> allFeedback = (List<Feedback>) request.getAttribute("all_feedback_list");
-
-                            feedbackToDisplay = showAll ? allFeedback : personalFeedback;
-                        } else {
-                            // For non-admins: use the regular feedback list
-                            feedbackToDisplay = (List<Feedback>) request.getAttribute("feedback_list");
-                        }
-
-                        if (feedbackToDisplay != null && !feedbackToDisplay.isEmpty()) {
-                            for (Feedback feedback : feedbackToDisplay) {
-                    %>
-                    <!-- Feedback Row -->
+                    <tbody>
+                    <% for (Feedback feedback : feedbackList) { %>
                     <tr>
-                        <!-- Checkbox Column -->
-                        <td>
-                            <input type="checkbox"
-                                   name="selectedIds"
-                                   value="<%= feedback.getId() %>"
-                                   class="feedback-checkbox">
+                        <td>#<%= feedback.getId() %></td>
+                        <td><%= feedback.getUserName() %></td>
+                        <td class="text-center">
+                            <%
+                                String type = feedback.getFeedbackType();
+                                String badgeClass = "bg-secondary";
+                                if ("Course".equals(type)) badgeClass = "bg-warning text-dark";
+                                if ("Coach".equals(type)) badgeClass = "bg-info text-dark";
+                                if ("General".equals(type)) badgeClass = "bg-success";
+                            %>
+                            <span class="badge <%= badgeClass %>"><%= type %></span>
                         </td>
-
-                        <!-- User Information Column -->
                         <td>
-                            <div class="user-info">
-                                <div class="user-name">
-                                    <i class="fas fa-user"></i>
-                                    <%= feedback.getUserName() != null ? feedback.getUserName() : "N/A" %>
-                                </div>
-                                <div class="user-email">
-                                    <%= feedback.getUserEmail() != null ? feedback.getUserEmail() : "" %>
-                                </div>
-                            </div>
+                            <%-- Dynamically display the feedback target --%>
+                            <% if ("Course".equals(type) && courseMap.containsKey(feedback.getCourseId())) { %>
+                            <%= courseMap.get(feedback.getCourseId()).getName() %>
+                            <% } else if ("Coach".equals(type) && coachMap.containsKey(feedback.getCoachId())) { %>
+                            <%= coachMap.get(feedback.getCoachId()).getFullName() %>
+                            <% } else { %>
+                            <%= feedback.getGeneralFeedbackType() %>
+                            <% } %>
                         </td>
-
-                        <!-- Feedback Type Column -->
-                        <td>
-                            <span class="badge badge-<%= feedback.getFeedbackType().toLowerCase() %>">
-                                <%= feedback.getFeedbackType() %>
-                            </span>
+                        <td class="text-center">
+                            <span class="rating-star"><i class="fas fa-star"></i></span>
+                            <%= feedback.getRating() %>
                         </td>
-
-                        <!-- Rating Column -->
-                        <td>
-                            <div class="star-rating">
-                                <%
-                                    int fullStars = feedback.getRating() / 2;
-                                    boolean hasHalfStar = feedback.getRating() % 2 == 1;
-
-                                    for (int i = 0; i < fullStars; i++) {
-                                %>
-                                <i class="fas fa-star"></i>
-                                <%
-                                    }
-
-                                    if (hasHalfStar) {
-                                %>
-                                <i class="fas fa-star-half-alt"></i>
-                                <%
-                                    }
-
-                                    for (int i = 0; i < (5 - fullStars - (hasHalfStar ? 1 : 0)); i++) {
-                                %>
-                                <i class="far fa-star"></i>
-                                <%
-                                    }
-                                %>
-                                <span style="margin-left: 8px; color: #6c757d;">
-                                            (<%= feedback.getRating() %>/10)
-                                        </span>
-                            </div>
-                        </td>
-
-                        <!-- Content Preview Column -->
-                        <td>
-                            <div class="content-preview" title="<%= feedback.getContent() %>">
-                                <%= feedback.getContent().length() > 50 ?
-                                        feedback.getContent().substring(0, 47) + "..." :
-                                        feedback.getContent() %>
-                            </div>
-                        </td>
-
-                        <!-- Date Column -->
-                        <td><%= feedback.getCreatedAt() %>
-                        </td>
-
-                        <!-- Actions Column -->
-                        <td>
-                            <div class="action-buttons">
-                                <!-- Preview Button -->
-                                <button type="button"
-                                        class="btn-icon btn-preview"
-                                        onclick="previewFeedback({
-                                                id: <%= feedback.getId() %>,
-                                                type: '<%= feedback.getFeedbackType() %>',
-                                                rating: <%= feedback.getRating() %>,
-                                                date: '<%= feedback.getCreatedAt() %>',
-                                                content: '<%= feedback.getContent().replace("'", "\\'").replace("\n", "\\n") %>',
-                                                userName: '<%= feedback.getUserName() != null ? feedback.getUserName().replace("'", "\\'") : "N/A" %>',
-                                                userEmail: '<%= feedback.getUserEmail() != null ? feedback.getUserEmail().replace("'", "\\'") : "" %>'
-                                                }, <%= feedback.getUserId() == user.getId() %>)"
-                                        title="Preview">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-
-                                <!-- Reply Button -->
-                                <a href="feedback?action=chat&id=<%= feedback.getId() %>"
-                                   class="btn-icon btn-reply"
-                                   title="Chat/Reply">
-                                    <i class="fas fa-comment"></i>
-                                </a>
-
-                                <%
-                                    User currentUser = (User) session.getAttribute("user");
-                                    if (currentUser.getId() == feedback.getUserId()) {
-                                %>
-                                <!-- Edit Button -->
-                                <a href="feedback?action=edit&id=<%= feedback.getId() %>"
-                                   class="btn-icon btn-edit"
-                                   title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <%
-                                    }
-                                %>
-
-                                <!-- Delete Button -->
-                                <button type="button"
-                                        class="btn-icon btn-delete"
-                                        onclick="confirmDelete(<%= feedback.getId() %>)"
-                                        title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+                        <td><%= sdf.format(feedback.getCreatedAt()) %></td>
+                        <td class="text-end">
+                            <a href="feedback?action=details&id=<%= feedback.getId() %>" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
                         </td>
                     </tr>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <!-- No Feedback Found Row -->
-                    <tr>
-                        <td colspan="7" class="no-feedback">
-                            <i class="fas fa-comments"></i><br>
-                            No feedback records found<br>
-                            <small>Try adjusting your filters or submit some feedback!</small>
-                        </td>
-                    </tr>
-                    <%
-                            }
-                    %>
+                    <% } %>
                     </tbody>
                 </table>
-            </form>
+            </div>
+            <% } %>
         </div>
     </div>
 </div>
 
-<!-- Preview Modal -->
-<div id="previewModal" class="modal">
-    <div class="modal-content">
-        <!-- Modal Header -->
-        <div class="modal-header">
-            <h2><i class="fas fa-eye"></i> Feedback Preview</h2>
-            <button class="close" onclick="closeModal()">&times;</button>
-        </div>
+<!-- Bootstrap JS -->
+<script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-        <!-- Modal Body -->
-        <div class="modal-body">
-            <!-- Feedback Information Section -->
-            <div class="feedback-info">
-                <h3>Feedback Details</h3>
-                <div class="feedback-meta">
-                    <!-- User Information -->
-                    <div class="meta-item">
-                        <span class="meta-label">User</span>
-                        <div class="meta-value" id="modalUser">
-                            <div class="user-info">
-                                <div class="user-name">
-                                    <i class="fas fa-user"></i>
-                                    <span id="modalUserName">-</span>
-                                </div>
-                                <div class="user-email" id="modalUserEmail">-</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Feedback Type -->
-                    <div class="meta-item">
-                        <span class="meta-label">Type</span>
-                        <span class="meta-value" id="modalFeedbackType">-</span>
-                    </div>
-
-                    <!-- Rating -->
-                    <div class="meta-item">
-                        <span class="meta-label">Rating</span>
-                        <div class="meta-value" id="modalRating">-</div>
-                    </div>
-
-                    <!-- Date -->
-                    <div class="meta-item">
-                        <span class="meta-label">Date</span>
-                        <span class="meta-value" id="modalDate">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feedback Content -->
-            <div class="feedback-content" id="modalContent">
-                Loading content...
-            </div>
-
-            <!-- Modal Actions -->
-            <div class="modal-actions">
-                <a href="#" id="modalReplyBtn" class="modal-btn modal-btn-reply">
-                    <i class="fas fa-comment"></i> Chat/Reply
-                </a>
-
-                <a href="#" id="modalEditBtn" class="modal-btn modal-btn-edit">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-
-                <button type="button" id="modalDeleteBtn" class="modal-btn modal-btn-delete">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Scripts -->
-<script src="Resources/JavaScript/FeedbackHistory.js"></script>
 </body>
 </html>

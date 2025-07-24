@@ -1,236 +1,219 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: LAPTOP
-  Date: 30-May-25
-  Time: 10:28
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page import="model.User" %>
 <%@ page import="model.Feedback" %>
+<%@ page import="model.Course" %>
+<%@ page import="model.Coach" %>
+<%@ page import="java.util.List" %>
 <%
-  User user = (User) session.getAttribute("user");
-  if (user == null) {
-    response.sendRedirect("login.jsp");
-    return;
-  }
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+    Feedback feedback = (Feedback) request.getAttribute("feedback");
+    boolean existing = feedback != null;
+
+    // --- Data for Dropdowns (from Servlet) ---
+    List<Course> courses = (List<Course>) request.getAttribute("courses");
+    List<Coach> coaches = (List<Coach>) request.getAttribute("coaches");
 %>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Swimming Pool Feedback Form</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./Resources/CSS/FeedbackForm.css">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Feedback Form</title>
+    <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: 1px solid #dee2e6;
+        }
+        /* Custom styles for the colored slider track */
+        .form-range {
+            --track-color: #0d6efd; /* Default Bootstrap primary blue */
+        }
+        .form-range::-webkit-slider-runnable-track {
+            background-color: var(--track-color);
+        }
+        .form-range::-moz-range-track {
+            background-color: var(--track-color);
+        }
+    </style>
 </head>
 <body>
 
-<!-- Style block for better readability and appearance -->
-<style>
-/* Enhanced feedback form styles */
-body {
-    font-family: 'Poppins', Arial, sans-serif;
-    background: #f4f8fb;
-    margin: 0;
-    padding: 0;
-}
-h1 {
-    text-align: center;
-    color: #0077b6;
-    margin-top: 30px;
-    font-weight: 600;
-}
-form {
-    background: #fff;
-    max-width: 500px;
-    margin: 30px auto;
-    padding: 30px 40px 20px 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
-.form-group {
-    margin-bottom: 22px;
-}
-label {
-    display: block;
-    margin-bottom: 7px;
-    color: #333;
-    font-weight: 500;
-}
-input[type="text"], select, textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #cfd8dc;
-    border-radius: 6px;
-    font-size: 1em;
-    background: #f9fafb;
-    transition: border 0.2s;
-}
-input[type="text"]:focus, select:focus, textarea:focus {
-    border-color: #0077b6;
-    outline: none;
-}
-textarea {
-    resize: vertical;
-}
-.star-rating {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.stars {
-    display: flex;
-    gap: 3px;
-}
-.star {
-    font-size: 1.7em;
-    color: #b0bec5;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-.star.selected, .star:hover, .star.selected ~ .star {
-    color: #ffd700;
-}
-.rating-text {
-    font-size: 1em;
-    color: #555;
-    margin-left: 10px;
-}
-.btn {
-    padding: 10px 22px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1em;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-.btn-primary {
-    background: #0077b6;
-    color: #fff;
-}
-.btn-primary:hover {
-    background: #005f8a;
-}
-.btn-secondary {
-    background: #b0bec5;
-    color: #333;
-}
-.btn-secondary:hover {
-    background: #90a4ae;
-}
-@media (max-width: 600px) {
-    form {
-        padding: 18px 8px 12px 8px;
-    }
-}
-</style>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="h3 mb-0"><%= existing ? "Edit Your Feedback" : "Share Your Experience" %></h1>
+                </div>
+                <div class="card-body">
+                    <%-- Display any alert messages passed from the servlet --%>
+                    <% if (request.getAttribute("alert_message") != null) { %>
+                    <script>
+                        alert('<%= request.getAttribute("alert_message") %>');
+                    </script>
+                    <% } %>
 
-<%
-  Feedback feedback = (Feedback) request.getAttribute("feedback");
-  boolean existing = feedback != null;
-%>
+                    <form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">
+                        <% if (existing) { %>
+                        <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
+                        <% } %>
 
-<%
-    if (request.getAttribute("alert_message") != null) {
-        String alertMessage = (String) request.getAttribute("alert_message");
-        String alertAction = (String) request.getAttribute("alert_action");
-        boolean existPostAction = request.getAttribute("alert_action") != null;
-%>
-<script>
-    alert("<%= alertMessage %>");
-    if (<%= existPostAction %>) {
-        window.location.href = "${pageContext.request.contextPath}<%= alertAction %>";
-    }
-</script>
-<%
-    }
-%>
+                        <!-- Feedback Category -->
+                        <div class="mb-3">
+                            <label for="feedback_type" class="form-label">Feedback Category</label>
+                            <select name="feedback_type" id="feedback_type" class="form-select" required onchange="showHideFields()">
+                                <option value="" disabled <%= !existing ? "selected" : "" %>>Select a category...</option>
+                                <option value="General" <%= existing && "General".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
+                                    General Feedback
+                                </option>
+                                <%-- UPDATED: Enabled Course and Coach options --%>
+                                <option value="Course" <%= existing && "Course".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
+                                    Course Feedback
+                                </option>
+                                <option value="Coach" <%= existing && "Coach".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
+                                    Coach Feedback
+                                </option>
+                            </select>
+                        </div>
 
-<h1><i class="fa fa-comments-o" aria-hidden="true"></i> <%=existing ? "Edit" : "Submit" %> Feedback</h1>
+                        <!-- Specific Category (for General feedback) -->
+                        <div class="mb-3 d-none" id="general_feedback_type_group">
+                            <label for="general_feedback_type" class="form-label">Specific Category</label>
+                            <select name="general_feedback_type" id="general_feedback_type" class="form-select">
+                                <option value="" disabled <%= !existing || feedback.getGeneralFeedbackType() == null ? "selected" : "" %>>Select specific category...</option>
+                                <option value="Food" <%= existing && "Food".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Food & Dining</option>
+                                <option value="Service" <%= existing && "Service".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Customer Service</option>
+                                <option value="Facility" <%= existing && "Facility".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Facilities & Amenities</option>
+                                <option value="Other" <%= existing && "Other".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Other</option>
+                            </select>
+                        </div>
 
-<form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">
-    <%
-      if (existing) {
-    %>
-      <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
-    <%
-      }
-    %>
+                        <%-- NEW: Dropdown for Course Feedback --%>
+                        <div class="mb-3 d-none" id="course_feedback_group">
+                            <label for="course_id" class="form-label">Select Course</label>
+                            <select name="course_id" id="course_id" class="form-select">
+                                <option value="" disabled selected>-- Choose a course --</option>
+                                <% if (courses != null) {
+                                    for (Course c : courses) { %>
+                                <option value="<%= c.getId() %>" <%= existing && feedback.getCourseId() != null && feedback.getCourseId() == c.getId() ? "selected" : "" %>><%= c.getName() %></option>
+                                <%  }
+                                } %>
+                            </select>
+                        </div>
 
-    <div class="form-group">
-        <label for="feedback_type">Feedback Type:</label>
-        <select name="feedback_type" id="feedback_type" required onchange="showHideFields()">
-            <option value="" disabled <%= !existing ? "selected" : "" %>>Select feedback type</option>
-            <option value="Coach" disabled title="Coach feedback is currently unavailable">Coach (Unavailable)</option>
-            <option value="Course" disabled title="Course feedback is currently unavailable">Course (Unavailable)</option>
-            <option value="General" <%= existing && "General".equals(feedback.getFeedbackType()) ? "selected" : "" %>>General</option>
-        </select>
-    </div>
+                        <%-- NEW: Dropdown for Coach Feedback --%>
+                        <div class="mb-3 d-none" id="coach_feedback_group">
+                            <label for="coach_id" class="form-label">Select Coach</label>
+                            <select name="coach_id" id="coach_id" class="form-select">
+                                <option value="" disabled selected>-- Choose a coach --</option>
+                                <% if (coaches != null) {
+                                    for (Coach c : coaches) { %>
+                                <option value="<%= c.getId() %>" <%= existing && feedback.getCoachId() != null && feedback.getCoachId() == c.getId() ? "selected" : "" %>><%= c.getFullName() %></option>
+                                <%  }
+                                } %>
+                            </select>
+                        </div>
 
-    <div class="form-group" id="coach_id_group" style="display: none;">
-        <label for="coach_id">Coach:</label>
-        <select name="coach_id" id="coach_id" required>
-            <option value="" disabled <%= !existing || feedback.getCoachId() == 0 ? "selected" : "" %>>Select coach</option>
-            <!-- Temporary static options for testing -->
-            <option value="1">Coach 1</option>
-            <option value="2">Coach 2</option>
-            <option value="3">Coach 3</option>
-        </select>
-    </div>
+                        <!-- Feedback Content -->
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Your Detailed Feedback</label>
+                            <textarea name="content" id="content" rows="5" class="form-control" required placeholder="Please share your thoughts..."><%= existing ? feedback.getContent() : "" %></textarea>
+                        </div>
 
-    <div class="form-group" id="course_id_group" style="display: none;">
-        <label for="course_id">Course:</label>
-        <select name="course_id" id="course_id" required>
-            <option value="" disabled <%= !existing || feedback.getCourseId() == 0 ? "selected" : "" %>>Select course</option>
-            <!-- Temporary static options for testing -->
-            <option value="1">Swimming Basics</option>
-            <option value="2">Advanced Swimming</option>
-            <option value="3">Water Safety</option>
-        </select>
-    </div>
+                        <!-- Rating Slider -->
+                        <div class="mb-4">
+                            <label for="rating" class="form-label">
+                                Overall Rating: <span id="ratingValueDisplay" class="fw-bold"><%= existing ? feedback.getRating() : 5 %></span>/10
+                            </label>
+                            <input type="range" class="form-range" id="rating" name="rating" min="0" max="10" step="1" value="<%= existing ? feedback.getRating() : 5 %>">
+                        </div>
 
-    <div class="form-group" id="general_feedback_type_group" style="display: none;">
-        <label for="general_feedback_type">General Feedback Type:</label>
-        <select name="general_feedback_type" id="general_feedback_type">
-            <option value="" disabled <%= !existing || feedback.getGeneralFeedbackType() == null ? "selected" : "" %>>Select general feedback type</option>
-            <option value="Food" <%= existing && "Food".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Food</option>
-            <option value="Service" <%= existing && "Service".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Service</option>
-            <option value="Facility" <%= existing && "Facility".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Facility</option>
-            <option value="Other" <%= existing && "Other".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Other</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="content">Content:</label>
-        <textarea name="content" id="content" rows="5" required><%= existing ? feedback.getContent() : "" %></textarea>
-    </div>
-
-    <div class="form-group">
-        <label for="rating">Rating:</label>
-        <div class="star-rating">
-            <div class="stars">
-                <!-- 5 stars = 10 points total, each star = 2 points, half star = 1 point -->
-                <i class="star fa fa-star-o" data-value="2"></i>
-                <i class="star fa fa-star-o" data-value="4"></i>
-                <i class="star fa fa-star-o" data-value="6"></i>
-                <i class="star fa fa-star-o" data-value="8"></i>
-                <i class="star fa fa-star-o" data-value="10"></i>
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="home.jsp" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <%= existing ? "Update Feedback" : "Submit Feedback" %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="rating-text">0 stars</div>
-            <input type="hidden" name="rating" id="rating" value="<%= existing ? feedback.getRating() : 0 %>" required>
         </div>
     </div>
+</div>
 
-    <div class="form-group" style="display: flex; justify-content: space-between;">
-        <button type="submit" class="btn btn-primary">Submit Feedback</button>
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='home.jsp'">Cancel</button>
-    </div>
-</form>
+<script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all the elements we need to interact with
+        const feedbackTypeSelect = document.getElementById('feedback_type');
+        const generalGroup = document.getElementById('general_feedback_type_group');
+        const generalSelect = document.getElementById('general_feedback_type');
+        const courseGroup = document.getElementById('course_feedback_group');
+        const courseSelect = document.getElementById('course_id');
+        const coachGroup = document.getElementById('coach_feedback_group');
+        const coachSelect = document.getElementById('coach_id');
+        const ratingSlider = document.getElementById('rating');
+        const ratingValueDisplay = document.getElementById('ratingValueDisplay');
 
-<!-- Move scripts to just before closing body tag for better readability -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="./Resources/JavaScript/FeedbackForm.js"></script>
+        // Function to show/hide the specific category dropdowns
+        window.showHideFields = function() {
+            const selectedType = feedbackTypeSelect.value;
+
+            // Hide all groups first and remove their 'required' attribute
+            generalGroup.classList.add('d-none');
+            generalSelect.required = false;
+            courseGroup.classList.add('d-none');
+            courseSelect.required = false;
+            coachGroup.classList.add('d-none');
+            coachSelect.required = false;
+
+            // Show the relevant group based on selection and make it required
+            if (selectedType === 'General') {
+                generalGroup.classList.remove('d-none');
+                generalSelect.required = true;
+            } else if (selectedType === 'Course') {
+                courseGroup.classList.remove('d-none');
+                courseSelect.required = true;
+            } else if (selectedType === 'Coach') {
+                coachGroup.classList.remove('d-none');
+                coachSelect.required = true;
+            }
+        };
+
+        // Function to update the slider's value display and track color
+        function updateRating() {
+            const value = ratingSlider.value;
+            ratingValueDisplay.textContent = value; // Update the number display
+
+            let color;
+            if (value <= 3) {
+                color = '#dc3545'; // Bootstrap Danger Red
+            } else if (value <= 7) {
+                color = '#ffc107'; // Bootstrap Warning Yellow
+            } else {
+                color = '#198754'; // Bootstrap Success Green
+            }
+            // Set the CSS variable which the stylesheet uses
+            ratingSlider.style.setProperty('--track-color', color);
+        }
+
+        // Add event listener for the slider
+        ratingSlider.addEventListener('input', updateRating);
+
+        // Initial setup on page load to ensure correct fields are shown
+        showHideFields();
+        updateRating();
+    });
+</script>
+
 </body>
 </html>

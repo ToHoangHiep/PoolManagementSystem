@@ -1,5 +1,5 @@
-<%@ page import="model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="model.User" %>
 <%
     User user = (User) session.getAttribute("user");
 %>
@@ -105,7 +105,6 @@
         </div>
         <div class="text-box">
             <h2>Our Services</h2>
-            <p>Explore our offerings to enhance your swimming experience:</p>
             <ul>
                 <li>Professional Swimming Training for all ages</li>
                 <li>Private Pool Booking for Events & Families</li>
@@ -121,12 +120,12 @@
 <div class="section" id="contact">
     <h2 style="text-align:center; color:#005caa;">Contact Us</h2>
     <div style="text-align:center;" class="hero-content">
-        <button class="btn btn-primary" onclick="window.location.href='feedback';">Send us a feedback</button>
+        <button class="btn btn-primary" onclick="window.location.href='feedback?action=create';">Send us a feedback</button>
     </div>
 
     <h2 style="text-align:center; color:#005caa;">See your old feedback</h2>
     <div style="text-align:center;" class="hero-content">
-        <button class="btn btn-primary" onclick="window.location.href='feedback?mode=list';">Feedback History</button>
+        <button class="btn btn-primary" onclick="window.location.href='feedback?action=list';">Feedback History</button>
     </div>
 </div>
 
@@ -135,6 +134,5 @@
     <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
     <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
-
 </body>
 </html>

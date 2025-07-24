@@ -123,7 +123,7 @@
 <!-- Thanh điều hướng navbar -->
 <div class="navbar">
   <div class="nav-links">
-    <a href="home.jsp">Home</a>
+    <a href="admin_dashboard.jsp">Home</a>
     <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
     <!-- Nếu user là Admin thì hiển thị liên kết đến trang danh sách người dùng -->
     <a href="admin-user">User List</a>

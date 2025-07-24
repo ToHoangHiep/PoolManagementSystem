@@ -1,6 +1,5 @@
 
 package model;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 
@@ -8,14 +7,17 @@ public class Inventory {
     private int inventoryId;
     private int managerId;
     private String itemName;
-    private String category;
+    private int categoryID;
     private int quantity;
     private String unit;
     private String status;
     private Date lastUpdated;
-    private int thresholdQuantity;
+    private int categoryQuantity;
     private int usageId;
     private String usageName;
+    private String categoryName;
+    private double importPrice;
+
 
 
     // Getters and Setters
@@ -43,12 +45,12 @@ public class Inventory {
         this.itemName = itemName;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryID() {
+        return categoryID;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryID(int categoryID) {
+        this.categoryID = categoryID;
     }
 
     public int getQuantity() {
@@ -83,9 +85,9 @@ public class Inventory {
         this.lastUpdated = lastUpdated;
     }
 
-    public int getThresholdQuantity() { return thresholdQuantity;}
+    public int getCategoryQuantity() { return categoryQuantity;}
 
-    public void setThresholdQuantity(int thresholdQuantity) { this.thresholdQuantity = thresholdQuantity;}
+    public void setCategoryQuantity(int categoryQuantity) { this.categoryQuantity = categoryQuantity;}
 
     public int getUsageId() {return usageId;}
     public void setUsageId(int usageId) { this.usageId = usageId;}
@@ -93,4 +95,28 @@ public class Inventory {
     public String getUsageName() {return usageName;}
     public void setUsageName(String usageName) { this.usageName = usageName;}
 
+    public String getCategoryName() {return categoryName;}
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName;}
+
+    public double getImportPrice() {return importPrice;}
+    public void setImportPrice(double importPrice) {this.importPrice = importPrice;}
+
+    @Override
+    public String toString() {
+        return "Inventory{" +
+                "inventoryId=" + inventoryId +
+                ", managerId=" + managerId +
+                ", itemName='" + itemName + '\'' +
+                ", categoryID=" + categoryID +
+                ", quantity=" + quantity +
+                ", unit='" + unit + '\'' +
+                ", status='" + status + '\'' +
+                ", lastUpdated=" + lastUpdated +
+                ", categoryQuantity=" + categoryQuantity +
+                ", usageId=" + usageId +
+                ", usageName='" + usageName + '\'' +
+                ", categoryName='" + categoryName + '\'' +
+                ", importPrice=" + importPrice +
+                '}';
+    }
 }

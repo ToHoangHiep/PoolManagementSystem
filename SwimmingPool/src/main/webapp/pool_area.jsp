@@ -15,55 +15,74 @@
   <title>Pool Area Management</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      background: url('https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg') no-repeat center center;
-      background-size: cover;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #ffffff);
     }
 
     .container {
-      background-color: rgba(255,255,255,0.95);
+      background-color: #ffffff;
       padding: 30px;
-      max-width: 1000px;
+      max-width: 960px;
       margin: 50px auto;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      transition: all 0.3s ease-in-out;
     }
 
     h2 {
       text-align: center;
-      color: #005caa;
-      margin-bottom: 20px;
+      color: #0077b6;
+      font-size: 28px;
+      margin-bottom: 25px;
+    }
+
+    h3 {
+      color: #0077b6;
+      margin-bottom: 15px;
     }
 
     .message {
       text-align: center;
-      font-weight: bold;
-      margin: 10px;
+      font-weight: 600;
+      padding: 10px 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
     }
 
     .message.error {
-      color: red;
+      color: #b00020;
+      background-color: #ffe5e5;
     }
 
     .message.success {
-      color: green;
+      color: #2e7d32;
+      background-color: #e8f5e9;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #fff;
+      background-color: #f9f9f9;
+      border-radius: 6px;
+      overflow: hidden;
     }
 
     th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
+      padding: 12px 10px;
+      border-bottom: 1px solid #ddd;
       text-align: center;
     }
 
     th {
-      background-color: #005caa;
+      background-color: #0077b6;
       color: white;
+      font-weight: bold;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
     }
 
     form.inline {
@@ -71,51 +90,61 @@
     }
 
     .form-section {
-      margin-top: 30px;
+      margin-top: 40px;
       text-align: center;
     }
 
     .form-row {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
     input[type="text"], textarea {
-      padding: 8px;
-      width: 300px;
+      padding: 10px;
+      width: 280px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 8px;
+      box-shadow: inset 1px 1px 3px rgba(0,0,0,0.05);
+      transition: border 0.2s;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: #0077b6;
+      outline: none;
     }
 
     textarea {
+      height: 70px;
       resize: vertical;
-      height: 60px;
     }
 
     input[type="submit"] {
-      padding: 8px 20px;
-      background-color: #005caa;
+      padding: 10px 22px;
+      background-color: #0077b6;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
     }
 
     input[type="submit"]:hover {
-      background-color: #004080;
+      background-color: #005b8e;
     }
 
     .back-link {
-      margin-top: 20px;
+      margin-top: 25px;
       text-align: center;
     }
 
     .back-link a {
-      color: #005caa;
+      color: #0077b6;
+      font-weight: 600;
       text-decoration: none;
     }
 
@@ -123,6 +152,7 @@
       text-decoration: underline;
     }
   </style>
+
 </head>
 <body>
 <div class="container">
@@ -180,7 +210,7 @@
   </div>
 
   <div class="back-link">
-    <a href="home.jsp">← Back to Home</a>
+    <a href="admin_dashboard.jsp">← Back to Home</a>
   </div>
 </div>
 </body>

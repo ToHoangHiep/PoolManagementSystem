@@ -4,39 +4,52 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
+import model.Cart;
+import model.CartItem;
 import model.Ticket;
-import model.Ticket.PaymentStatus;
-import model.Ticket.TicketStatus;
 import model.Ticket.TicketTypeName;
-import model.User;
-import validate.TicketValid;
 import dal.TicketDAO;
+import model.User;
+import model.Role;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @WebServlet("/purchase")
 public class TicketPurchaseServlet extends HttpServlet {
 
     @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        // Cho phép admin (roleId = 1) và staff (roleId = 5) truy cập
+        if (user == null || (user.getRole().getId() != 1 && user.getRole().getId() != 5)) {
+            request.setAttribute("error", "Chức năng chỉ dành cho admin và nhân viên!");
+            response.sendRedirect("home.jsp");
+            return;
+        }
+        request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            // 1. Lấy dữ liệu từ form
             String typeStr = request.getParameter("ticketType");
             String quantityStr = request.getParameter("quantity");
+            String customerName = request.getParameter("customerName");
+            String customerIdCard = request.getParameter("customerIdCard");
 
-            // 2. Kiểm tra dữ liệu null
-            if (typeStr == null || quantityStr == null ||
-                    typeStr.isEmpty() || quantityStr.isEmpty()) {
+
+            if (typeStr == null || quantityStr == null || customerName == null || customerIdCard == null ||
+                    typeStr.isEmpty() || quantityStr.isEmpty() || customerName.isEmpty() || customerIdCard.isEmpty()) {
+                System.out.println("Debug: Error - Missing input fields");
                 request.setAttribute("error", "Vui lòng điền đầy đủ thông tin.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
             }
 
-            // 3. Parse và validate số lượng
             int quantity;
             try {
                 quantity = Integer.parseInt(quantityStr);
@@ -44,61 +57,52 @@ public class TicketPurchaseServlet extends HttpServlet {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException e) {
+                System.out.println("Debug: Error - Invalid quantity: " + quantityStr);
                 request.setAttribute("error", "Số lượng vé phải là số nguyên dương.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
             }
 
-            // 4. Parse loại vé
             TicketTypeName ticketType = TicketTypeName.valueOf(typeStr);
 
-            // 5. Xác định ngày bắt đầu và ngày kết thúc
-            LocalDate startDate = LocalDate.now(); // luôn là hôm nay
-            LocalDate endDate = TicketValid.calculateEndDate(ticketType, startDate); // tự tính
-
-
-            // 6. Lấy thông tin loại vé từ DB
-            int ticketTypeId = TicketDAO.getTicketTypeIdByEnum(ticketType);
             BigDecimal price = TicketDAO.getTicketTypePrice(ticketType);
-            BigDecimal total = price.multiply(BigDecimal.valueOf(quantity));
-
-            // 7. Lấy người dùng từ session
-            HttpSession session = request.getSession();
-            User user = (User) session.getAttribute("user");
-
-            if (user == null) {
-                response.sendRedirect("home.jsp");
+            System.out.println("Debug: Price from DB for " + ticketType + ": " + price);
+            if (price == null) {
+                System.out.println("Debug: Error - Price null from DB");
+                request.setAttribute("error", "Không lấy được giá vé từ hệ thống. Vui lòng thử lại sau.");
+                request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
             }
 
-            // 8. Tạo đối tượng vé
-            Ticket ticket = new Ticket();
-            ticket.setUserId(user.getId());
-            ticket.setTicketTypeName(ticketType.name());
-            ticket.setTicketTypeId(ticketTypeId);
-            ticket.setPrice(price);
-            ticket.setQuantity(quantity);
-            ticket.setStartDate(startDate);
-            ticket.setEndDate(endDate);
-            ticket.setTotal(total);
-            ticket.setTicketStatus(TicketStatus.Cancelled); // chưa thanh toán thì Cancelled
-            ticket.setPaymentStatus(PaymentStatus.Unpaid);
-            ticket.setCreatedAt(LocalDateTime.now());
 
-            // 9. Lưu vào DB
-            Integer ticketId = new TicketDAO().saveTicket(ticket);
-
-            if (ticketId != null) {
-                ticket.setTicketId(ticketId);
-                session.setAttribute("ticket", ticket);
-                response.sendRedirect("checkout.jsp");
-            } else {
-                request.setAttribute("error", "Lỗi cơ sở dữ liệu. Không thể lưu vé.");
-                request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
+            // Cho phép admin (roleId = 1) và staff (roleId = 5) thực hiện mua vé
+            if (user == null || (user.getRole().getId() != 1 && user.getRole().getId() != 5)) {
+                request.setAttribute("error", "Chức năng chỉ dành cho admin và nhân viên!");
+                response.sendRedirect("home.jsp");
+                return;
             }
+            CartItem cartItem = new CartItem(ticketType, quantity, price);
+
+            Cart cart = (Cart) session.getAttribute("cart");
+            if (cart == null) {
+                cart = new Cart();
+                session.setAttribute("cart", cart);
+            }
+
+            cart.addItem(cartItem);
+            cart.setCustomerName(customerName);
+            cart.setCustomerIdCard(customerIdCard);
+
+            System.out.println("Debug: Cart after add - Items: " + cart.getItems().size() + ", Total: " + cart.getTotal());
+
+            session.setAttribute("success", "Đã thêm vé vào giỏ hàng!");
+            response.sendRedirect("ticketPurchase.jsp");
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Debug: Exception in doPost: " + e.getMessage());
             request.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
             request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
         }

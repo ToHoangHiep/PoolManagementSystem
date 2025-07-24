@@ -56,4 +56,49 @@ public class EmailUtils {
             e.printStackTrace();
         }
     }
+
+    public static void sendEmail(String toEmail, String subject, String body) {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(USERNAME, PASSWORD);
+            }
+        });
+
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(USERNAME, "Swimming Pool System", "UTF-8"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(MimeUtility.encodeText(subject, "UTF-8", "B"));
+
+            String htmlContent = "<div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;'>"
+                    + "<div style='background-color: #0056b3; color: white; padding: 20px; text-align: center;'>"
+                    + "<h2>" + subject + "</h2>"
+                    + "</div>"
+                    + "<div style='padding: 20px 30px;'>"
+                    + body.replace("\n", "<br>")
+                    + "</div>"
+                    + "<div style='background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 0.85em; color: #6c757d; border-top: 1px solid #ddd;'>"
+                    + "<p style='margin: 0;'>This is an automated message. Please do not reply directly to this email.</p>"
+                    + "<p style='margin: 5px 0 0 0;'>&copy; " + java.time.Year.now().getValue() + " Swimming Pool Management. All rights reserved.</p>"
+                    + "</div>"
+                    + "</div>";
+
+            message.setContent(htmlContent, "text/html; charset=UTF-8");
+
+            Transport.send(message);
+            System.out.println(">>> Successfully sent email to: " + toEmail);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send email to " + toEmail, e);
+        }
+    }
 }
+
+
