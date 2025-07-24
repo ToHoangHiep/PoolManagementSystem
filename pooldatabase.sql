@@ -568,3 +568,12 @@ CREATE TABLE StaffInitialSetup (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
 );
+Create TABLE Repair_Request (
+    request_id INT PRIMARY KEY AUTO_INCREMENT,
+    inventory_id INT NOT NULL,
+    reason TEXT,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    requested_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at DATETIME,
+    FOREIGN KEY (inventory_id) REFERENCES Inventory(inventory_id)
+);
