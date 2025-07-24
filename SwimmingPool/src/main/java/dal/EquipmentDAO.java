@@ -821,4 +821,43 @@ public class EquipmentDAO {
         }
         return "Unknown Item";  // Fallback
     }
+
+
+    public static List<Map<String, Object>> getRecentTransactions(int limit) throws SQLException {
+        String sql = """
+            SELECT 
+                rental_id AS id, 'Rental' AS type, customer_name, er.inventory_id, er.quantity, 
+            total_amount, created_at, i.item_name
+            FROM Equipment_Rentals er
+            JOIN Inventory i ON er.inventory_id = i.inventory_id
+            UNION
+            SELECT 
+                sale_id AS id, 'Sale' AS type, customer_name, es.inventory_id, es.quantity, 
+                total_amount, created_at, i.item_name
+            FROM Equipment_Sales es
+            JOIN Inventory i ON es.inventory_id = i.inventory_id
+            ORDER BY created_at DESC
+            LIMIT ?
+        """;
+        List<Map<String, Object>> transactions = new ArrayList<>();
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> transaction = new HashMap<>();
+                    transaction.put("id", rs.getInt("id"));
+                    transaction.put("type", rs.getString("type"));
+                    transaction.put("customerName", rs.getString("customer_name"));
+                    transaction.put("inventoryId", rs.getInt("inventory_id"));
+                    transaction.put("quantity", rs.getInt("quantity"));
+                    transaction.put("totalAmount", rs.getDouble("total_amount"));
+                    transaction.put("transactionDate", rs.getTimestamp("created_at"));
+                    transaction.put("itemName", rs.getString("item_name"));
+                    transactions.add(transaction);
+                }
+            }
+        }
+        return transactions;
+    }
 }

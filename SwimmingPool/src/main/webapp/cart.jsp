@@ -156,11 +156,18 @@
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-        <a href="home.jsp">Home</a>
-        <a href="about">About Us</a>
-        <a href="home.jsp">Services</a>
-        <a href="gallery">Gallery</a>
-        <a href="contact">Contact</a>
+        <a href="staff_dashboard.jsp" class="nav-link">Home</a>
+        <a href="purchase" class="nav-link">Vé Bơi</a>
+        <a href="equipment?mode=transaction_history" class="nav-link">📜 Transaction History</a>
+        <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
+            🛒 Equipment Rental
+        </a>
+        <a href="equipment?mode=buy" class="nav-link ${empty currentFilter ? 'active' : ''}">
+            🛒 Equipment Buy
+        </a>
+        <a href="cart" class="nav-link">
+            🛒 View Cart <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
+        </a>
     </div>
     <div class="auth">
         <span>Hello, <%= user.getFullName() %>!</span>
@@ -237,7 +244,24 @@
     </c:if>
 
     <c:if test="${cart == null || cart.isEmpty()}">
-        <p>Giỏ hàng rỗng. <a href="ticketPurchase.jsp">Tiếp tục mua vé</a></p>
+        <c:choose>
+            <c:when test="${lastMode == 'equipment_rental'}">
+                <p>Giỏ hàng rỗng. <a href="equipment?mode=rental">Tiếp tục thuê thiết bị</a></p>
+            </c:when>
+            <c:when test="${lastMode == 'equipment_buy'}">
+                <p>Giỏ hàng rỗng. <a href="equipment?mode=buy">Tiếp tục mua thiết bị</a></p>
+            </c:when>
+            <c:when test="${lastMode == 'ticket'}">
+                <p>Giỏ hàng rỗng. <a href="ticketPurchase.jsp">Tiếp tục mua vé</a></p>
+            </c:when>
+            <c:otherwise>  <!-- Cho mixed hoặc không xác định -->
+                <p>Giỏ hàng rỗng. Tiếp tục mua sắm:
+                    <a href="ticketPurchase.jsp">Mua vé</a> |
+                    <a href="equipment?mode=rental">Thuê thiết bị</a> |
+                    <a href="equipment?mode=buy">Mua thiết bị</a>
+                </p>
+            </c:otherwise>
+        </c:choose>
     </c:if>
 
     <div class="message">

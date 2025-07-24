@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poolax - Equipment Rental Shop</title>
+    <title>Poolax - Cửa Hàng Thuê Thiết Bị</title>
     <style>
         * {
             margin: 0;
@@ -637,17 +637,16 @@
         }
 
         .success {
-            background: #d4edda;
-            color: #155724;
+            background: #f4fff7;
+            color: #28a745;
             border-left-color: #28a745;
         }
 
         .error {
-            background: #f8d7da;
-            color: #721c24;
+            background: #fff4f4;
+            color: #dc3545;
             border-left-color: #dc3545;
         }
-
 
         /* ===== FOOTER STYLES ===== */
         footer {
@@ -705,29 +704,29 @@
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-        <a href="staff_dashboard.jsp">Home</a>
-        <a href="home.jsp#about">About Us</a>
-        <a href="home.jsp#services">Services</a>
-        <a href="home.jsp#gallery">Gallery</a>
-        <a href="home.jsp#contact">Contact</a>
+        <a href="staff_dashboard.jsp" class="nav-link">Home</a>
+        <a href="purchase" class="nav-link">Vé Bơi</a>
+        <a href="equipment?mode=transaction_history" class="nav-link">📜 Lịch Sử Giao Dịch</a>
         <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
-
-            🏊 Equipment Rental
+            🛒 Thuê Thiết Bị
+        </a>
+        <a href="equipment?mode=buy" class="nav-link ${empty currentFilter ? 'active' : ''}">
+            🛒 Mua Thiết Bị
         </a>
         <a href="cart" class="nav-link">
-            🛒 View Cart <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
+            🛒 Xem Giỏ Hàng <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
         </a>
     </div>
     <div class="auth">
         <% if (user == null) { %>
-        <a class="login-btn" href="login.jsp">Login</a>
-        <a class="register-btn" href="register.jsp">Register</a>
+        <a class="login-btn" href="login.jsp">Đăng Nhập</a>
+        <a class="register-btn" href="register.jsp">Đăng Ký</a>
         <% } else { %>
-        <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;">
+        <span>Xin chào, <a href="userprofile" style="text-decoration:none; color:inherit;">
             <%= user.getFullName() %>
         </a>!</span>
         <form action="logout" method="post" style="display:inline;">
-            <input type="submit" value="Logout">
+            <input type="submit" value="Đăng Xuất">
         </form>
         <% } %>
     </div>
@@ -738,8 +737,8 @@
 
 <!-- Page Header -->
 <div class="page-header">
-    <h1>Equipment Rental Shop</h1>
-    <p>Find and rent swimming pool equipment</p>
+    <h1>Cửa Hàng Thuê Thiết Bị</h1>
+    <p>Tìm và thuê thiết bị hồ bơi</p>
 </div>
 
 <!-- Main Container -->
@@ -756,32 +755,24 @@
     <div class="main-layout">
         <!-- Sidebar -->
         <div class="sidebar">
-            <h3>Filter Categories</h3>
+            <h3>Lọc Danh Mục</h3>
             <ul class="category-list">
                 <li class="category-item">
                     <a href="#" class="category-link active" onclick="filterByCategory('all')" id="filter-all">
                         <span class="category-icon">🏊</span>
-                        All Categories
+                        Tất Cả Danh Mục
                     </a>
                 </li>
-                <c:forEach var="cat" items="${categories}">
-                    <li class="category-item">
-                        <a href="#" class="category-link" onclick="filterByCategory(${cat.id})" id="filter-${cat.id}">
-                            <span class="category-icon">🔄</span>
-                                ${cat.name} (${cat.quantity})
-                        </a>
-                    </li>
-                </c:forEach>
             </ul>
 
             <div class="filter-section">
-                <h4>Filter By Price</h4>
+                <h4>Lọc Theo Giá</h4>
                 <div class="price-range">
                     <div class="price-inputs">
-                        <input type="number" class="price-input" placeholder="Min" id="minPrice">
-                        <input type="number" class="price-input" placeholder="Max" id="maxPrice">
+                        <input type="number" class="price-input" placeholder="Tối Thiểu" id="minPrice">
+                        <input type="number" class="price-input" placeholder="Tối Đa" id="maxPrice">
                     </div>
-                    <button class="btn btn-primary" onclick="filterByPrice()" style="width: 100%;">Apply Filter</button>
+                    <button class="btn btn-primary" onclick="filterByPrice()" style="width: 100%;">Áp Dụng Lọc</button>
                 </div>
             </div>
         </div>
@@ -791,8 +782,8 @@
             <!-- Tabs -->
             <div class="tabs">
                 <div class="tab-buttons">
-                    <button class="tab-btn active" onclick="showTab('equipment')">🏊 Equipment Rental</button>
-                    <button class="tab-btn" onclick="showTab('rentals')">📋 Active Rentals</button>
+                    <button class="tab-btn active" onclick="showTab('equipment')">🏊 Thiết Bị Cho Thuê</button>
+                    <button class="tab-btn" onclick="showTab('rentals')">📋 Đang Thuê</button>
                 </div>
 
                 <!-- Equipment Tab -->
@@ -800,21 +791,20 @@
                     <!-- Search & Sort Bar -->
                     <div class="search-sort-bar">
                         <div class="search-box">
-                            <input type="text" class="search-input" placeholder="Search equipment..." id="searchInput">
+                            <input type="text" class="search-input" placeholder="Tìm thiết bị..." id="searchInput">
                             <button class="search-btn" onclick="searchEquipment()">🔍</button>
                         </div>
 
-
                         <select class="sort-select" onchange="sortEquipment(this.value)">
-                            <option value="name">Sort by Name</option>
-                            <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
-                            <option value="availability">Availability</option>
+                            <option value="name">Sắp xếp theo Tên</option>
+                            <option value="price-low">Giá: Thấp đến Cao</option>
+                            <option value="price-high">Giá: Cao đến Thấp</option>
+                            <option value="availability">Tình Trạng Có Sẵn</option>
                         </select>
                     </div>
 
                     <div class="results-info">
-                        Showing <span id="resultCount">${not empty equipmentList ? equipmentList.size() : 0}</span> equipment(s)
+                        Hiển thị <span id="resultCount">${not empty equipmentList ? equipmentList.size() : 0}</span> thiết bị
                     </div>
 
                     <!-- Equipment Grid -->
@@ -825,7 +815,8 @@
                                  data-name="${fn:toLowerCase(item.itemName)}"
                                  data-rent-price="${item.rentPrice}"
                                  data-sale-price="${item.salePrice}"
-                                 data-usage-id="${item.usageId}">
+                                 data-usage-id="${item.usageId}"
+                                 data-quantity="${item.quantity}">
 
                                 <div class="equipment-image">
                                     🏊‍♂️
@@ -836,11 +827,11 @@
                                     <div class="equipment-category">${item.category}</div>
 
                                     <div class="equipment-details">
-                                        <div><strong>Unit:</strong> ${item.unit}</div>
+                                        <div><strong>Đơn vị:</strong> ${item.unit}</div>
 
                                         <c:if test="${item.rentPrice > 0}">
                                             <div class="price-row">
-                                                <span>Rent Price:</span>
+                                                <span>Giá Thuê:</span>
                                                 <span class="price">
                                                     <c:if test="${not empty item.rentPrice && item.rentPrice != ''}"><fmt:formatNumber value="${item.rentPrice}" type="currency" currencyCode="VND"/></c:if>
                                                 </span>
@@ -849,16 +840,16 @@
 
                                         <c:if test="${item.salePrice > 0}">
                                             <div class="price-row">
-                                                <span>Sale Price:</span>
+                                                <span>Giá Bán:</span>
                                                 <span class="price"><fmt:formatNumber value="${item.salePrice}" type="currency" currencyCode="VND"/></span>
                                             </div>
                                         </c:if>
                                     </div>
 
                                     <div class="stock-info">
-                                        <span class="stock-text">Available: ${item.quantity}</span>
+                                        <span class="stock-text">Có sẵn: ${item.quantity}</span>
                                         <span class="stock-badge ${item.quantity == 0 ? 'out-stock' : (item.quantity <= 5 ? 'low-stock' : 'in-stock')}">
-                                                ${item.quantity == 0 ? 'Out of Stock' : (item.quantity <= 5 ? 'Low Stock' : 'In Stock')}
+                                                ${item.quantity == 0 ? 'Hết Hàng' : (item.quantity <= 5 ? 'Sắp Hết' : 'Còn Hàng')}
                                         </span>
                                     </div>
 
@@ -866,16 +857,16 @@
                                         <c:if test="${item.rentPrice > 0}">
                                             <!-- Nút Rent: Gọi modal với redirectTo='cart' -->
                                             <button class="btn btn-primary btn-sm"
-                                                    onclick="openRentalModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.rentPrice}', 'cart')"
+                                                    onclick="openRentalModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.rentPrice}', 'cart', '${item.quantity}')"
                                                 ${item.quantity == 0 ? 'disabled' : ''}>
-                                                🔄 Rent
+                                                🔄 Thuê Ngay
                                             </button>
 
                                             <!-- Nút Add to Cart: Gọi modal với redirectTo='rental' -->
-                                            <button class="btn btn-success btn-sm"
-                                                    onclick="openRentalModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.rentPrice}', 'rental')"
+                                            <button class="btn btn-primary btn-sm"
+                                                    onclick="openRentalModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.rentPrice}', 'rental', '${item.quantity}')"
                                                 ${item.quantity == 0 ? 'disabled' : ''}>
-                                                🛒 Add to Cart
+                                                🛒 Thêm Vào Giỏ
                                             </button>
                                         </c:if>
                                     </div>
@@ -890,14 +881,14 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>Rental ID</th>
-                            <th>Equipment</th>
-                            <th>Customer</th>
-                            <th>Quantity</th>
-                            <th>Date</th>
+                            <th>ID Thuê</th>
+                            <th>Thiết Bị</th>
+                            <th>Khách Hàng</th>
+                            <th>Số Lượng</th>
+                            <th>Ngày Thuê</th>
                             <th>CCCD</th>
-                            <th>Total</th>
-                            <th>Action</th>
+                            <th>Tổng Tiền</th>
+                            <th>Hành Động</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -912,13 +903,13 @@
                                 <td><fmt:formatNumber value="${rental.totalAmount}" type="currency" currencyCode="VND"/></td>
                                 <td class="actions">
                                     <!-- Return Button -->
-                                    <button class="btn-return" onclick="processReturn(${rental.rentalId})" title="Mark as returned normally">
-                                        ✅ Return
+                                    <button class="btn-return" onclick="processReturn(${rental.rentalId})" title="Trả thiết bị bình thường">
+                                        ✅ Trả
                                     </button>
 
                                     <!-- Report Issue Button -->
-                                    <button class="btn-report" onclick="reportIssue(${rental.rentalId})" title="Report damage, loss, or overdue">
-                                        ⚠️ Report Issue
+                                    <button class="btn-report" onclick="reportIssue(${rental.rentalId})" title="Báo hỏng, mất, hoặc quá hạn">
+                                        ⚠️ Báo Cáo
                                     </button>
 
                                     <!-- Optional: View Details Button -->
@@ -945,47 +936,47 @@
     <div id="rentalModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">🔄 Rent Equipment</h3>
-                <button class="close" onclick="closeModal('rentalModal')">&times;</button>
+                <h3 class="modal-title">🔄 Thuê Thiết Bị</h3>
+                <button class="close" onclick="closeModal('rentalModal')">×</button>
             </div>
             <form action="equipment" method="post">
                 <input type="hidden" name="action" value="rental">
                 <input type="hidden" name="mode" value="rental">
                 <input type="hidden" name="inventoryId" id="rental_inventoryId">
                 <input type="hidden" name="rentPrice" id="rental_hiddenPrice">
+                <input type="hidden" id="availableQuantity" value="0">
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="form-label">Equipment</label>
+                        <label class="form-label">Thiết Bị</label>
                         <input type="text" class="form-input" id="rental_itemName" readonly>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Customer Name *</label>
-                        <input type="text" name="customerName" class="form-input" placeholder="Enter customer name" required>
+                        <label class="form-label">Tên Khách Hàng *</label>
+                        <input type="text" name="customerName" class="form-input" placeholder="Nhập tên khách hàng" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">CCCD *</label>
-                        <input type="text" name="customerIdCard" class="form-input" placeholder="Enter CCCD number" required>
+                        <label class="form-label">Số CMND *</label>
+                        <input type="text" name="customerIdCard" class="form-input" placeholder="Nhập số CMND" required maxlength="10" pattern="\d{10}" id="customerIdCard">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Quantity *</label>
+                        <label class="form-label">Số Lượng *</label>
                         <input type="number" name="quantity" class="form-input" min="1" value="1" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Rental Price</label>
+                        <label class="form-label">Giá Thuê</label>
                         <input type="text" class="form-input" id="rental_price" readonly>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" onclick="closeModal('rentalModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    <button type="button" class="btn btn-cancel" onclick="closeModal('rentalModal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm Vào Giỏ</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Filter by category
         function filterByCategory(categoryId) {
             console.log('Filtering by category:', categoryId);
 
@@ -1160,18 +1151,19 @@
         }
 
         // ==================== MODAL FUNCTIONS ====================
-        function openRentalModal(inventoryId, itemName, rentPrice, redirectTo) {
+        function openRentalModal(inventoryId, itemName, rentPrice, redirectTo, availableQuantity) {
             console.log('Opening rental modal:', {
                 inventoryId: inventoryId,
                 itemName: itemName,
                 rentPrice: rentPrice,
-                redirectTo: redirectTo
+                redirectTo: redirectTo,
+                availableQuantity: availableQuantity
             });
 
             // Validate inputs
             if (!inventoryId || !itemName || !rentPrice) {
                 console.error('Missing required parameters for rental modal');
-                alert('Error: Missing product information. Please try again.');
+                alert('Lỗi: Thiếu thông tin sản phẩm. Vui lòng thử lại.');
                 return;
             }
 
@@ -1180,6 +1172,7 @@
             document.getElementById('rental_itemName').value = itemName;
             document.getElementById('rental_price').value = formatCurrency(rentPrice);
             document.getElementById('rental_hiddenPrice').value = rentPrice;
+            document.getElementById('availableQuantity').value = availableQuantity;
 
             // Handle redirect parameter
             let redirectInput = document.getElementById('redirectToInput');
@@ -1219,7 +1212,7 @@
 
         // ==================== RENTAL FUNCTIONS ====================
         function processReturn(rentalId) {
-            if (confirmAction('Are you sure you want to process this return?')) {
+            if (confirmAction('Bạn có chắc chắn muốn xử lý trả thiết bị này?')) {
                 console.log('Processing return for rental ID:', rentalId);
 
                 const form = document.createElement('form');
@@ -1251,7 +1244,7 @@
         }
 
         function reportIssue(rentalId) {
-            if (confirmAction('Report issue for this rental?')) {
+            if (confirmAction('Báo cáo vấn đề cho lần thuê này?')) {
                 console.log('Reporting issue for rental ID:', rentalId);
                 location.href = 'compensation?action=create&rentalId=' + rentalId;
             }
@@ -1261,19 +1254,25 @@
             const customerName = form.querySelector('input[name="customerName"]').value.trim();
             const customerIdCard = form.querySelector('input[name="customerIdCard"]').value.trim();
             const quantity = parseInt(form.querySelector('input[name="quantity"]').value);
+            const availableQuantity = parseInt(document.getElementById('availableQuantity').value);
 
             if (!customerName) {
-                alert('Please enter customer name');
+                alert('Vui lòng nhập tên khách hàng');
                 return false;
             }
 
-            if (!customerIdCard) {
-                alert('Please enter CCCD number');
+            if (!/^\d{10}$/.test(customerIdCard)) {
+                alert('Số CMND phải là số và đúng 10 chữ số');
                 return false;
             }
 
             if (!quantity || quantity < 1) {
-                alert('Please enter a valid quantity');
+                alert('Vui lòng nhập số lượng hợp lệ');
+                return false;
+            }
+
+            if (quantity > availableQuantity) {
+                alert('Số lượng thuê không được vượt quá số lượng có sẵn');
                 return false;
             }
 
@@ -1292,7 +1291,7 @@
             const stockText = card.querySelector('.stock-text');
             if (stockText) {
                 const text = stockText.textContent;
-                const match = text.match(/Available:\s*(\d+)/);
+                const match = text.match(/Có sẵn:\s*(\d+)/);
                 return match ? parseInt(match[1]) : 0;
             }
             return 0;
@@ -1324,7 +1323,7 @@
         }
 
         function confirmAction(message) {
-            return confirm(message || 'Are you sure you want to proceed?');
+            return confirm(message || 'Bạn có chắc chắn muốn tiếp tục?');
         }
 
         // ==================== EVENT LISTENERS ====================
@@ -1333,6 +1332,18 @@
 
             // Ẩn category filters (chỉ giữ lại "All Categories")
             hideCategoryFilters();
+
+            // Lọc chỉ hiển thị equipment có usageId = 2
+            const cards = document.querySelectorAll('.equipment-card');
+            let visibleCount = 0;
+            cards.forEach(card => {
+                if (card.getAttribute('data-usage-id') !== '2') {
+                    card.style.display = 'none';
+                } else {
+                    visibleCount++;
+                }
+            });
+            updateResultCount(visibleCount);
 
             // Search functionality
             const searchInput = document.getElementById('searchInput');
@@ -1393,7 +1404,7 @@
             const priceRange = document.querySelector('.price-range');
             if (priceRange) {
                 const clearFiltersBtn = document.createElement('button');
-                clearFiltersBtn.textContent = 'Clear Filters';
+                clearFiltersBtn.textContent = 'Xóa Lọc';
                 clearFiltersBtn.className = 'btn btn-cancel';
                 clearFiltersBtn.style.width = '100%';
                 clearFiltersBtn.style.marginTop = '10px';
@@ -1424,7 +1435,7 @@
 
             // Add tooltips to disabled buttons
             document.querySelectorAll('.btn[disabled]').forEach(btn => {
-                btn.title = 'This item is currently out of stock';
+                btn.title = 'Sản phẩm này hiện hết hàng';
             });
 
             // Form submission handling
@@ -1442,7 +1453,7 @@
                     const submitBtn = this.querySelector('button[type="submit"]');
                     if (submitBtn) {
                         const originalText = submitBtn.textContent;
-                        submitBtn.textContent = 'Processing...';
+                        submitBtn.textContent = 'Đang Xử Lý...';
                         submitBtn.disabled = true;
 
                         // Reset button state if form submission fails
@@ -1454,12 +1465,12 @@
                 });
             });
 
-            // Initialize page state
-            const equipmentCards = document.querySelectorAll('.equipment-card');
-            updateResultCount(equipmentCards.length);
+            // Thêm dòng này để hiển thị tất cả sản phẩm ngay khi load
+            filterByCategory('all');
+
 
             console.log('Equipment Rental System initialized successfully!');
-            console.log(`Found ${equipmentCards.length} equipment items`);
+            console.log(`Found ${cards.length} equipment items, showing ${visibleCount} with usageId=2`);
         });
 
         // ==================== ERROR HANDLING ====================

@@ -230,7 +230,7 @@
             Please review the details below.
         </div>
 
-        <!-- Customer Information for ticket-->
+        <!-- Customer Information -->
         <div class="section">
             <h3 class="section-title">Customer Information</h3>
             <div class="info-grid">
@@ -443,12 +443,12 @@
                         <tr>
                             <th>Item Name</th>
                             <th class="text-right">Quantity</th>
-                            <th class="text-right">Sale Price</th> <!-- Sửa từ Rent Price -->
+                            <th class="text-right">Sale Price</th>
                             <th class="text-right">Amount</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <c:forEach var="sale" items="${sales}"> <!-- sales từ servlet setAttribute("sales", EquipmentDAO.getSalesByIds(ids)) -->
+                        <c:forEach var="sale" items="${sales}">
                             <tr>
                                 <td>${sale.itemName}</td>
                                 <td class="text-right">${sale.quantity}</td>
@@ -464,6 +464,97 @@
                     </table>
                 </div>
             </c:when>
+
+            <c:when test="${type == 'mixed'}">
+                <!-- Mixed Details: Hiển thị từng phần nếu có -->
+                <div class="section">
+                    <h3 class="section-title">Mixed Details</h3>
+
+                    <!-- Ticket Details nếu có -->
+                    <c:if test="${not empty tickets}">
+                        <h4 class="section-title">Ticket Items</h4>
+                        <table class="calculation-table">
+                            <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="ticket" items="${tickets}">
+                                <tr>
+                                    <td>${ticket.ticketTypeName}</td>
+                                    <td class="text-right">${ticket.quantity}</td>
+                                    <td class="text-right"><fmt:formatNumber value="${ticket.price}" type="currency" currencyCode="VND"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${ticket.total}" type="currency" currencyCode="VND"/></td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                    <!-- Rental Details nếu có -->
+                    <c:if test="${not empty rentals}">
+                        <h4 class="section-title">Rental Items</h4>
+                        <table class="calculation-table">
+                            <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Rent Price</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="rental" items="${rentals}">
+                                <tr>
+                                    <td>${rental.itemName}</td>
+                                    <td class="text-right">${rental.quantity}</td>
+                                    <td class="text-right"><fmt:formatNumber value="${rental.rentPrice}" type="currency" currencyCode="VND"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${rental.totalAmount}" type="currency" currencyCode="VND"/></td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                    <!-- Sale Details nếu có -->
+                    <c:if test="${not empty sales}">
+                        <h4 class="section-title">Sale Items</h4>
+                        <table class="calculation-table">
+                            <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th class="text-right">Quantity</th>
+                                <th class="text-right">Sale Price</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="sale" items="${sales}">
+                                <tr>
+                                    <td>${sale.itemName}</td>
+                                    <td class="text-right">${sale.quantity}</td>
+                                    <td class="text-right"><fmt:formatNumber value="${sale.salePrice}" type="currency" currencyCode="VND"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${sale.totalAmount}" type="currency" currencyCode="VND"/></td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                    <!-- Total Amount cho mixed -->
+                    <table class="calculation-table">
+                        <tr class="total-row">
+                            <td colspan="3">Total Amount</td>
+                            <td class="text-right"><fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </c:when>
+
             <c:otherwise>
                 <!-- Unknown type -->
                 <div class="section">
@@ -494,7 +585,7 @@
         <button class="btn btn-primary" onclick="window.print()">
             ✅ Confirm and Print Invoice
         </button>
-        <a href="${backUrl}" class="btn btn-secondary">⬅️ Back Up</a> <!-- Xóa </a> dư -->
+        <a href="${backUrl}" class="btn btn-secondary">⬅️ Back Up</a>
     </div>
 </div>
 
@@ -516,11 +607,9 @@
     }, 10000);
     window.addEventListener('afterprint', function () {
         const backUrl = '${backUrl}';
-        console.log('Debug: Redirecting after print to ' + backUrl);  // Thêm debug
         if (backUrl && backUrl !== '') {
             window.location.href = backUrl;
         } else {
-            console.log('Debug: backUrl invalid, fallback to home');
             window.location.href = '/home';  // Fallback
         }
     });

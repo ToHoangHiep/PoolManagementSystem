@@ -25,20 +25,27 @@ public class CartServlet extends HttpServlet {
             session.setAttribute("cart", cart);
         }
 
-        System.out.println("Debug: doGet CartServlet - Cart items: " +
-                (cart.getItems() != null ? cart.getItems().size() : 0) +
-                ", Total: " + cart.getTotal());
-
-        // Debug: In ra từng item trong cart
-        if (cart.getItems() != null) {
-            for (int i = 0; i < cart.getItems().size(); i++) {
-                CartItem item = cart.getItems().get(i);
-                System.out.println("  Item " + i + ": Type=" + item.getType() +
-                        ", Name=" + item.getItemName() +
-                        ", Qty=" + item.getQty() +
-                        ", Price=" + item.getPrice());
+        // Thêm phần này: Lấy "from" và lưu lastCartMode
+        String from = request.getParameter("from");
+        if (from != null && !from.isEmpty()) {
+            // Chuyển "rental" -> "equipment_rental", "buy" -> "equipment_buy" để khớp với determineCartType
+            String lastMode = from;
+            if ("rental".equals(from)) {
+                lastMode = "equipment_rental";
+            } else if ("buy".equals(from)) {
+                lastMode = "equipment_buy";
+            } else if ("ticket".equals(from)) {
+                lastMode = "ticket";
             }
+            session.setAttribute("lastCartMode", lastMode);
         }
+
+        // Set attribute cho JSP (dùng lastCartMode từ session, nếu có)
+        String lastMode = (String) session.getAttribute("lastCartMode");
+        if (lastMode == null) {
+            lastMode = "ticket";  // Default nếu không có
+        }
+        request.setAttribute("lastMode", lastMode);
 
         request.setAttribute("cart", cart);
         request.getRequestDispatcher("cart.jsp").forward(request, response);
@@ -55,7 +62,7 @@ public class CartServlet extends HttpServlet {
             session.setAttribute("cart", cart);
         }
 
-        System.out.println("Debug: doPost CartServlet - Action: " + action);
+
 
         try {
             if ("remove".equals(action)) {
@@ -63,8 +70,6 @@ public class CartServlet extends HttpServlet {
                 if (index >= 0 && index < cart.getItems().size()) {
                     CartItem removedItem = cart.getItems().get(index);
                     cart.removeItem(index);
-                    System.out.println("Debug: Removed item '" + removedItem.getItemName() +
-                            "' at index " + index + ", New cart items: " + cart.getItems().size());
                     request.setAttribute("success", "Đã xóa '" + removedItem.getItemName() + "' khỏi giỏ!");
                 } else {
                     request.setAttribute("error", "Index không hợp lệ!");
@@ -78,9 +83,6 @@ public class CartServlet extends HttpServlet {
                     CartItem item = cart.getItems().get(index);
                     int oldQty = item.getQty();
                     cart.updateItemQty(index, newQty);
-                    System.out.println("Debug: Updated qty of '" + item.getItemName() +
-                            "' from " + oldQty + " to " + newQty +
-                            ", New total: " + cart.getTotal());
                     request.setAttribute("success", "Đã cập nhật số lượng của '" + item.getItemName() + "'!");
                 } else {
                     request.setAttribute("error", "Dữ liệu cập nhật không hợp lệ!");
@@ -88,21 +90,14 @@ public class CartServlet extends HttpServlet {
 
             } else if ("checkout".equals(action)) {
                 if (cart.isEmpty()) {
-                    System.out.println("Debug: Checkout failed - Cart empty");
                     request.setAttribute("error", "Giỏ hàng rỗng!");
                 } else {
                     // Xác định loại cart
                     String cartType = determineCartType(cart);
-                    System.out.println("Debug: Checkout successful - Cart type: " + cartType +
-                            ", Total items: " + cart.getItems().size() +
-                            ", Total amount: " + cart.getTotal());
-
-                    // Redirect tới payment với type phù hợp
                     response.sendRedirect("payment?action=confirm&for=" + cartType);
                     return;
                 }
             } else {
-                System.out.println("Debug: Unknown action: " + action);
                 request.setAttribute("error", "Hành động không hợp lệ: " + action);
             }
 
@@ -110,13 +105,11 @@ public class CartServlet extends HttpServlet {
             request.getRequestDispatcher("cart.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
-            System.out.println("Debug: NumberFormatException in doPost: " + e.getMessage());
             request.setAttribute("error", "Dữ liệu số không hợp lệ: " + e.getMessage());
             request.setAttribute("cart", cart);
             request.getRequestDispatcher("cart.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Debug: Exception in doPost: " + e.getMessage());
             request.setAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             request.setAttribute("cart", cart);
             request.getRequestDispatcher("cart.jsp").forward(request, response);
@@ -130,7 +123,6 @@ public class CartServlet extends HttpServlet {
      */
     private String determineCartType(Cart cart) {
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            System.out.println("Debug: determineCartType - Empty cart, defaulting to ticket");
             return "ticket"; // Default fallback
         }
 
@@ -149,13 +141,9 @@ public class CartServlet extends HttpServlet {
                 } else if ("EquipmentBuy".equals(type)) {
                     buyCount++;
                 } else {
-                    System.out.println("Debug: Unknown item type: " + type);
                 }
             }
         }
-
-        System.out.println("Debug: Cart analysis - Tickets: " + ticketCount +
-                ", Rentals: " + rentalCount + ", Buys: " + buyCount);
 
         // Đếm số loại khác nhau
         int distinctTypes = 0;
@@ -165,19 +153,14 @@ public class CartServlet extends HttpServlet {
 
         // Logic xác định type
         if (distinctTypes > 1) {
-            System.out.println("Debug: Mixed cart detected - " + distinctTypes + " different types");
             return "mixed";  // Có nhiều hơn 1 loại → Mixed
         } else if (ticketCount > 0) {
-            System.out.println("Debug: Pure ticket cart");
             return "ticket";
         } else if (rentalCount > 0) {
-            System.out.println("Debug: Pure rental cart");
             return "equipment_rental";
         } else if (buyCount > 0) {
-            System.out.println("Debug: Pure buy cart");
             return "equipment_buy";
         } else {
-            System.out.println("Debug: No recognizable items, defaulting to ticket");
             return "ticket"; // Fallback
         }
     }
