@@ -6,15 +6,14 @@ import java.util.Date;
 public class InventoryRequest {
     private int requestId;
     private int inventoryId;
+    private String itemName; // Tên thiết bị
     private int requestedQuantity;
-    private String status;
-    private Date requestDate;
-    private String itemName;
     private String reason;
+    private String status;
     private Timestamp requestedAt;
     private Timestamp approvedAt;
-    // getters, setters
 
+    // Getters & Setters
     public int getRequestId() {
         return requestId;
     }
@@ -31,12 +30,28 @@ public class InventoryRequest {
         this.inventoryId = inventoryId;
     }
 
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
     public int getRequestedQuantity() {
         return requestedQuantity;
     }
 
     public void setRequestedQuantity(int requestedQuantity) {
         this.requestedQuantity = requestedQuantity;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public String getStatus() {
@@ -47,31 +62,10 @@ public class InventoryRequest {
         this.status = status;
     }
 
-    public Date getRequestDate() {
-        return requestDate;
-    }
-
-    public void setRequestDate(Date requestDate) {
-        this.requestDate = requestDate;
-    }
-    public String getItemName() {
-        return itemName;
-    }
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
-    }
-
-
-    public String getReason() {
-        return reason;
-    }
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
     public Timestamp getRequestedAt() {
         return requestedAt;
     }
+
     public void setRequestedAt(Timestamp requestedAt) {
         this.requestedAt = requestedAt;
     }
@@ -79,8 +73,10 @@ public class InventoryRequest {
     public Timestamp getApprovedAt() {
         return approvedAt;
     }
+
     public void setApprovedAt(Timestamp approvedAt) {
         this.approvedAt = approvedAt;
     }
 }
+
 
