@@ -1,22 +1,19 @@
 package controller;
 
+import dal.CoachDAO;
+import dal.CourseDAO;
 import dal.FeedbackDAO;
-import dal.FeedbackRepliesDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Feedback;
-import model.FeedbackReplies;
-import model.FeedbackSorting;
-import model.User;
+import model.*;
 import utils.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class FeedbackServlet extends HttpServlet {
     private static final String alert_message = "alert_message";
@@ -34,117 +31,84 @@ public class FeedbackServlet extends HttpServlet {
 
         switch (action) {
             case "create"          -> submitAction(request, response);
-            case "edit"            -> editAction(request, response);
-            case "confirm_edit"    -> confirmEditAction(request, response);
             case "delete"          -> deleteAction(request, response);
             case "delete_multiple" -> deleteMultipleAction(request, response);
             case "sort"            -> sortAction(request, response);
-            case "reply"           -> replyAction(request, response);
             default                -> response.sendRedirect(error_link);
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String mode = request.getParameter("mode");
-        boolean listMode = mode != null && mode.equals("list");
-
-        // Existing code for mode=list
-        if (listMode) {
-            listMode(request, response);
-            return;
-        }
-
         String action = request.getParameter("action");
         // Handle action parameter if present
         if (action != null) {
             switch (action) {
                 case "create" -> {
                     // Just display the empty form for creation
-                    request.getRequestDispatcher("feedback.jsp").forward(request, response);
+                    showFeedbackForm(request, response);
                     return;
                 }
-                case "edit" -> {
-                    Feedback f = (Feedback) request.getSession().getAttribute("feedback");
+                case "details" -> {
+                    User user = (User) request.getSession().getAttribute("user");
 
-                    if (f == null) {
-                        // Get the ID from the URL
-                        String idParam = request.getParameter("id");
-
-                        if (idParam == null || idParam.isEmpty()) {
-                            response.sendRedirect(error_link);
-                            return;
-                        }
-
-                        int id = Integer.parseInt(idParam);
-
-                        f = FeedbackDAO.getSpecificFeedback(id);
-
-                        if (f == null) {
-                            request.setAttribute(alert_message, "Không tìm thấy phản hồi để chỉnh sửa.");
-                            request.setAttribute(alert_action, list_link);
-                            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-                            return;
-                        }
-
-                        if (f.getUserId() != ((User) request.getSession().getAttribute("user")).getId()) {
-                            request.setAttribute(alert_message, "Bạn không có quyền chỉnh sửa phản hồi này.");
-                            request.setAttribute(alert_action, list_link);
-                            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-                            return;
-                        }
-
-                        request.setAttribute("feedback", f);
-                        request.getRequestDispatcher("feedback.jsp").forward(request, response);
+                    // User must be logged in to view details
+                    if (user == null) {
+                        response.sendRedirect(login_link);
                         return;
                     }
 
-                    request.getSession().removeAttribute("feedback");
-                    request.setAttribute("feedback", f);
-                    request.getRequestDispatcher("feedback.jsp").forward(request, response);
+                    // Authorization: Only admins can view feedback details.
+                    // Assuming roles 3 (Coach) and 4 (Customer) are non-admins
+                    List<Integer> nonAdminRoles = Arrays.asList(3, 4);
+                    boolean isAdmin = !nonAdminRoles.contains(user.getRole().getId());
 
-                    return;
-                }
-                case "delete" -> {
-                    // Handle delete action
-                    String idParam = request.getParameter("id");
-
-                    if (idParam == null || idParam.isEmpty()) {
-                        response.sendRedirect(error_link);
+                    if (!isAdmin) {
+                        request.getSession().setAttribute(alert_message, "You do not have permission to view this page.");
+                        response.sendRedirect("home.jsp"); // Redirect non-admins to home
                         return;
                     }
 
-                    deleteAction(request, response);
-                    response.sendRedirect(list_link);
-
-                    return;
-                }
-                case "chat" -> {
-                    // Handle chat/reply view
-                    String idParam = request.getParameter("id");
-                    
-                    if (idParam == null || idParam.isEmpty()) {
-                        response.sendRedirect(error_link);
+                    int feedbackId;
+                    try {
+                        feedbackId = Integer.parseInt(request.getParameter("id"));
+                    } catch (NumberFormatException e) {
+                        // Handle cases where ID is not a valid number
+                        request.getSession().setAttribute(alert_message, "Invalid feedback ID.");
+                        response.sendRedirect("feedback?action=list");
                         return;
                     }
-                    
-                    int feedbackId = Integer.parseInt(idParam);
+
                     Feedback feedback = FeedbackDAO.getSpecificFeedback(feedbackId);
-                    
+
                     if (feedback == null) {
-                        request.setAttribute(alert_message, "Feedback not found.");
-                        request.setAttribute(alert_action, list_link);
-                        request.getRequestDispatcher("feedback.jsp").forward(request, response);
+                        request.getSession().setAttribute(alert_message, "Feedback not found.");
+                        response.sendRedirect("feedback?action=list");
                         return;
                     }
-                    
-                    // Get replies for this feedback
-                    List<FeedbackReplies> replies = FeedbackRepliesDAO.getRepliesByFeedbackId(feedbackId);
-                    
-                    // Set attributes for the chat page
+
+                    // --- NEW LOGIC ---
+                    // Based on the feedback type, fetch the related entity (Course or Coach)
+                    try {
+                        if ("Course".equals(feedback.getFeedbackType()) && feedback.getCourseId() > 0) {
+                            Course course = CourseDAO.getCourseById(feedback.getCourseId());
+                            request.setAttribute("relatedCourse", course); // Pass the course object to the JSP
+                        } else if ("Coach".equals(feedback.getFeedbackType()) && feedback.getCoachId() > 0) {
+                            Coach coach = CoachDAO.getById(feedback.getCoachId());
+                            request.setAttribute("relatedCoach", coach); // Pass the coach object to the JSP
+                        }
+                    } catch (SQLException e) {
+                        throw new ServletException("Database error fetching related feedback data", e);
+                    }
+                    // --- END NEW LOGIC ---
+
+                    // Set feedback attribute and forward to the details page.
                     request.setAttribute("feedback", feedback);
-                    request.setAttribute("replies", replies);
-                    request.getRequestDispatcher("feedback_chat.jsp").forward(request, response);
+                    request.getRequestDispatcher("feedback_details.jsp").forward(request, response);
+                    return; // Important to stop further execution
+                }
+                case "list" -> {
+                    listMode(request, response);
                     return;
                 }
                 default -> {
@@ -157,14 +121,69 @@ public class FeedbackServlet extends HttpServlet {
         // Existing code for handling id parameter
         String urlId = request.getParameter("id");
         if (!Utils.CheckIfEmpty(urlId)) {
+            User user = (User) request.getSession().getAttribute("user");
+
+            // User must be logged in to view details
+            if (user == null) {
+                response.sendRedirect(login_link);
+                return;
+            }
+
+            // Authorization: Only admins can view feedback details.
+            // Assuming roles 3 (Coach) and 4 (Customer) are non-admins
+            List<Integer> nonAdminRoles = Arrays.asList(3, 4);
+            boolean isAdmin = !nonAdminRoles.contains(user.getRole().getId());
+
+            if (!isAdmin) {
+                request.getSession().setAttribute(alert_message, "You do not have permission to view this page.");
+                response.sendRedirect("home.jsp"); // Redirect non-admins to home
+                return;
+            }
+
             int id = Integer.parseInt(urlId);
             Feedback f = FeedbackDAO.getSpecificFeedback(id);
             request.setAttribute("feedback", f);
             return;
         }
 
-        // If no specific action or id is provided, just forward to the feedback.jsp
-        response.sendRedirect(list_link); // for feedback form use: /feedback?action=create
+        response.sendRedirect("feedback?action=create"); // for feedback form use: /feedback?action=create
+    }
+
+    // In your FeedbackServlet.java
+
+    // This method should be called when action is "create" or "edit"
+    private void showFeedbackForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Your existing security check for logged-in user...
+        User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        try {
+            // If editing, load the existing feedback object
+            String action = request.getParameter("action");
+            if ("edit".equals(action)) {
+                // Your logic to load the feedback object and set it as a request attribute
+                // request.setAttribute("feedback", loadedFeedback);
+            }
+
+            // --- NEW LOGIC ---
+            // Fetch lists for the dropdowns from your DAOs
+            List<Course> courses = CourseDAO.getAllCourses();
+            List<Coach> coaches = CoachDAO.getAll();
+
+            // Set the lists as request attributes so the JSP can access them
+            request.setAttribute("courses", courses);
+            request.setAttribute("coaches", coaches);
+
+        } catch (SQLException e) {
+            // Handle database errors
+            throw new ServletException("Database error fetching data for feedback form", e);
+        }
+
+        // Forward to the JSP
+        request.getRequestDispatcher("feedback.jsp").forward(request, response);
     }
 
     //region Actions
@@ -210,97 +229,6 @@ public class FeedbackServlet extends HttpServlet {
             request.setAttribute(alert_message, "Phản hồi đã được gửi thành công.");
         } else {
             request.setAttribute(alert_message, "Không thể gửi phản hồi. Vui lòng thử lại sau.");
-        }
-
-        request.setAttribute(alert_action, list_link);
-        request.getRequestDispatcher("feedback.jsp").forward(request, response);
-    }
-
-    private void editAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int f_id   = Integer.parseInt(request.getParameter("id"));
-        Feedback f = FeedbackDAO.getSpecificFeedback(f_id);
-
-        if (f == null) {
-            request.setAttribute(alert_message, "Không tìm thấy phản hồi để chỉnh sửa.");
-            request.setAttribute(alert_action, list_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        if (f.getUserId() != ((User) request.getSession().getAttribute("user")).getId()) {
-            request.setAttribute(alert_message, "Bạn không có quyền chỉnh sửa phản hồi này.");
-            request.setAttribute(alert_action, list_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        List<FeedbackReplies> f_rep = FeedbackRepliesDAO.getRepliesByFeedbackId(f_id);
-        if (!f_rep.isEmpty()) {
-            request.setAttribute(alert_message, "Đã có phản hồi, không thể chỉnh sửa.");
-            request.setAttribute(alert_action, "/feedback?id=" + f_id);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        request.getSession().setAttribute("feedback", f);
-        response.sendRedirect("feedback?action=edit&id=" + f_id);
-    }
-
-    private void confirmEditAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int feedbackId = Integer.parseInt(request.getParameter("id"));
-        User user      = (User) request.getSession().getAttribute("user");
-        String content = request.getParameter("content");
-        int rating     = Integer.parseInt(request.getParameter("rating"));
-
-        if (user == null) {
-            request.setAttribute(alert_message, "Bạn cần đăng nhập để chỉnh sửa phản hồi.");
-            request.setAttribute(alert_action, login_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        Feedback f_old = FeedbackDAO.getSpecificFeedback(feedbackId);
-
-        if (f_old == null) {
-            request.setAttribute(alert_message, "Không tìm thấy phản hồi để chỉnh sửa.");
-            request.setAttribute(alert_action, list_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        if (f_old.getUserId() != user.getId()) {
-            request.setAttribute(alert_message, "Bạn không có quyền chỉnh sửa phản hồi này.");
-            request.setAttribute(alert_action, list_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-        
-        List<FeedbackReplies> f_rep = FeedbackRepliesDAO.getRepliesByFeedbackId(feedbackId);
-        if (!f_rep.isEmpty()) {
-            request.setAttribute(alert_message, "Đã có phản hồi, không thể chỉnh sửa.");
-            request.setAttribute(alert_action, "feedback?id=" + feedbackId);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        if (f_old.getContent().equals(content) && f_old.getRating() == rating) {
-            request.setAttribute(error, "Không có thay đổi nào được thực hiện.");
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        if (Utils.CheckIfEmpty(content) || rating < 0 || rating > 10) {
-            request.setAttribute(error, "Vui lòng điền đầy đủ thông tin và đánh giá hợp lệ (0-10).");
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
-            return;
-        }
-
-        boolean success = FeedbackDAO.updateFeedback(feedbackId, content, rating);
-
-        if (success) {
-            request.setAttribute(alert_message, "Phản hồi đã được cập nhật thành công.");
-        } else {
-            request.setAttribute(alert_message, "Không thể cập nhật phản hồi. Vui lòng thử lại sau.");
         }
 
         request.setAttribute(alert_action, list_link);
@@ -421,103 +349,55 @@ public class FeedbackServlet extends HttpServlet {
         request.setAttribute("feedback_list", f_list_result);
         request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
     }
-
-    private void replyAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = (User) request.getSession().getAttribute("user");
-        if (user == null) {
-            request.setAttribute(alert_message, "You need to be logged in to send a reply.");
-            request.setAttribute(alert_action, login_link);
-            request.getRequestDispatcher("feedback_chat.jsp").forward(request, response);
-            return;
-        }
-
-        String content = request.getParameter("reply_content");
-        String feedbackIdParam = request.getParameter("id");
-        
-        if (feedbackIdParam == null || feedbackIdParam.isEmpty()) {
-            request.setAttribute("error", "Invalid feedback ID.");
-            response.sendRedirect("feedback?mode=list");
-            return;
-        }
-        
-        int feedbackId = Integer.parseInt(feedbackIdParam);
-        
-        // Validate content
-        if (content == null || content.trim().isEmpty()) {
-            request.setAttribute("error", "Reply content cannot be empty.");
-            // Redirect back to chat page with error
-            response.sendRedirect("feedback?action=chat&id=" + feedbackId + "&error=empty_content");
-            return;
-        }
-        
-        if (content.length() > 500) {
-            request.setAttribute("error", "Reply is too long. Maximum 500 characters allowed.");
-            response.sendRedirect("feedback?action=chat&id=" + feedbackId + "&error=too_long");
-            return;
-        }
-
-        // Check if feedback exists
-        Feedback feedback = FeedbackDAO.getSpecificFeedback(feedbackId);
-        if (feedback == null) {
-            request.setAttribute("error", "Feedback not found.");
-            response.sendRedirect("feedback?mode=list");
-            return;
-        }
-
-        // Create the reply
-        boolean success = FeedbackRepliesDAO.createFeedbackReply(feedbackId, user.getId(), content.trim());
-        
-        if (success) {
-            // Redirect back to chat page with success
-            response.sendRedirect("feedback?action=chat&id=" + feedbackId + "&success=reply_sent");
-        } else {
-            // Redirect back to chat page with error
-            response.sendRedirect("feedback?action=chat&id=" + feedbackId + "&error=send_failed");
-        }
-    }
-    
     //endregion
 
     //region DoGet Method
+// In FeedbackServlet.java
+
     private void listMode(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
-        boolean show_all = request.getParameter("show_all") != null && request.getParameter("show_all").equals("true");
 
         if (user == null) {
-            request.setAttribute(alert_message, "Bạn cần đăng nhập để xem phản hồi.");
-            request.setAttribute(alert_action, login_link);
-            request.getRequestDispatcher("feedback.jsp").forward(request, response);
+            response.sendRedirect(login_link);
             return;
         }
 
-        Integer[] show_all_banned_role = new Integer[]{3, 4};
-        boolean is_admin = !Arrays.asList(show_all_banned_role).contains(user.getRole().getId());
+        // Authorization check: Only non-customers can view the feedback list.
+        // Adjust role IDs as needed.
+        if (user.getRole().getId() == 4) { // Assuming 4 is Customer role
+            request.getSession().setAttribute(alert_message, "You do not have permission to view this page.");
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
-        if (!is_admin && show_all) {
-            request.setAttribute(alert_message, "Bạn không có quyền xem tất cả phản hồi.");
-            request.setAttribute(alert_action, list_link);
+        try {
+            // 1. Fetch all feedback entries
+            List<Feedback> allFeedback = FeedbackDAO.getAllFeedbacks();
+
+            // 2. Fetch all courses and coaches to easily look up their names
+            List<Course> allCourses = CourseDAO.getAllCourses();
+            List<Coach> allCoaches = CoachDAO.getAll();
+
+            // 3. Convert lists to Maps for efficient O(1) lookups in the JSP
+            // This prevents multiple database calls inside a loop
+            Map<Integer, Course> courseMap = allCourses.stream()
+                    .collect(Collectors.toMap(Course::getId, course -> course));
+
+            Map<Integer, Coach> coachMap = allCoaches.stream()
+                    .collect(Collectors.toMap(Coach::getId, coach -> coach));
+
+            // 4. Set all the necessary data as request attributes
+            request.setAttribute("feedbackList", allFeedback);
+            request.setAttribute("courseMap", courseMap);
+            request.setAttribute("coachMap", coachMap);
+
+            // 5. Forward to the new history/list page
             request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
-            return;
-        }
-        
-        List<Feedback> f_list_all = FeedbackDAO.getAllFeedbacks(); 
 
-        // Optimized: Load both datasets for admins, single dataset for non-admins
-        if (is_admin) {
-            // Load both personal and all feedback for admins
-            List<Feedback> personalFeedback = f_list_all.stream().filter(f -> f.getUserId() == user.getId()).toList();
-            List<Feedback> allFeedback = f_list_all;
-            
-            request.setAttribute("personal_feedback_list", personalFeedback);
-            request.setAttribute("all_feedback_list", allFeedback);
-            request.setAttribute("show_all", show_all);
-        } else {
-            // Load only personal feedback for non-admins
-            List<Feedback> f_list = f_list_all.stream().filter(f -> f.getUserId() == user.getId()).toList();;
-            request.setAttribute("feedback_list", f_list);
+        } catch (SQLException e) {
+            log("Database error while fetching feedback list and related data.", e);
+            throw new ServletException("Could not retrieve feedback data.", e);
         }
-
-        request.getRequestDispatcher("feedback_history.jsp").forward(request, response);
     }
 
     private boolean isSameSorting(FeedbackSorting f_sort, String feedBackType, Integer coachId, Integer courseId, String generalFeedbackType, String sortBy, boolean sortOrder) {

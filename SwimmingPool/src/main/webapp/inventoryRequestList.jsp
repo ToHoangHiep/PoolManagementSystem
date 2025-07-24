@@ -89,6 +89,7 @@
 </table>
 <div style="text-align: center;">
   <a href="inventory">Quay lại danh sách</a>
+  <a href="inventory?action=approvedRequestHistory">Lịch sử nhập</a>
 </div>
 
 </body>

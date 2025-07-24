@@ -1,17 +1,20 @@
 package dal;
 
 import model.Coach;
+import utils.DBConnect;
+
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CoachDAO {
-    private Connection conn;
+    private static Connection conn;
 
     public CoachDAO(Connection conn) {
         this.conn = conn;
     }
 
-    public List<Coach> getAll() throws SQLException {
+    public static List<Coach> getAll() throws SQLException {
         List<Coach> list = new ArrayList<>();
         String sql = "SELECT * FROM Coaches";
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -23,7 +26,7 @@ public class CoachDAO {
         return list;
     }
 
-    public Coach getById(int id) throws SQLException {
+    public static Coach getById(int id) throws SQLException {
         String sql = "SELECT * FROM Coaches WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -65,42 +68,16 @@ public class CoachDAO {
         }
     }
 
-    public void delete(int id) throws SQLException {
-        String sql = "DELETE FROM Coaches WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        }
-    }
-
     public boolean isCoachUsed(int coachId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Classes WHERE coach_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coachId);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
+            return rs.next() && rs.getInt(1) > 0;
         }
-        return false;
     }
 
-    public List<Coach> searchByName(String keyword) throws SQLException {
-        List<Coach> list = new ArrayList<>();
-        String sql = "SELECT * FROM Coaches WHERE full_name LIKE ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + keyword + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapCoach(rs));
-                }
-            }
-        }
-        return list;
-    }
-
-    // ✅ Hàm tái sử dụng ánh xạ dữ liệu từ ResultSet sang Coach
-    private Coach mapCoach(ResultSet rs) throws SQLException {
+    private static Coach mapCoach(ResultSet rs) throws SQLException {
         Coach c = new Coach();
         c.setId(rs.getInt("id"));
         c.setFullName(rs.getString("full_name"));

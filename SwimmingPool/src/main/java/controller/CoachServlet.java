@@ -35,18 +35,6 @@ public class CoachServlet extends HttpServlet {
                 request.setAttribute("coach", coach);
                 request.getRequestDispatcher("/coach-form.jsp").forward(request, response);
 
-            } else if ("delete".equals(action)) {
-                int id = Integer.parseInt(request.getParameter("id"));
-                if (dao.isCoachUsed(id)) {
-                    request.setAttribute("error", "Không thể xóa vì huấn luyện viên đang được phân công lớp học.");
-                    List<Coach> list = dao.getAll();
-                    request.setAttribute("coaches", list);
-                    request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
-                } else {
-                    dao.delete(id);
-                    response.sendRedirect("coach-list");
-                }
-
             } else {
                 List<Coach> list = dao.getAll();
                 request.setAttribute("coaches", list);
@@ -75,18 +63,14 @@ public class CoachServlet extends HttpServlet {
             String bio = request.getParameter("bio");
             boolean isActive = request.getParameter("active") != null;
 
-            // 👇 Lưu ảnh vào thư mục cố định trong thư mục webapp/images
             Part filePart = request.getPart("profilePicture");
             String fileName = null;
 
             if (filePart != null && filePart.getSize() > 0) {
                 fileName = System.currentTimeMillis() + "_" + filePart.getSubmittedFileName();
-
-                // Lưu vào thư mục webapp/images
                 String uploadDir = getServletContext().getRealPath("/images");
                 File dir = new File(uploadDir);
                 if (!dir.exists()) dir.mkdirs();
-
                 filePart.write(uploadDir + File.separator + fileName);
             }
 

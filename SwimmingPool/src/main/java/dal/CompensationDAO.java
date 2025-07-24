@@ -255,82 +255,6 @@ public class CompensationDAO {
         }
     }
 
-    // ===================== DAMAGE PHOTO METHODS =====================
-
-    /**
-     * Thêm ảnh thiệt hại
-     */
-    public static boolean addDamagePhoto(EquipmentDamagePhoto photo) {
-        String sql = "INSERT INTO Equipment_Damage_Photos (compensation_id, photo_path, photo_description) VALUES (?, ?, ?)";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setInt(1, photo.getCompensationId());
-            stmt.setString(2, photo.getPhotoPath());
-            stmt.setString(3, photo.getPhotoDescription());
-
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        photo.setPhotoId(rs.getInt(1));
-                    }
-                }
-                return true;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Lấy ảnh thiệt hại theo compensation ID
-     */
-    public static List<EquipmentDamagePhoto> getDamagePhotosByCompensationId(int compensationId) {
-        String sql = "SELECT * FROM Equipment_Damage_Photos WHERE compensation_id = ? ORDER BY uploaded_at DESC";
-        List<EquipmentDamagePhoto> photos = new ArrayList<>();
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, compensationId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    photos.add(mapResultSetToPhoto(rs));
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return photos;
-    }
-
-    /**
-     * Xóa ảnh thiệt hại
-     */
-    public static boolean deleteDamagePhoto(int photoId) {
-        String sql = "DELETE FROM Equipment_Damage_Photos WHERE photo_id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, photoId);
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
 
     // ===================== REPAIR METHODS =====================
 
@@ -452,20 +376,6 @@ public class CompensationDAO {
         return compensation;
     }
 
-    /**
-     * Helper method: Map ResultSet to EquipmentDamagePhoto
-     */
-    private static EquipmentDamagePhoto mapResultSetToPhoto(ResultSet rs) throws SQLException {
-        EquipmentDamagePhoto photo = new EquipmentDamagePhoto();
-
-        photo.setPhotoId(rs.getInt("photo_id"));
-        photo.setCompensationId(rs.getInt("compensation_id"));
-        photo.setPhotoPath(rs.getString("photo_path"));
-        photo.setPhotoDescription(rs.getString("photo_description"));
-        photo.setUploadedAt(rs.getTimestamp("uploaded_at"));
-
-        return photo;
-    }
 
     /**
      * Helper method: Map ResultSet to EquipmentRepair
@@ -496,5 +406,102 @@ public class CompensationDAO {
         repair.setCreatedAt(rs.getTimestamp("created_at"));
 
         return repair;
+    }
+    public static boolean createCompensationAndDeductInventory(
+            EquipmentCompensation compensation,
+            int inventoryId,
+            int quantity,
+            String compensationType) {
+
+        Connection conn = null;
+
+        try {
+            conn = DBConnect.getConnection();
+            conn.setAutoCommit(false); // Bắt đầu transaction
+
+            // 1. Tạo compensation record
+            String compensationSql = "INSERT INTO Equipment_Compensations (rental_id, compensation_type, damage_description, " +
+                    "import_price_total, compensation_rate, total_amount, paid_amount, " +
+                    "payment_status, can_repair) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (PreparedStatement stmt = conn.prepareStatement(compensationSql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setInt(1, compensation.getRentalId());
+                stmt.setString(2, compensation.getCompensationType());
+                stmt.setString(3, compensation.getDamageDescription());
+                stmt.setBigDecimal(4, compensation.getImportPriceTotal());
+                stmt.setBigDecimal(5, compensation.getCompensationRate());
+                stmt.setBigDecimal(6, compensation.getTotalAmount());
+                stmt.setBigDecimal(7, compensation.getPaidAmount());
+                stmt.setString(8, compensation.getPaymentStatus());
+
+                if (compensation.getCanRepair() != null) {
+                    stmt.setBoolean(9, compensation.getCanRepair());
+                } else {
+                    stmt.setNull(9, Types.BOOLEAN);
+                }
+
+                int affectedRows = stmt.executeUpdate();
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return false;
+                }
+
+                // Lấy compensation ID
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        compensation.setCompensationId(rs.getInt(1));
+                    }
+                }
+            }
+
+            // 2. Trừ thiết bị khỏi kho (chỉ với damaged và lost)
+            if ("damaged".equals(compensationType) || "lost".equals(compensationType)) {
+                String inventorySql = "UPDATE Inventory SET quantity = quantity - ? WHERE inventory_id = ?";
+
+                try (PreparedStatement stmt = conn.prepareStatement(inventorySql)) {
+                    stmt.setInt(1, quantity);
+                    stmt.setInt(2, inventoryId);
+
+                    int updated = stmt.executeUpdate();
+                    if (updated == 0) {
+                        System.err.println("Warning: Could not update inventory quantity for ID: " + inventoryId);
+                    }
+                }
+
+                System.out.println("Deducted " + quantity + " units from inventory ID: " + inventoryId +
+                        " (Reason: " + compensationType + ")");
+            }
+
+            // 3. Update rental status thành 'compensated'
+            String rentalSql = "UPDATE Equipment_Rentals SET status = 'compensated' WHERE rental_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(rentalSql)) {
+                stmt.setInt(1, compensation.getRentalId());
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+            System.out.println("Successfully created compensation and updated inventory");
+            return true;
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    e.addSuppressed(rollbackEx);
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    // Log warning
+                }
+            }
+        }
     }
 }
