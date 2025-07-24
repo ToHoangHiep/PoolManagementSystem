@@ -32,6 +32,11 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
+        if (action == null) {
+            listCourse(request, response);
+            return;
+        }
+
         switch (action) {
             case "create" -> createCourse(request, response);
             case "view" -> detailCourse(request, response);
@@ -45,7 +50,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void createCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_create.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -72,7 +77,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void editCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_edit.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -84,7 +89,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void deleteCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_delete.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -135,7 +140,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_form_details.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -161,12 +166,22 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormManage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
-            response.sendRedirect("home.jsp");
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(login_link);
             return;
         }
 
+        boolean isManagement = user.getRole().getId() != 3;
+
         List<CourseForm> courseForms = CourseFormDAO.getAll();
+
+        if (!isManagement) {
+            courseForms = courseForms.stream()
+                    .filter(form -> form.getUser_id() == user.getId())
+                    .toList();
+        }
 
         request.setAttribute("courseForms", courseForms);
         request.getRequestDispatcher("course_form_manage.jsp").forward(request, response);
@@ -204,7 +219,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void createCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_create.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -227,7 +242,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void editCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_edit.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -260,7 +275,7 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void deleteCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (!isUserAllowed(request, response, "course_delete.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }
@@ -274,7 +289,7 @@ public class CourseServlet extends HttpServlet {
 
     private void confirmForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Authorization Check
-        if (isUserAllowed(request, response, "course_create.jsp")) {
+        if (isUserAllowed(request, response, "course_form_details.jsp")) {
             response.sendRedirect("home.jsp");
             return;
         }

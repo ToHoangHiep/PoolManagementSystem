@@ -82,7 +82,20 @@
                         <div class="alert alert-info">
                             Bạn đang đăng ký với tư cách: <strong><%= user.getFullName() %></strong> (<%= user.getEmail() %>)
                         </div>
+
                         <% } else { %>
+                        <%-- BANNER MỚI ĐƯỢC THÊM VÀO ĐÂY --%>
+                        <div class="alert alert-light border-start border-4 border-info mb-4">
+                            <p class="mb-1 small">
+                                <i class="fas fa-info-circle me-2 text-info"></i>
+                                Đã có tài khoản? <a href="login" class="fw-bold text-decoration-none">Đăng nhập</a> để điền thông tin nhanh hơn.
+                            </p>
+                            <p class="mb-0 small">
+                                <i class="fas fa-user-plus me-2 text-info"></i>
+                                Chưa có tài khoản? <a href="register" class="fw-bold text-decoration-none">Đăng ký ngay</a> để xem lại lịch sử đăng ký của bạn.
+                            </p>
+                        </div>
+
                         <h5 class="mb-3">Thông tin của bạn (Khách)</h5>
                         <div class="row">
                             <div class="col-md-6 mb-3">
