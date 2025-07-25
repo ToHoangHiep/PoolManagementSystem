@@ -30,6 +30,7 @@
         <a href="#services">Dịch vụ</a>
         <a href="#how-to-register">Bài viết</a>
         <a href="blogs">Đăng kí khóa học</a>
+
     </div>
 
     <div class="auth">
@@ -41,6 +42,7 @@
             <i class="fas fa-user-circle user-icon"></i>
             <div class="dropdown-menu">
                 <a href="userprofile">Hồ sơ của tôi</a>
+                <a href="course?action=list_form">Lịch sử Đăng kí khóa học</a>
                 <a href="change-password">Đổi mật khẩu</a> <%-- Giả định có trang đổi mật khẩu --%>
                 <form action="logout" method="post" style="display:inline-block;">
                     <button type="submit">Đăng xuất</button>

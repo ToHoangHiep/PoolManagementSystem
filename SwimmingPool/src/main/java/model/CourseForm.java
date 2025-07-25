@@ -105,7 +105,7 @@ public class CourseForm {
         this.has_processed = has_processed;
     }
 
-    private String getRejected_reason() {
+    public String getRejected_reason() {
         return rejected_reason;
     }
 

@@ -187,6 +187,7 @@ CREATE TABLE Course_Form(
     course_id INT,
     request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     has_processed int DEFAULT 0,
+    rejected_reason varchar(100),
     FOREIGN KEY (user_id) REFERENCES Users(id),
     FOREIGN KEY (coach_id) REFERENCES Coaches(id),
     FOREIGN KEY (course_id) REFERENCES Courses(id)
@@ -435,11 +436,3 @@ INSERT INTO TicketType (type_name, price) VALUES
 INSERT INTO StaffInitialSetup (user_id, is_setup_complete) VALUES
 (3, TRUE),
 (5, FALSE);
-
-CREATE TABLE Inventory_Receive_Pending (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  request_id INT,
-  status VARCHAR(20) DEFAULT 'waiting', -- waiting, completed
-  received_at DATETIME NULL,
-  FOREIGN KEY (request_id) REFERENCES Inventory_Request(request_id)
-);

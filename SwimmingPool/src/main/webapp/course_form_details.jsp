@@ -147,6 +147,12 @@
                                 </span>
                             </p>
                         </div>
+                        <% if (form.getHas_processed() == 2) { %>
+                        <div>
+                            <p class="details-label mb-1">Lý do</p>
+                            <p class="details-value fw-bold mb-0"><%= form.getRejected_reason() %></p>
+                        </div>
+                        <% } %>
                     </div>
 
                     <div class="row">

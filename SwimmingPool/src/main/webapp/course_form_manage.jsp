@@ -68,12 +68,16 @@
             <h2 class="mb-0 h4">
                 <i class="fas fa-tasks me-2 text-primary"></i>Quản lý Đơn đăng ký Khóa học
             </h2>
-            <%if (adminUser.getRole().getId() == 4) {%>
-                <a href="blogs" class="btn btn-sm btn-outline-secondary">
+            <%if (adminUser.getRole().getId() == 1 || adminUser.getRole().getId() == 2) {%>
+                <a href="admin_dashboard.jsp" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại Danh mục
+                </a>
+            <%} else if (adminUser.getRole().getId() == 5) {%>
+                <a href="staff_dashboard.jsp" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i> Quay lại Danh mục
                 </a>
             <%} else { %>
-                <a href="admin_dashboard.jsp" class="btn btn-sm btn-outline-secondary">
+                <a href="blogs" class="btn btn-sm btn-outline-secondary">
                     <i class="fas fa-arrow-left me-1"></i> Quay lại quản lí
                 </a>
             <%}%>
@@ -122,8 +126,10 @@
                         <td><%= CourseDAO.getCourseById(form.getCourse_id()).getName() %></td>
                         <td><%= sdf.format(form.getRequest_date()) %></td>
                         <td class="text-center">
-                            <% if (form.isHas_processed()) { %>
+                            <% if (form.getHas_processed() == 1) { %>
                             <span class="badge bg-success">Đã xác nhận</span>
+                            <% } else if (form.getHas_processed() == 2) { %>
+                                <span class="badge bg-danger">Đã bị Từ chối</span>
                             <% } else { %>
                             <span class="badge bg-warning text-dark">Chờ xử lý</span>
                             <% } %>

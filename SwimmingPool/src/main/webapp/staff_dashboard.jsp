@@ -178,6 +178,7 @@
 
         <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>
         <a href="feedback?mode=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>
+        <a href="course?action=list_form"><i class="fa-brands fa-discourse"></i> Lịch sử Đăng kí khóa học</a>
     </div>
 
     <!-- Background bên phải -->
