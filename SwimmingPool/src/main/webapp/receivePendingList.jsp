@@ -72,5 +72,8 @@
 <c:if test="${not empty message}">
   <p style="color: green">${message}</p>
 </c:if>
+<div style="text-align: center;">
+  <a href="staff_dashboard.jsp">Quay lại </a> 
+</div>
 </body>
 </html>
