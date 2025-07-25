@@ -147,7 +147,8 @@ public class TicketDAO {
 
     public List<Ticket> getTicketsByIds(List<Integer> ids) throws SQLException {
         if (ids.isEmpty()) return new ArrayList<>();
-
+        System.out.println("Debug: Calling getTicketsByIds with IDs: " + ids);
+        if (ids.isEmpty()) return new ArrayList<>();
         String sql = "SELECT t.*, tt.price AS ticket_price, tt.type_name AS ticket_type_name " +
                 "FROM Ticket t " +
                 "LEFT JOIN TicketType tt ON t.ticket_type_id = tt.id " +

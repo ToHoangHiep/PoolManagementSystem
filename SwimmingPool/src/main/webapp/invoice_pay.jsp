@@ -2,11 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice - Swimming Pool</title>
+    <title>Hóa Đơn - Hồ Bơi</title>
     <style>
         * {
             margin: 0;
@@ -213,32 +213,32 @@
 </head>
 <body>
 <div class="invoice-container">
-    <div class="watermark">INVOICE</div>
+    <div class="watermark">HÓA ĐƠN</div>
 
     <!-- Invoice Header -->
     <div class="invoice-header">
-        <h1>🏊 SWIMMING POOL</h1>
-        <div class="invoice-number">Invoice No: ${invoiceNumber}</div>
-        <div class="invoice-date">Date: <fmt:formatDate value="<%=new java.util.Date()%>" pattern="dd/MM/yyyy HH:mm"/></div>
+        <h1>🏊 HỒ BƠI</h1>
+        <div class="invoice-number">Số hóa đơn: ${invoiceNumber}</div>
+        <div class="invoice-date">Ngày: <fmt:formatDate value="<%=new java.util.Date()%>" pattern="dd/MM/yyyy HH:mm"/></div>
     </div>
 
     <!-- Invoice Body -->
     <div class="invoice-body">
         <!-- Success Message -->
         <div class="success-box">
-            <strong>✅ Payment Successful!</strong><br>
-            Please review the details below.
+            <strong>✅ Thanh toán thành công!</strong><br>
+            Vui lòng xem lại các chi tiết bên dưới.
         </div>
 
-        <!-- Customer Information for ticket-->
+        <!-- Customer Information -->
         <div class="section">
-            <h3 class="section-title">Customer Information</h3>
+            <h3 class="section-title">Thông tin khách hàng</h3>
             <div class="info-grid">
                 <c:choose>
                     <c:when test="${type == 'ticket'}">
                         <!-- For Ticket: Get from first ticket -->
                         <div class="info-item">
-                            <div class="info-label">Customer Name</div>
+                            <div class="info-label">Tên khách hàng</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty tickets and not empty tickets[0].customerName}">
@@ -251,7 +251,7 @@
                             </div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">ID Card</div>
+                            <div class="info-label">CMND/CCCD</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty tickets and not empty tickets[0].customerIdCard}">
@@ -268,7 +268,7 @@
                     <c:when test="${type == 'equipment_rental'}">
                         <!-- For Rental: Get from first rental -->
                         <div class="info-item">
-                            <div class="info-label">Customer Name</div>
+                            <div class="info-label">Tên khách hàng</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty rentals and not empty rentals[0].customerName}">
@@ -281,7 +281,7 @@
                             </div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">ID Card</div>
+                            <div class="info-label">CMND/CCCD</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty rentals and not empty rentals[0].customerIdCard}">
@@ -298,7 +298,7 @@
                     <c:when test="${type == 'equipment_buy'}">
                         <!-- For Sale: Get from first sale (no ID Card available) -->
                         <div class="info-item">
-                            <div class="info-label">Customer Name</div>
+                            <div class="info-label">Tên khách hàng</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty sales and not empty sales[0].customerName}">
@@ -311,15 +311,15 @@
                             </div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">ID Card</div>
-                            <div class="info-value">N/A</div> <!-- Equipment Sale không có ID Card -->
+                            <div class="info-label">CMND/CCCD</div>
+                            <div class="info-value">Không có</div> <!-- Equipment Sale không có ID Card -->
                         </div>
                     </c:when>
 
                     <c:when test="${type == 'mixed'}">
                         <!-- For Mixed: Priority order - ticket > rental > sale -->
                         <div class="info-item">
-                            <div class="info-label">Customer Name</div>
+                            <div class="info-label">Tên khách hàng</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty tickets and not empty tickets[0].customerName}">
@@ -338,7 +338,7 @@
                             </div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">ID Card</div>
+                            <div class="info-label">CMND/CCCD</div>
                             <div class="info-value">
                                 <c:choose>
                                     <c:when test="${not empty tickets and not empty tickets[0].customerIdCard}">
@@ -348,7 +348,7 @@
                                         ${rentals[0].customerIdCard}
                                     </c:when>
                                     <c:otherwise>
-                                        N/A
+                                        Không có
                                     </c:otherwise>
                                 </c:choose>
                             </div>
@@ -358,11 +358,11 @@
                     <c:otherwise>
                         <!-- Fallback: Use generic customer info -->
                         <div class="info-item">
-                            <div class="info-label">Customer Name</div>
+                            <div class="info-label">Tên khách hàng</div>
                             <div class="info-value">${customerName}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">ID Card</div>
+                            <div class="info-label">CMND/CCCD</div>
                             <div class="info-value">${customerIdCard}</div>
                         </div>
                     </c:otherwise>
@@ -375,14 +375,14 @@
             <c:when test="${type == 'ticket'}">
                 <!-- Ticket Details -->
                 <div class="section">
-                    <h3 class="section-title">Ticket Details</h3>
+                    <h3 class="section-title">Chi tiết vé</h3>
                     <table class="calculation-table">
                         <thead>
                         <tr>
-                            <th>Description</th>
-                            <th class="text-right">Quantity</th>
-                            <th class="text-right">Unit Price</th>
-                            <th class="text-right">Amount</th>
+                            <th>Mô tả</th>
+                            <th class="text-right">Số lượng</th>
+                            <th class="text-right">Đơn giá</th>
+                            <th class="text-right">Thành tiền</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -395,7 +395,7 @@
                             </tr>
                         </c:forEach>
                         <tr class="total-row">
-                            <td colspan="3">Total Amount</td>
+                            <td colspan="3">Tổng cộng</td>
                             <td class="text-right"><fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/></td>
                         </tr>
                         </tbody>
@@ -406,14 +406,14 @@
             <c:when test="${type == 'equipment_rental'}">
                 <!-- Rental Details -->
                 <div class="section">
-                    <h3 class="section-title">Rental Details</h3>
+                    <h3 class="section-title">Chi tiết thuê dụng cụ</h3>
                     <table class="calculation-table">
                         <thead>
                         <tr>
-                            <th>Item Name</th>
-                            <th class="text-right">Quantity</th>
-                            <th class="text-right">Rent Price</th>
-                            <th class="text-right">Amount</th>
+                            <th>Tên dụng cụ</th>
+                            <th class="text-right">Số lượng</th>
+                            <th class="text-right">Giá thuê</th>
+                            <th class="text-right">Thành tiền</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -426,7 +426,7 @@
                             </tr>
                         </c:forEach>
                         <tr class="total-row">
-                            <td colspan="3">Total Amount</td>
+                            <td colspan="3">Tổng cộng</td>
                             <td class="text-right"><fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/></td>
                         </tr>
                         </tbody>
@@ -437,18 +437,18 @@
             <c:when test="${type == 'equipment_buy'}">
                 <!-- Sale Details -->
                 <div class="section">
-                    <h3 class="section-title">Sale Details</h3>
+                    <h3 class="section-title">Chi tiết mua dụng cụ</h3>
                     <table class="calculation-table">
                         <thead>
                         <tr>
-                            <th>Item Name</th>
-                            <th class="text-right">Quantity</th>
-                            <th class="text-right">Sale Price</th> <!-- Sửa từ Rent Price -->
-                            <th class="text-right">Amount</th>
+                            <th>Tên dụng cụ</th>
+                            <th class="text-right">Số lượng</th>
+                            <th class="text-right">Giá bán</th>
+                            <th class="text-right">Thành tiền</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <c:forEach var="sale" items="${sales}"> <!-- sales từ servlet setAttribute("sales", EquipmentDAO.getSalesByIds(ids)) -->
+                        <c:forEach var="sale" items="${sales}">
                             <tr>
                                 <td>${sale.itemName}</td>
                                 <td class="text-right">${sale.quantity}</td>
@@ -457,54 +457,145 @@
                             </tr>
                         </c:forEach>
                         <tr class="total-row">
-                            <td colspan="3">Total Amount</td>
+                            <td colspan="3">Tổng cộng</td>
                             <td class="text-right"><fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </c:when>
+
+            <c:when test="${type == 'mixed'}">
+                <!-- Mixed Details: Hiển thị từng phần nếu có -->
+                <div class="section">
+                    <h3 class="section-title">Chi tiết hóa đơn hỗn hợp</h3>
+
+                    <!-- Ticket Details nếu có -->
+                    <c:if test="${not empty tickets}">
+                        <h4 class="section-title">Các loại vé</h4>
+                        <table class="calculation-table">
+                            <thead>
+                            <tr>
+                                <th>Mô tả</th>
+                                <th class="text-right">Số lượng</th>
+                                <th class="text-right">Đơn giá</th>
+                                <th class="text-right">Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="ticket" items="${tickets}">
+                                <tr>
+                                    <td>${ticket.ticketTypeName}</td>
+                                    <td class="text-right">${ticket.quantity}</td>
+                                    <td class="text-right"><fmt:formatNumber value="${ticket.price}" type="currency" currencyCode="VND"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${ticket.total}" type="currency" currencyCode="VND"/></td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                    <!-- Rental Details nếu có -->
+                    <c:if test="${not empty rentals}">
+                        <h4 class="section-title">Dụng cụ thuê</h4>
+                        <table class="calculation-table">
+                            <thead>
+                            <tr>
+                                <th>Tên dụng cụ</th>
+                                <th class="text-right">Số lượng</th>
+                                <th class="text-right">Giá thuê</th>
+                                <th class="text-right">Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="rental" items="${rentals}">
+                                <tr>
+                                    <td>${rental.itemName}</td>
+                                    <td class="text-right">${rental.quantity}</td>
+                                    <td class="text-right"><fmt:formatNumber value="${rental.rentPrice}" type="currency" currencyCode="VND"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${rental.totalAmount}" type="currency" currencyCode="VND"/></td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                    <!-- Sale Details nếu có -->
+                    <c:if test="${not empty sales}">
+                        <h4 class="section-title">Dụng cụ mua</h4>
+                        <table class="calculation-table">
+                            <thead>
+                            <tr>
+                                <th>Tên dụng cụ</th>
+                                <th class="text-right">Số lượng</th>
+                                <th class="text-right">Giá bán</th>
+                                <th class="text-right">Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="sale" items="${sales}">
+                                <tr>
+                                    <td>${sale.itemName}</td>
+                                    <td class="text-right">${sale.quantity}</td>
+                                    <td class="text-right"><fmt:formatNumber value="${sale.salePrice}" type="currency" currencyCode="VND"/></td>
+                                    <td class="text-right"><fmt:formatNumber value="${sale.totalAmount}" type="currency" currencyCode="VND"/></td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                    <!-- Total Amount cho mixed -->
+                    <table class="calculation-table">
+                        <tr class="total-row">
+                            <td colspan="3">Tổng cộng</td>
+                            <td class="text-right"><fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </c:when>
+
             <c:otherwise>
                 <!-- Unknown type -->
                 <div class="section">
-                    <p class="error">Unknown invoice type: ${type}. Please contact support.</p>
+                    <p class="error">Loại hóa đơn không xác định: ${type}. Vui lòng liên hệ hỗ trợ.</p>
                 </div>
             </c:otherwise>
         </c:choose>
 
         <!-- Payment Information -->
         <div class="section">
-            <h3 class="section-title">Payment Information</h3>
+            <h3 class="section-title">Thông tin thanh toán</h3>
             <div class="alert-box">
-                <strong>⚠️ Payment Completed</strong><br>
-                Amount: <fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/><br>
+                <strong>⚠️ Thanh toán hoàn tất</strong><br>
+                Số tiền: <fmt:formatNumber value="${totalAmount}" type="currency" currencyCode="VND"/><br>
             </div>
         </div>
 
         <!-- Footer Note -->
         <div class="footer-note">
-            <p>This is a computer-generated invoice and requires no signature.</p>
-            <p>For inquiries, please contact: +84 123 456 789 | support@swimmingpool.com</p>
-            <p>Thank you for your cooperation!</p>
+            <p>Đây là hóa đơn được tạo bởi máy tính và không cần chữ ký.</p>
+            <p>Để được hỗ trợ, vui lòng liên hệ: +84 123 456 789 | support@swimmingpool.com</p>
+            <p>Cảm ơn quý khách đã hợp tác!</p>
         </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="action-buttons">
         <button class="btn btn-primary" onclick="window.print()">
-            ✅ Confirm and Print Invoice
+            ✅ Xác nhận và In hóa đơn
         </button>
-        <a href="${backUrl}" class="btn btn-secondary">⬅️ Back Up</a> <!-- Xóa </a> dư -->
+        <a href="${backUrl}" class="btn btn-secondary">⬅️ Quay lại</a>
     </div>
 </div>
 
 <!-- Print-only footer -->
 <div class="print-only" style="margin-top: 50px; text-align: center;">
     <p>-----------------------------------</p>
-    <p>Customer Signature</p>
+    <p>Chữ ký khách hàng</p>
     <br><br>
     <p>-----------------------------------</p>
-    <p>Staff Signature</p>
+    <p>Chữ ký nhân viên</p>
 </div>
 
 <script>
@@ -516,11 +607,9 @@
     }, 10000);
     window.addEventListener('afterprint', function () {
         const backUrl = '${backUrl}';
-        console.log('Debug: Redirecting after print to ' + backUrl);  // Thêm debug
         if (backUrl && backUrl !== '') {
             window.location.href = backUrl;
         } else {
-            console.log('Debug: backUrl invalid, fallback to home');
             window.location.href = '/home';  // Fallback
         }
     });

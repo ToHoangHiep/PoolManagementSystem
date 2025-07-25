@@ -27,28 +27,8 @@ public class InvoiceServlet extends HttpServlet {
         String type = request.getParameter("type");
         String idsStr = request.getParameter("ids");
 
-
-
         if (idsStr == null || idsStr.isEmpty()) {
-            System.out.println("[ERROR] Thiếu tham số ids");
             request.setAttribute("error", "IDs are missing");
-            request.getRequestDispatcher("error.jsp").forward(request, response);
-            return;
-        }
-
-        String[] idsArr = idsStr.split(",");
-        List<Integer> ids = new ArrayList<>();
-        for (String id : idsArr) {
-            try {
-                ids.add(Integer.parseInt(id.trim()));
-            } catch (NumberFormatException e) {
-                System.out.println("[WARN] Bỏ qua ID không hợp lệ: " + id);
-            }
-        }
-
-
-        if (ids.isEmpty()) {
-            request.setAttribute("error", "Invalid IDs: " + idsStr);
             request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
@@ -57,21 +37,35 @@ public class InvoiceServlet extends HttpServlet {
         String customerName = "Unknown";
         String customerIdCard = "Unknown";
 
-
         if ("ticket".equals(type)) {
             TicketDAO ticketDAO = new TicketDAO();
-            List<Ticket> tickets;
+            List<Integer> ids = new ArrayList<>();
+            for (String id : idsStr.split(",")) {
+                try {
+                    ids.add(Integer.parseInt(id.trim()));
+                } catch (NumberFormatException e) {
+                    System.out.println("[WARN Invoice] Bỏ qua ID không hợp lệ: " + id + " - Lỗi: " + e.getMessage());
+                }
+            }
 
+            if (ids.isEmpty()) {
+                request.setAttribute("error", "Invalid IDs: " + idsStr);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+
+            List<Ticket> tickets;
             try {
                 tickets = ticketDAO.getTicketsByIds(ids);
             } catch (SQLException e) {
+                System.out.println("[ERROR Invoice] Lỗi khi lấy ticket: " + e.getMessage());
                 request.setAttribute("error", "Lỗi khi tải thông tin vé: " + e.getMessage());
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
             }
 
             if (tickets == null || tickets.isEmpty()) {
-                System.out.println("[ERROR] Không tìm thấy vé nào với IDs: " + idsStr);
+                System.out.println("[ERROR Invoice] Không tìm thấy vé nào với IDs: " + idsStr);
                 request.setAttribute("error", "Không tìm thấy vé với IDs: " + idsStr);
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
@@ -90,11 +84,26 @@ public class InvoiceServlet extends HttpServlet {
 
         } else if ("equipment_rental".equals(type)) {
             EquipmentDAO equipmentDAO = new EquipmentDAO();
-            List<EquipmentRental> rentals;
+            List<Integer> ids = new ArrayList<>();
+            for (String id : idsStr.split(",")) {
+                try {
+                    ids.add(Integer.parseInt(id.trim()));
+                } catch (NumberFormatException e) {
+                    System.out.println("[WARN Invoice] Bỏ qua ID không hợp lệ: " + id + " - Lỗi: " + e.getMessage());
+                }
+            }
 
+            if (ids.isEmpty()) {
+                request.setAttribute("error", "Invalid IDs: " + idsStr);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+
+            List<EquipmentRental> rentals;
             try {
                 rentals = equipmentDAO.getRentalsByIds(ids);
             } catch (SQLException e) {
+                System.out.println("[ERROR Invoice] Lỗi khi lấy rental: " + e.getMessage());
                 request.setAttribute("error", "Lỗi khi tải thông tin thuê: " + e.getMessage());
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
@@ -118,12 +127,26 @@ public class InvoiceServlet extends HttpServlet {
 
         } else if ("equipment_buy".equals(type)) {
             EquipmentDAO equipmentDAO = new EquipmentDAO();
-            List<EquipmentSale> sales;
+            List<Integer> ids = new ArrayList<>();
+            for (String id : idsStr.split(",")) {
+                try {
+                    ids.add(Integer.parseInt(id.trim()));
+                } catch (NumberFormatException e) {
+                    System.out.println("[WARN Invoice] Bỏ qua ID không hợp lệ: " + id + " - Lỗi: " + e.getMessage());
+                }
+            }
 
+            if (ids.isEmpty()) {
+                request.setAttribute("error", "Invalid IDs: " + idsStr);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+
+            List<EquipmentSale> sales;
             try {
                 sales = equipmentDAO.getSalesByIds(ids);
             } catch (SQLException e) {
-                System.out.println("[ERROR] Lỗi khi lấy thông tin mua: " + e.getMessage());
+                System.out.println("[ERROR Invoice] Lỗi khi lấy sale: " + e.getMessage());
                 request.setAttribute("error", "Lỗi khi tải thông tin mua: " + e.getMessage());
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
@@ -140,7 +163,6 @@ public class InvoiceServlet extends HttpServlet {
             }
 
             customerName = sales.get(0).getCustomerName();
-            // customerIdCard không có
 
             request.setAttribute("sales", sales);
             request.setAttribute("type", type);
@@ -149,35 +171,67 @@ public class InvoiceServlet extends HttpServlet {
             TicketDAO ticketDAO = new TicketDAO();
             EquipmentDAO equipmentDAO = new EquipmentDAO();
 
-            List<Ticket> tickets;
-            List<EquipmentRental> rentals;
-            List<EquipmentSale> sales;
+            List<Integer> ticketIds = new ArrayList<>();
+            List<Integer> rentalIds = new ArrayList<>();
+            List<Integer> saleIds = new ArrayList<>();
+
+            // Parse ids với prefix
+            for (String idStr : idsStr.split(",")) {
+                try {
+                    if (idStr.startsWith("T")) {
+                        ticketIds.add(Integer.parseInt(idStr.substring(1).trim()));
+                    } else if (idStr.startsWith("R")) {
+                        rentalIds.add(Integer.parseInt(idStr.substring(1).trim()));
+                    } else if (idStr.startsWith("S")) {
+                        saleIds.add(Integer.parseInt(idStr.substring(1).trim()));
+                    } else {
+                        System.out.println("[WARN Invoice Mixed] Bỏ qua ID không có prefix: " + idStr);
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("[WARN Invoice Mixed] Bỏ qua ID không hợp lệ: " + idStr + " - Lỗi: " + e.getMessage());
+                }
+            }
+
+            // Kiểm tra nếu tất cả lists đều rỗng
+            if (ticketIds.isEmpty() && rentalIds.isEmpty() && saleIds.isEmpty()) {
+                request.setAttribute("error", "Invalid IDs: " + idsStr);
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
+
+            List<Ticket> tickets = new ArrayList<>();
+            List<EquipmentRental> rentals = new ArrayList<>();
+            List<EquipmentSale> sales = new ArrayList<>();
 
             try {
-                tickets = ticketDAO.getTicketsByIds(ids);
-                rentals = equipmentDAO.getRentalsByIds(ids);
-                sales = equipmentDAO.getSalesByIds(ids);
-
-
+                if (!ticketIds.isEmpty()) {
+                    tickets = ticketDAO.getTicketsByIds(ticketIds);
+                }
+                if (!rentalIds.isEmpty()) {
+                    rentals = equipmentDAO.getRentalsByIds(rentalIds);
+                }
+                if (!saleIds.isEmpty()) {
+                    sales = equipmentDAO.getSalesByIds(saleIds);
+                }
             } catch (SQLException e) {
-                System.out.println("[ERROR] Lỗi khi lấy thông tin mixed: " + e.getMessage());
+                System.out.println("[ERROR Invoice Mixed] Lỗi khi lấy thông tin mixed: " + e.getMessage());
                 request.setAttribute("error", "Lỗi khi tải thông tin mixed: " + e.getMessage());
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
             }
 
+            // Tính total
             for (Ticket ticket : tickets) {
                 totalAmount = totalAmount.add(ticket.getTotal() != null ? ticket.getTotal() : BigDecimal.ZERO);
             }
-
             for (EquipmentRental rental : rentals) {
                 totalAmount = totalAmount.add(BigDecimal.valueOf(rental.getTotalAmount()));
             }
-
             for (EquipmentSale sale : sales) {
                 totalAmount = totalAmount.add(BigDecimal.valueOf(sale.getTotalAmount()));
             }
 
+            // Lấy customer info từ item đầu tiên có info
             if (!tickets.isEmpty()) {
                 customerName = tickets.get(0).getCustomerName();
                 customerIdCard = tickets.get(0).getCustomerIdCard();
@@ -186,7 +240,6 @@ public class InvoiceServlet extends HttpServlet {
                 customerIdCard = rentals.get(0).getCustomerIdCard();
             } else if (!sales.isEmpty()) {
                 customerName = sales.get(0).getCustomerName();
-                // customerIdCard không có
             }
 
             request.setAttribute("tickets", tickets);
@@ -194,25 +247,20 @@ public class InvoiceServlet extends HttpServlet {
             request.setAttribute("sales", sales);
             request.setAttribute("type", type);
         } else {
-            System.out.println("[ERROR] Loại invoice không hợp lệ: " + type);
             request.setAttribute("error", "Invalid invoice type: " + type);
             request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
         }
 
-        // Thiết lập URL quay lại theo type
-        String backUrl = request.getContextPath() + "/home";  // Default
-
+        String backUrl = request.getContextPath() + "/staff_dashboard.jsp";
         if ("ticket".equals(type)) {
-            backUrl = request.getContextPath() + "/purchase";  // Giữ nguyên nếu /purchase là servlet load data cho ticket
-            // Nếu ticketpurchase.jsp cần servlet, đổi thành "/ticket-servlet" hoặc tương tự
+            backUrl = request.getContextPath() + "/purchase";
         } else if ("equipment_rental".equals(type)) {
-            backUrl = request.getContextPath() + "/equipment?mode=rental";  // Gọi servlet để load data rồi forward rental.jsp
+            backUrl = request.getContextPath() + "/equipment?mode=rental";
         } else if ("equipment_buy".equals(type)) {
-            backUrl = request.getContextPath() + "/equipment?mode=buy";  // Gọi servlet để load data rồi forward buy.jsp
+            backUrl = request.getContextPath() + "/equipment?mode=buy";
         } else if ("mixed".equals(type)) {
-            backUrl = request.getContextPath() + "/home";
-
+            backUrl = request.getContextPath() + "/staff_dashboard.jsp";
         }
         request.setAttribute("backUrl", backUrl);
 
@@ -221,7 +269,7 @@ public class InvoiceServlet extends HttpServlet {
         request.setAttribute("customerIdCard", customerIdCard);
         request.setAttribute("invoiceNumber", "INV-" + idsStr.replace(",", "-"));
 
-        System.out.println("[DEBUG] Kết thúc xử lý, forward tới invoice_pay.jsp");
+
         request.getRequestDispatcher("invoice_pay.jsp").forward(request, response);
     }
 }

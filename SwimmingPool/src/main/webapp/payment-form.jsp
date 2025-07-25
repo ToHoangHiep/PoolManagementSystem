@@ -153,18 +153,24 @@
 <div class="bg-cover"></div>
 
 <div class="navbar">
-  <div class="logo">SwimmingPool</div>
+  <div class="logo">Hồ Bơi</div>
   <div class="nav-links">
-    <a href="home.jsp">Home</a>
-    <a href="about">About Us</a>
-    <a href="home.jsp">Services</a>
-    <a href="gallery">Gallery</a>
-    <a href="contact">Contact</a>
+    <a href="staff_dashboard.jsp" class="nav-link">Trang chủ</a>
+    <a href="purchase" class="nav-link">🎟️ Vé bơi</a>
+    <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
+      📦 Thuê thiết bị
+    </a>
+    <a href="equipment?mode=buy" class="nav-link ${empty currentFilter ? 'active' : ''}">
+      🛍️ Mua thiết bị
+    </a>
+    <a href="cart" class="nav-link">
+      🛒 Giỏ hàng <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
+    </a>
   </div>
   <div class="auth">
-    <span>Hello, <%= user.getFullName() %>!</span>
+    <span>Xin chào, <%= user.getFullName() %>!</span>
     <form action="logout" method="post">
-      <input type="submit" value="Logout">
+      <input type="submit" value="Đăng xuất">
     </form>
   </div>
 </div>
@@ -172,19 +178,19 @@
 <div style="height: 80px;"></div>
 
 <div class="hero">
-  <h1>Confirm Payment</h1>
+  <h1>Xác nhận thanh toán</h1>
 </div>
 
 <div class="container">
-  <h2>Cart Summary</h2>
+  <h2>Thông tin đơn hàng</h2>
 
   <c:if test="${cart != null && !cart.isEmpty()}">
     <table>
       <tr>
-        <th>Type</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Subtotal</th>
+        <th>Loại sản phẩm</th>
+        <th>Số lượng</th>
+        <th>Đơn giá</th>
+        <th>Thành tiền</th>
       </tr>
       <c:forEach var="item" items="${cart.items}">
         <tr>
@@ -195,7 +201,7 @@
         </tr>
       </c:forEach>
       <tr>
-        <td colspan="3"><strong>Total</strong></td>
+        <td colspan="3"><strong>Tổng cộng</strong></td>
         <td><fmt:formatNumber value="${cart.total}" type="currency" currencyCode="VND"/></td>
       </tr>
     </table>
@@ -204,30 +210,38 @@
       <input type="hidden" name="action" value="confirm">
       <input type="hidden" name="for" value="ticket">
       <table>
-        <tr><th>Amount</th><td><input type="text" name="amount" value="${cart.total}" readonly></td></tr>
-        <tr><th>Notes</th><td><textarea name="notes"></textarea></td></tr>
-        <tr><td colspan="2" style="text-align:right;"><button type="submit" class="btn">Confirm Payment</button></td></tr>
+        <tr>
+          <th>Số tiền</th>
+          <td><input type="text" name="amount" value="${cart.total}" readonly></td>
+        </tr>
+        <tr>
+          <th>Ghi chú</th>
+          <td><textarea name="notes" placeholder="Thêm ghi chú (nếu có)"></textarea></td>
+        </tr>
+        <tr>
+          <td colspan="2" style="text-align:right;">
+            <button type="submit" class="btn">Xác nhận thanh toán</button>
+          </td>
+        </tr>
       </table>
     </form>
   </c:if>
 
   <c:if test="${cart == null || cart.isEmpty()}">
-    <p>Giỏ hàng rỗng. <a href="ticketPurchase.jsp">Tiếp tục mua vé</a></p>
+    <p>Giỏ hàng của bạn đang trống. <a href="staff_dashboard.jsp">Quay trở về Home</a></p>
   </c:if>
 
   <div class="message">
-    <c:if test="${error != null}"><p class="error">${error}</p></c:if>
+    <c:if test="${error != null}">
+      <p class="error">${error}</p>
+    </c:if>
   </div>
 </div>
 
 <div class="footer">
-  <p>© 2025 SwimmingPool. All rights reserved.</p>
-  <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
+  <p>&copy; 2025 Hồ Bơi. Mọi quyền được bảo lưu.</p>
+  <p>Liên hệ: contact@swimmingpool.com | +84 123 456 789</p>
 </div>
-
-<script>
-  // Nếu cần JS, thêm ở đây (hiện không có trong cart.jsp, nên bỏ nếu không cần)
-</script>
 
 </body>
 </html>

@@ -575,17 +575,17 @@
                         <div class="card">
                             <h3>⚡ Quick Actions</h3>
 
-                            <c:if test="${not compensation.fullyPaid}">
-                                <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"
-                                   class="btn btn-success">💳 Add Payment</a>
-                            </c:if>
+<%--                            <c:if test="${not compensation.fullyPaid}">--%>
+<%--                                <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"--%>
+<%--                                   class="btn btn-success">💳 Add Payment</a>--%>
+<%--                            </c:if>--%>
 
 
 
-                            <c:if test="${compensation.compensationType == 'damaged' && compensation.canRepair}">
-                                <a href="${pageContext.request.contextPath}/repair?action=create&compensationId=${compensation.compensationId}"
-                                   class="btn btn-warning">🔧 Create Repair</a>
-                            </c:if>
+<%--                            <c:if test="${compensation.compensationType == 'damaged' && compensation.canRepair}">--%>
+<%--                                <a href="${pageContext.request.contextPath}/repair?action=create&compensationId=${compensation.compensationId}"--%>
+<%--                                   class="btn btn-warning">🔧 Create Repair</a>--%>
+<%--                            </c:if>--%>
 
                             <a href="${pageContext.request.contextPath}/compensation" class="btn btn-secondary">📋 Back to List</a>
                         </div>
