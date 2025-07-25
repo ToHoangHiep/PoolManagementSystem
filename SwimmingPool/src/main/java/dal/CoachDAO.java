@@ -1,16 +1,12 @@
 package dal;
 
 import model.Coach;
+import utils.DBConnect;
+
 import java.sql.*;
 import java.util.*;
 
 public class CoachDAO {
-    private static Connection conn;
-
-    public CoachDAO(Connection conn) {
-        this.conn = conn;
-    }
-
     // Lấy danh sách tất cả huấn luyện viên
     public static List<Coach> getAllCoaches() throws SQLException {
         List<Coach> list = new ArrayList<>();
@@ -60,9 +56,10 @@ public class CoachDAO {
     }
 
     // Thêm huấn luyện viên mới
-    public void insertCoach(Coach coach) throws SQLException {
+    public static void insertCoach(Coach coach) throws SQLException {
         String sql = "INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture, active) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, coach.getFullName());
             ps.setString(2, coach.getEmail());
             ps.setString(3, coach.getPhone());
@@ -75,9 +72,10 @@ public class CoachDAO {
     }
 
     // Cập nhật huấn luyện viên
-    public void updateCoach(Coach coach) throws SQLException {
+    public static void updateCoach(Coach coach) throws SQLException {
         String sql = "UPDATE Coaches SET full_name=?, email=?, phone_number=?, gender=?, bio=?, profile_picture=?, active=? WHERE id=?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, coach.getFullName());
             ps.setString(2, coach.getEmail());
             ps.setString(3, coach.getPhone());
@@ -91,9 +89,10 @@ public class CoachDAO {
     }
 
     // Xóa huấn luyện viên
-    public void deleteCoach(int id) throws SQLException {
+    public static void deleteCoach(int id) throws SQLException {
         String sql = "DELETE FROM Coaches WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }

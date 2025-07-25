@@ -32,14 +32,14 @@ public class CoachServlet extends HttpServlet {
 
             if ("edit".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Coach coach = dao.getCoachById(id);
+                Coach coach = CoachDAO.getCoachById(id);
                 request.setAttribute("coach", coach);
                 request.getRequestDispatcher("/coach-form.jsp").forward(request, response);
                 return;
             }
 
             // Danh sách mặc định
-            List<Coach> list = dao.getAllCoaches();
+            List<Coach> list = CoachDAO.getAllCoaches();
             request.setAttribute("coaches", list);
             request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
 
@@ -57,12 +57,10 @@ public class CoachServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
-
             // XÓA HUẤN LUYỆN VIÊN
             if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                dao.deleteCoach(id);
+                CoachDAO.deleteCoach(id);
                 response.sendRedirect("coach-list");
                 return;
             }
@@ -101,15 +99,15 @@ public class CoachServlet extends HttpServlet {
                 coach.setProfilePicture(fileName);
             } else if (id > 0) {
                 // nếu không upload ảnh mới, giữ nguyên ảnh cũ
-                Coach old = dao.getCoachById(id);
+                Coach old = CoachDAO.getCoachById(id);
                 coach.setProfilePicture(old.getProfilePicture());
             }
 
             if (id > 0) {
                 coach.setId(id);
-                dao.updateCoach(coach);
+                CoachDAO.updateCoach(coach);
             } else {
-                dao.insertCoach(coach);
+                CoachDAO.insertCoach(coach);
             }
 
             response.sendRedirect("coach-list");
