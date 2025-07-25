@@ -140,8 +140,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (!isUserAllowed(request, response, "course_form_details.jsp")) {
-            response.sendRedirect("home.jsp");
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(login_link);
             return;
         }
 
@@ -152,10 +154,20 @@ public class CourseServlet extends HttpServlet {
             Course course = CourseDAO.getCourseById(courseForm.getCourse_id());
             Coach coach = CoachDAO.getById(courseForm.getCoach_id());
 
+            boolean isManagement = user.getRole().getId() != 3;
+
+            if (!isManagement && courseForm.getUser_id() != user.getId()) {
+                request.setAttribute(alert_message, "You are not allowed to view this form!");
+                request.setAttribute(alert_action, "course_form_manage");
+                request.getRequestDispatcher("course_form_details.jsp").forward(request, response);
+                return;
+            }
+
             if (courseForm.getUser_id() != -1){
                 request.setAttribute("user", UserDAO.getUserById(courseForm.getUser_id()));
             }
 
+            request.setAttribute("isManagement", isManagement);
             request.setAttribute("course", course);
             request.setAttribute("coach", coach);
             request.setAttribute("courseForm", courseForm);

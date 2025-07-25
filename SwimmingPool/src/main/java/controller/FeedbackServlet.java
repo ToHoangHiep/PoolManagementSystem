@@ -352,7 +352,6 @@ public class FeedbackServlet extends HttpServlet {
     //endregion
 
     //region DoGet Method
-// In FeedbackServlet.java
 
     private void listMode(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");

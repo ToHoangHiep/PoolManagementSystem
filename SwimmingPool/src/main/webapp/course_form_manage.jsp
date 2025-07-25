@@ -13,12 +13,6 @@
         response.sendRedirect("login.jsp");
         return;
     }
-    // Ví dụ: Vai trò 4 (Khách hàng) không thể quản lý đơn.
-    if (adminUser.getRole().getId() == 4) {
-        session.setAttribute("alert_message", "Bạn không có quyền truy cập trang này.");
-        response.sendRedirect("home.jsp");
-        return;
-    }
 
     // --- Lấy dữ liệu ---
     List<CourseForm> courseForms = (List<CourseForm>)  request.getAttribute("courseForms");
@@ -46,21 +40,23 @@
 </head>
 <body>
 
-<%-- Đây là "flash message" hiển thị một lần từ session rồi bị xóa đi. --%>
 <%
-    String alertMessage = (String) session.getAttribute("alert_message");
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
     if (alertMessage != null) {
-        session.removeAttribute("alert_message"); // Xóa thông báo sau khi đọc
+        String alertAction = (String) request.getAttribute("alert_action");
 %>
 <script>
-    // Dịch các thông báo phổ biến
-    let message = '<%= alertMessage.replace("'", "\\'") %>';
-    if (message.includes("You do not have permission")) {
-        message = "Bạn không có quyền truy cập trang này.";
-    } else if (message.includes("Form processed successfully")) {
-        message = "Đơn đã được xử lý thành công.";
-    }
-    alert(message);
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
 </script>
 <%
     }
@@ -72,9 +68,17 @@
             <h2 class="mb-0 h4">
                 <i class="fas fa-tasks me-2 text-primary"></i>Quản lý Đơn đăng ký Khóa học
             </h2>
-            <a href="blogs" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Quay lại Danh mục
-            </a>
+            <%if (adminUser.getRole().getId() == 4) {%>
+                <a href="blogs" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại Danh mục
+                </a>
+            <%} else { %>
+                <a href="admin_dashboard.jsp" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại quản lí
+                </a>
+            <%}%>
+
+
         </div>
         <div class="card-body">
             <% if (courseForms == null || courseForms.isEmpty()) { %>

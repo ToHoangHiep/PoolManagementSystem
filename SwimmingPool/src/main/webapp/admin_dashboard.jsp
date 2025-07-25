@@ -132,6 +132,7 @@
             <a href="course?action=list_form" style="padding-left: 30px;"><i class="fas fa-user-plus"></i> Đăng kí mới</a>
         </div>
 
+        <a href="feedback?action=list"><i class="fas fa-file"></i> Quản lý Phản hồi</a>
         <a href="MaintenanceServlet"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
         <a href="coach-list"><i class="fas fa-user-tie"></i> Quản lý huấn luyện viên</a>
         <a href="pool-area"><i class="fas fa-warehouse"></i> Quản bể bơi</a>

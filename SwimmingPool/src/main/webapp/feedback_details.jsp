@@ -49,6 +49,28 @@
 </head>
 <body>
 
+<%
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
+    if (alertMessage != null) {
+        String alertAction = (String) request.getAttribute("alert_action");
+%>
+<script>
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
+</script>
+<%
+    }
+%>
+
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-9">

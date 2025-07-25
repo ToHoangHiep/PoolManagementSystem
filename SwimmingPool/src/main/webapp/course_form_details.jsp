@@ -23,6 +23,7 @@
     Course course = (Course) request.getAttribute("course");
     Coach coach = (Coach) request.getAttribute("coach");
     User applicant = (User) request.getAttribute("user"); // Sửa tên thuộc tính cho rõ ràng
+    boolean isManagement = (boolean) request.getAttribute("isManagement");
 
     // Nếu thiếu bất kỳ dữ liệu cần thiết nào, chuyển hướng an toàn
     if (form == null || course == null || coach == null) {
@@ -58,6 +59,28 @@
     </style>
 </head>
 <body>
+
+<%
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
+    if (alertMessage != null) {
+        String alertAction = (String) request.getAttribute("alert_action");
+%>
+<script>
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
+</script>
+<%
+    }
+%>
 
 <div class="container my-5">
     <div class="row justify-content-center">
@@ -155,7 +178,7 @@
 
                 <!-- Chân Card với Nút hành động -->
                 <%-- Nút xác nhận chỉ hiển thị nếu đơn chưa được xử lý --%>
-                <% if (!form.isHas_processed()) { %>
+                <% if (!form.isHas_processed() && isManagement) { %>
                 <div class="card-footer text-end bg-light p-3">
                     <form action="course?action=form_confirmed" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn đăng ký này không? Hành động này sẽ gửi email cho người dùng và huấn luyện viên.');">
                         <input type="hidden" name="formId" value="<%= form.getId() %>">
