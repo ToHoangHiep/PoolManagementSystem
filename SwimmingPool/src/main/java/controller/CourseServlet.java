@@ -403,6 +403,104 @@ public class CourseServlet extends HttpServlet {
         response.sendRedirect("course?action=list_form");
     }
 
+    private void cancelForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 1. Authorization Check
+        if (isUserAllowed(request, response, "course_form_details.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
+
+        int formId;
+        try {
+            formId = Integer.parseInt(request.getParameter("formId"));
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute(alert_message, "Invalid Form ID provided.");
+            response.sendRedirect("course?action=list_form");
+            return;
+        }
+
+        try {
+            // 2. Fetch all required data from the database
+            CourseForm form = CourseFormDAO.getById(formId);
+            if (form == null) {
+                request.getSession().setAttribute(alert_message, "Course form with ID " + formId + " not found.");
+                response.sendRedirect("course?action=list_form");
+                return;
+            }
+
+            // Prevent re-sending emails for an already confirmed form
+            if (form.isHas_processed()) {
+                request.getSession().setAttribute(alert_message, "This form has already been confirmed.");
+                response.sendRedirect("course?action=list_form");
+                return;
+            }
+
+            Course course = CourseDAO.getCourseById(form.getCourse_id());
+            Coach coach = CoachDAO.getCoachById(form.getCoach_id());
+
+            if (course == null || coach == null) {
+                request.getSession().setAttribute(alert_message, "Could not retrieve full details (missing course or coach). Cannot send emails.");
+                response.sendRedirect("course?action=list_form");
+                return;
+            }
+
+            // 3. Determine student's name and email
+            String studentEmail;
+            String studentName;
+            if (form.getUser_id() > 0) {
+                // Case 1: A registered user signed up
+                User student = UserDAO.getUserById(form.getUser_id());
+                if (student != null) {
+                    studentEmail = student.getEmail();
+                    studentName = student.getFullName(); // Assumes User model has getFullName()
+                } else {
+                    // This is an edge case, but good to handle
+                    request.getSession().setAttribute(alert_message, "Registered user with ID " + form.getUser_id() + " not found. Cannot send email.");
+                    response.sendRedirect("course?action=list_form");
+                    return;
+                }
+            } else {
+                // Case 2: A guest signed up
+                studentEmail = form.getUser_email();
+                studentName = form.getUser_fullName();
+            }
+
+            // 4. Update the form status in the database
+            if (!CourseFormDAO.setFormStatus(formId)){
+                request.getSession().setAttribute(alert_message, "Failed to update form status.");
+                return;
+            }
+
+            String reason = request.getParameter("reason");
+
+            // 5. Compose and send emails
+            // --- Email to Student ---
+            String studentSubject = "Course Registration Confirmed: " + course.getName();
+            String studentBody = "Dear " + studentName + ",\n\n"
+                    + "We are unable get you the course: '" + course.getName() + "'.\n"
+                    + "Your assigned coach is " + coach.getFullName() + ".\n\n"
+                    + "The reason is: " + reason + ".\n\n"
+                    + "We are sadden to tell you this new.\n\n"
+                    + "You are always welcome to sign up for new courses at our website.\n\n"
+                    + "Best regards,\n"
+                    + "The Swimming Pool Management Team";
+            EmailUtils.sendEmail(studentEmail, studentSubject, studentBody);
+
+            request.getSession().setAttribute(alert_message, "Form confirmed successfully. Emails have been sent to the student and coach.");
+
+        } catch (SQLException e) {
+            log("Database error during form confirmation: " + e.getMessage());
+            request.getSession().setAttribute(alert_message, "A database error occurred. Please try again.");
+        } catch (Exception e) {
+            // This will catch potential email sending errors
+            log("Error sending confirmation email: " + e.getMessage());
+            request.getSession().setAttribute(alert_message, "An error occurred while sending emails. The form status may not have been updated.");
+        }
+
+        // 6. Redirect back to the management page to prevent re-submission on refresh
+        response.sendRedirect("course?action=list_form");
+    }
+
     private void createCourseFormPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         int courseId = Integer.parseInt(request.getParameter("courseId"));

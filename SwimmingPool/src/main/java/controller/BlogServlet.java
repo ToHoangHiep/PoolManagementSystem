@@ -101,7 +101,7 @@ public class BlogServlet extends HttpServlet {
         // 1. Fetch all data for the lists
         List<Course> courses = CourseDAO.getAllCourses();
         List<Coach> coaches = CoachDAO.getAllCoaches();
-        Map<Integer, Integer> courseCounts = CourseDAO.getCourseRegistrationCounts();
+        Map<Integer, Integer> courseCounts = CourseDAO.getProcessedCourseRegistrationCounts();
         request.setAttribute("courses", courses != null ? courses : Collections.emptyList());
         request.setAttribute("coaches", coaches != null ? coaches : Collections.emptyList());
         request.setAttribute("courseCounts", courseCounts != null ? courseCounts : Collections.emptyMap());

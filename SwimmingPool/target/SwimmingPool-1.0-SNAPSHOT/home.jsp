@@ -25,46 +25,11 @@
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-<<<<<<< HEAD
-        <a href="home.jsp">Home</a>
-        <a href="#about">About Us</a>
-        <a href="#services">Services</a>
-
-        <%-- Equipment Rental chỉ cho Staff --%>
-        <% if (user != null && user.getRole() != null && "Staff".equalsIgnoreCase(user.getRole().getName())) { %>
-        <a href="equipment-rental">Equipment Rental</a>
-        <% } %>
-
-        <%-- Maintenance cho Admin & Manager --%>
-        <% if (user != null && user.getRole() != null) {
-            String roleName = user.getRole().getName();
-            if ("Admin".equalsIgnoreCase(roleName) || "Manager".equalsIgnoreCase(roleName)) {
-        %>
-        <a href="MaintenanceServlet?action=list">Maintenance</a>
-        <a href="pool-area">Pool Area</a>
-        <% } } %>
-
-        <%-- View My Maintenance cho Staff --%>
-        <% if (user != null && user.getRole() != null && "Staff".equalsIgnoreCase(user.getRole().getName())) { %>
-        <a href="MaintenanceServlet?action=staffView">My Maintenance</a>
-        <% } %>
-
-        <a href="#contact">Contact</a>
-        <a href="blogs">Blogs</a>
-        <a href="course?action=create_form">Enroll</a>
-
-        <%-- User List cho Admin --%>
-        <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>
-        <a href="admin-user">User List</a>
-        <% } %>
-=======
         <a href="home.jsp">Trang chủ</a>
         <a href="#about">Giới thiệu</a>
         <a href="#services">Dịch vụ</a>
-        <a href="#how-to-register">Đăng ký học bơi</a>
-        <%-- Đã bỏ link "Bình luận" khỏi navbar --%>
-        <a href="blogs">Bài viết</a>
->>>>>>> origin/ngocnthe176424
+        <a href="#how-to-register">Bài viết</a>
+        <a href="blogs">Đăng kí khóa học</a>
     </div>
 
     <div class="auth">
@@ -76,7 +41,7 @@
             <i class="fas fa-user-circle user-icon"></i>
             <div class="dropdown-menu">
                 <a href="userprofile">Hồ sơ của tôi</a>
-                <a href="change-password.jsp">Đổi mật khẩu</a> <%-- Giả định có trang đổi mật khẩu --%>
+                <a href="change-password">Đổi mật khẩu</a> <%-- Giả định có trang đổi mật khẩu --%>
                 <form action="logout" method="post" style="display:inline-block;">
                     <button type="submit">Đăng xuất</button>
                 </form>
