@@ -3,6 +3,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user == null || user.getRole() == null || user.getRole().getId() != 5) {
+        response.sendRedirect("error.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -696,15 +703,12 @@
     </style>
 </head>
 <body>
-<%
-    User user = (User) session.getAttribute("user");
-%>
 
 <!-- Navbar -->
 <div class="navbar">
     <div class="logo">SwimmingPool</div>
     <div class="nav-links">
-        <a href="staff_dashboard.jsp" class="nav-link">Home</a>
+        <a href="staff_dashboard.jsp" class="nav-link">Trang chủ</a>
         <a href="purchase" class="nav-link">Vé Bơi</a>
         <a href="equipment?mode=transaction_history" class="nav-link">📜 Lịch Sử Giao Dịch</a>
         <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
@@ -980,18 +984,15 @@
         function filterByCategory(categoryId) {
             console.log('Filtering by category:', categoryId);
 
-            // Remove active class from all category links
             document.querySelectorAll('.category-link').forEach(link => {
                 link.classList.remove('active');
             });
 
-            // Add active class to clicked link
             const activeLink = document.getElementById('filter-' + (categoryId === 'all' ? 'all' : categoryId));
             if (activeLink) {
                 activeLink.classList.add('active');
             }
 
-            // Filter equipment cards
             const cards = document.querySelectorAll('.equipment-card');
             let visibleCount = 0;
 
@@ -1006,11 +1007,9 @@
                 }
             });
 
-            // Update result count display
             updateResultCount(visibleCount);
         }
 
-        // Ẩn các category filter (chỉ giữ lại "All Categories")
         function hideCategoryFilters() {
             console.log('Hiding category filters, keeping only "All Categories"');
 
@@ -1025,7 +1024,6 @@
             console.log(`Hidden ${categoryItems.length - 1} category filters`);
         }
 
-        // ==================== SEARCH FUNCTIONS ====================
         function searchEquipment() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             console.log('Searching for:', searchTerm);
@@ -1038,7 +1036,6 @@
                 const categoryText = card.querySelector('.equipment-category')?.textContent.toLowerCase() || '';
                 const equipmentName = card.querySelector('.equipment-name')?.textContent.toLowerCase() || '';
 
-                // Search in multiple fields
                 if (name.includes(searchTerm) ||
                     categoryText.includes(searchTerm) ||
                     equipmentName.includes(searchTerm)) {
@@ -1057,7 +1054,6 @@
             searchEquipment();
         }
 
-        // ==================== SORT FUNCTIONS ====================
         function sortEquipment(sortBy) {
             console.log('Sorting by:', sortBy);
 
@@ -1091,12 +1087,10 @@
                 }
             });
 
-            // Clear grid and re-append sorted cards
             grid.innerHTML = '';
             cards.forEach(card => grid.appendChild(card));
         }
 
-        // ==================== PRICE FILTER FUNCTIONS ====================
         function filterByPrice() {
             const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
@@ -1126,7 +1120,6 @@
             filterByCategory('all'); // Reset to show all
         }
 
-        // ==================== TAB FUNCTIONS ====================
         function showTab(tabName) {
             console.log('Switching to tab:', tabName);
 
@@ -1135,22 +1128,18 @@
                 tab.classList.remove('active');
             });
 
-            // Remove active from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Show selected tab
             const selectedTab = document.getElementById(tabName);
             if (selectedTab) {
                 selectedTab.classList.add('active');
             }
 
-            // Add active to clicked button
             event.target.classList.add('active');
         }
 
-        // ==================== MODAL FUNCTIONS ====================
         function openRentalModal(inventoryId, itemName, rentPrice, redirectTo, availableQuantity) {
             console.log('Opening rental modal:', {
                 inventoryId: inventoryId,
@@ -1160,21 +1149,18 @@
                 availableQuantity: availableQuantity
             });
 
-            // Validate inputs
             if (!inventoryId || !itemName || !rentPrice) {
                 console.error('Missing required parameters for rental modal');
                 alert('Lỗi: Thiếu thông tin sản phẩm. Vui lòng thử lại.');
                 return;
             }
 
-            // Set modal form values
             document.getElementById('rental_inventoryId').value = inventoryId;
             document.getElementById('rental_itemName').value = itemName;
             document.getElementById('rental_price').value = formatCurrency(rentPrice);
             document.getElementById('rental_hiddenPrice').value = rentPrice;
             document.getElementById('availableQuantity').value = availableQuantity;
 
-            // Handle redirect parameter
             let redirectInput = document.getElementById('redirectToInput');
             if (!redirectInput) {
                 redirectInput = document.createElement('input');
@@ -1185,16 +1171,13 @@
             }
             redirectInput.value = redirectTo || 'rental';
 
-            // Reset form fields
             const form = document.querySelector('#rentalModal form');
             form.querySelector('input[name="customerName"]').value = '';
             form.querySelector('input[name="customerIdCard"]').value = '';
             form.querySelector('input[name="quantity"]').value = '1';
 
-            // Show modal
             document.getElementById('rentalModal').style.display = 'block';
 
-            // Focus on customer name field
             setTimeout(() => {
                 const customerNameField = form.querySelector('input[name="customerName"]');
                 if (customerNameField) {
@@ -1210,7 +1193,6 @@
             }
         }
 
-        // ==================== RENTAL FUNCTIONS ====================
         function processReturn(rentalId) {
             if (confirmAction('Bạn có chắc chắn muốn xử lý trả thiết bị này?')) {
                 console.log('Processing return for rental ID:', rentalId);
@@ -1229,7 +1211,6 @@
                 rentalIdInput.name = 'rentalId';
                 rentalIdInput.value = rentalId;
 
-                // Add mode to maintain page
                 const modeInput = document.createElement('input');
                 modeInput.type = 'hidden';
                 modeInput.name = 'mode';
@@ -1279,7 +1260,6 @@
             return true;
         }
 
-        // ==================== UTILITY FUNCTIONS ====================
         function updateResultCount(count) {
             const resultCountElement = document.getElementById('resultCount');
             if (resultCountElement) {
@@ -1326,14 +1306,11 @@
             return confirm(message || 'Bạn có chắc chắn muốn tiếp tục?');
         }
 
-        // ==================== EVENT LISTENERS ====================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Initializing Equipment Rental System...');
 
-            // Ẩn category filters (chỉ giữ lại "All Categories")
             hideCategoryFilters();
 
-            // Lọc chỉ hiển thị equipment có usageId = 2
             const cards = document.querySelectorAll('.equipment-card');
             let visibleCount = 0;
             cards.forEach(card => {
@@ -1345,10 +1322,8 @@
             });
             updateResultCount(visibleCount);
 
-            // Search functionality
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
-                // Search on Enter key
                 searchInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -1356,7 +1331,6 @@
                     }
                 });
 
-                // Real-time search (optional)
                 searchInput.addEventListener('input', function() {
                     clearTimeout(this.searchTimeout);
                     this.searchTimeout = setTimeout(() => {
@@ -1365,7 +1339,6 @@
                 });
             }
 
-            // Price filter inputs
             const minPriceInput = document.getElementById('minPrice');
             const maxPriceInput = document.getElementById('maxPrice');
 
@@ -1380,14 +1353,12 @@
                 });
             }
 
-            // Modal event listeners
             window.onclick = function(event) {
                 if (event.target.classList.contains('modal')) {
                     event.target.style.display = 'none';
                 }
             };
 
-            // Auto-hide success/error messages
             setTimeout(() => {
                 document.querySelectorAll('.message').forEach(msg => {
                     msg.style.transition = 'opacity 0.3s';
@@ -1400,7 +1371,6 @@
                 });
             }, 5000);
 
-            // Add clear filters button
             const priceRange = document.querySelector('.price-range');
             if (priceRange) {
                 const clearFiltersBtn = document.createElement('button');
@@ -1413,7 +1383,6 @@
                 priceRange.appendChild(clearFiltersBtn);
             }
 
-            // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
                 // ESC to close modals
                 if (e.key === 'Escape') {
@@ -1422,7 +1391,6 @@
                     });
                 }
 
-                // Ctrl + F to focus search
                 if (e.ctrlKey && e.key === 'f') {
                     e.preventDefault();
                     const searchInput = document.getElementById('searchInput');
@@ -1433,15 +1401,12 @@
                 }
             });
 
-            // Add tooltips to disabled buttons
             document.querySelectorAll('.btn[disabled]').forEach(btn => {
                 btn.title = 'Sản phẩm này hiện hết hàng';
             });
 
-            // Form submission handling
             document.querySelectorAll('form').forEach(form => {
                 form.addEventListener('submit', function(e) {
-                    // Validate rental form if it's the rental modal form
                     if (this.closest('#rentalModal')) {
                         if (!validateRentalForm(this)) {
                             e.preventDefault();
@@ -1449,14 +1414,12 @@
                         }
                     }
 
-                    // Add loading state
                     const submitBtn = this.querySelector('button[type="submit"]');
                     if (submitBtn) {
                         const originalText = submitBtn.textContent;
                         submitBtn.textContent = 'Đang Xử Lý...';
                         submitBtn.disabled = true;
 
-                        // Reset button state if form submission fails
                         setTimeout(() => {
                             submitBtn.textContent = originalText;
                             submitBtn.disabled = false;
@@ -1465,7 +1428,6 @@
                 });
             });
 
-            // Thêm dòng này để hiển thị tất cả sản phẩm ngay khi load
             filterByCategory('all');
 
 
@@ -1473,12 +1435,7 @@
             console.log(`Found ${cards.length} equipment items, showing ${visibleCount} with usageId=2`);
         });
 
-        // ==================== ERROR HANDLING ====================
-        window.addEventListener('error', function(e) {
-            console.error('JavaScript Error:', e.error);
-        });
 
-        // ==================== PERFORMANCE MONITORING ====================
         if ('performance' in window) {
             window.addEventListener('load', function() {
                 setTimeout(() => {

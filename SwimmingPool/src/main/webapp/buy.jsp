@@ -632,7 +632,7 @@
 <div class="navbar">
   <div class="logo">SwimmingPool</div>
   <div class="nav-links">
-    <a href="staff_dashboard.jsp" class="nav-link">Home</a>
+    <a href="staff_dashboard.jsp" class="nav-link">Trang chủ</a>
     <a href="purchase" class="nav-link">Vé Bơi</a>
     <a href="equipment?mode=transaction_history" class="nav-link">📜 Lịch Sử Giao Dịch</a>
     <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
@@ -646,7 +646,8 @@
     </a>
   </div>
   <div class="auth">
-    <% if (user == null) { %>
+    <%
+      if (user == null || user.getRole() == null || user.getRole().getId() != 5) { %>
     <a class="login-btn" href="login.jsp">Đăng Nhập</a>
     <a class="register-btn" href="register.jsp">Đăng Ký</a>
     <% } else { %>
@@ -733,7 +734,8 @@
                data-category="${item.category}"
                data-name="${fn:toLowerCase(item.itemName)}"
                data-sale-price="${item.salePrice}"
-               data-usage-id="${item.usageId}">
+               data-usage-id="${item.usageId}"
+               data-quantity="${item.quantity}">
 
             <div class="equipment-image">
               🏊‍♂️
@@ -769,14 +771,14 @@
                 <c:if test="${item.salePrice > 0}">
                   <!-- Nút Buy: Gọi modal với redirectTo='cart' -->
                   <button class="btn btn-success btn-sm"
-                          onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}', 'cart')"
+                          onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}', 'cart', '${item.quantity}')"
                     ${item.quantity == 0 ? 'disabled' : ''}>
                     💳 Mua Ngay
                   </button>
 
                   <!-- Nút Add to Cart: Gọi modal với redirectTo='buy' -->
                   <button class="btn btn-primary btn-sm"
-                          onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}', 'buy')"
+                          onclick="openBuyModal('${item.inventoryId}', '${fn:escapeXml(item.itemName)}', '${item.salePrice}', 'buy', '${item.quantity}')"
                     ${item.quantity == 0 ? 'disabled' : ''}>
                     🛒 Thêm Vào Giỏ
                   </button>
@@ -801,13 +803,14 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3 class="modal-title">🛒 Mua Thiết Bị</h3>
-      <button class="close" onclick="closeModal('buyModal')">&times;</button>
+      <button class="close" onclick="closeModal('buyModal')">×</button>
     </div>
     <form action="equipment" method="post">
       <input type="hidden" name="action" value="add">
       <input type="hidden" name="mode" value="buy">
       <input type="hidden" name="inventoryId" id="buy_inventoryId">
       <input type="hidden" name="salePrice" id="buy_hiddenPrice">
+      <input type="hidden" id="availableQuantity" value="0">
 
       <div class="modal-body">
         <div class="form-group">
@@ -837,6 +840,21 @@
 </div>
 
 <script>
+  // Ẩn các category filter (chỉ giữ lại "All Categories")
+  function hideCategoryFilters() {
+    console.log('Hiding category filters, keeping only "All Categories"');
+
+    const categoryItems = document.querySelectorAll('.category-item');
+    categoryItems.forEach((item, index) => {
+      // Giữ lại item đầu tiên (All Categories), ẩn các item còn lại
+      if (index > 0) {
+        item.style.display = 'none';
+      }
+    });
+
+    console.log(`Hidden ${categoryItems.length - 1} category filters`);
+  }
+
   function filterByCategory(categoryId) {
     console.log('Filtering by category:', categoryId);
 
@@ -972,18 +990,27 @@
   }
 
   // ==================== MODAL FUNCTIONS ====================
-  function openBuyModal(inventoryId, itemName, salePrice, redirectTo) {
+  function openBuyModal(inventoryId, itemName, salePrice, redirectTo, availableQuantity) {
     console.log('Opening buy modal:', {
       inventoryId: inventoryId,
       itemName: itemName,
       salePrice: salePrice,
-      redirectTo: redirectTo
+      redirectTo: redirectTo,
+      availableQuantity: availableQuantity
     });
 
     // Validate inputs
     if (!inventoryId || !itemName || !salePrice) {
       console.error('Missing required parameters for buy modal');
-      alert('Error: Missing product information. Please try again.');
+      alert('Lỗi: Thiếu thông tin sản phẩm. Vui lòng thử lại.');
+      return;
+    }
+
+    // Get form first
+    const form = document.querySelector('#buyModal form');
+    if (!form) {
+      console.error('Form not found in buyModal');
+      alert('Lỗi: Không tìm thấy form. Vui lòng thử lại.');
       return;
     }
 
@@ -993,6 +1020,14 @@
     document.getElementById('buy_price').value = formatCurrency(salePrice);
     document.getElementById('buy_hiddenPrice').value = salePrice;
 
+    // Set availableQuantity
+    const availableQtyField = document.getElementById('availableQuantity');
+    availableQtyField.value = parseInt(availableQuantity) || 0;
+
+    // Set max for input quantity
+    const quantityInput = form.querySelector('input[name="quantity"]');
+    quantityInput.max = parseInt(availableQuantity) || 0;
+
     // Handle redirect parameter
     let redirectInput = document.getElementById('redirectToInputBuy');
     if (!redirectInput) {
@@ -1000,12 +1035,11 @@
       redirectInput.type = 'hidden';
       redirectInput.id = 'redirectToInputBuy';
       redirectInput.name = 'redirectTo';
-      document.querySelector('#buyModal form').appendChild(redirectInput);
+      form.appendChild(redirectInput);
     }
     redirectInput.value = redirectTo || 'buy';
 
     // Reset form fields
-    const form = document.querySelector('#buyModal form');
     form.querySelector('input[name="customerName"]').value = '';
     form.querySelector('input[name="quantity"]').value = '1';
 
@@ -1028,18 +1062,10 @@
     }
   }
 
-  // ==================== BUY FUNCTIONS ====================
-  function buyNow(inventoryId, itemName, salePrice) {
-    openBuyModal(inventoryId, itemName, salePrice, 'cart');
-  }
-
-  function addToCart(inventoryId, itemName, salePrice) {
-    openBuyModal(inventoryId, itemName, salePrice, 'buy');
-  }
-
   function validateBuyForm(form) {
     const customerName = form.querySelector('input[name="customerName"]').value.trim();
     const quantity = parseInt(form.querySelector('input[name="quantity"]').value);
+    const availableQuantity = parseInt(document.getElementById('availableQuantity').value);
 
     if (!customerName) {
       alert('Vui lòng nhập tên khách hàng');
@@ -1051,10 +1077,14 @@
       return false;
     }
 
+    if (quantity > availableQuantity) {
+      alert('Số lượng mua không được vượt quá số lượng có sẵn');
+      return false;
+    }
+
     return true;
   }
 
-  // ==================== UTILITY FUNCTIONS ====================
   function updateResultCount(count) {
     const resultCountElement = document.getElementById('resultCount');
     if (resultCountElement) {
@@ -1101,9 +1131,11 @@
     return confirm(message || 'Bạn có chắc chắn muốn tiếp tục?');
   }
 
-  // ==================== EVENT LISTENERS ====================
   document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing Equipment Buy System...');
+
+    // Ẩn category filters (chỉ giữ lại "All Categories")
+    hideCategoryFilters();
 
     // Lọc chỉ hiển thị equipment có usageId = 1
     const cards = document.querySelectorAll('.equipment-card');
@@ -1112,6 +1144,7 @@
       if (card.getAttribute('data-usage-id') !== '1') {
         card.style.display = 'none';
       } else {
+        card.style.display = 'block';
         visibleCount++;
       }
     });
@@ -1120,7 +1153,6 @@
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-      // Search on Enter key
       searchInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -1128,7 +1160,6 @@
         }
       });
 
-      // Real-time search (optional)
       searchInput.addEventListener('input', function() {
         clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(() => {
@@ -1187,14 +1218,12 @@
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
-      // ESC to close modals
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal').forEach(modal => {
           modal.style.display = 'none';
         });
       }
 
-      // Ctrl + F to focus search
       if (e.ctrlKey && e.key === 'f') {
         e.preventDefault();
         const searchInput = document.getElementById('searchInput');
@@ -1213,7 +1242,6 @@
     // Form submission handling
     document.querySelectorAll('form').forEach(form => {
       form.addEventListener('submit', function(e) {
-        // Validate buy form if it's the buy modal form
         if (this.closest('#buyModal')) {
           if (!validateBuyForm(this)) {
             e.preventDefault();
@@ -1221,14 +1249,12 @@
           }
         }
 
-        // Add loading state
         const submitBtn = this.querySelector('button[type="submit"]');
         if (submitBtn) {
           const originalText = submitBtn.textContent;
           submitBtn.textContent = 'Đang Xử Lý...';
           submitBtn.disabled = true;
 
-          // Reset button state if form submission fails
           setTimeout(() => {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
@@ -1237,25 +1263,12 @@
       });
     });
 
+    // Hiển thị tất cả sản phẩm ngay khi load
+    filterByCategory('all');
+
     console.log('Equipment Buy System initialized successfully!');
     console.log(`Found ${cards.length} equipment items, showing ${visibleCount} with usageId=1`);
-    filterByCategory('all');
   });
-
-  // ==================== ERROR HANDLING ====================
-  window.addEventListener('error', function(e) {
-    console.error('JavaScript Error:', e.error);
-  });
-
-  // ==================== PERFORMANCE MONITORING ====================
-  if ('performance' in window) {
-    window.addEventListener('load', function() {
-      setTimeout(() => {
-        const perfData = performance.getEntriesByType('navigation')[0];
-        console.log('Page Load Time:', Math.round(perfData.loadEventEnd - perfData.loadEventStart), 'ms');
-      }, 0);
-    });
-  }
 </script>
 </body>
 </html>

@@ -5,8 +5,8 @@
 <%@ page import="model.User" %>
 <%
     User user = (User) session.getAttribute("user");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
+    if (user == null || user.getRole() == null || user.getRole().getId() != 5) {
+        response.sendRedirect("error.jsp");
         return;
     }
 %>
@@ -158,7 +158,6 @@
     <div class="nav-links">
         <a href="staff_dashboard.jsp" class="nav-link">Home</a>
         <a href="purchase" class="nav-link">Vé Bơi</a>
-        <a href="equipment?mode=transaction_history" class="nav-link">📜 Transaction History</a>
         <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
             🛒 Equipment Rental
         </a>

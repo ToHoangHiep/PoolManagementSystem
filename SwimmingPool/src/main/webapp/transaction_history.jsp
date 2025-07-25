@@ -3,11 +3,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poolax - Transaction History</title>
+    <title>Poolax - Lịch Sử Giao Dịch</title>
     <style>
         * {
             margin: 0;
@@ -163,29 +163,29 @@
 
 
 <div class="navbar">
-    <div class="logo">SwimmingPool</div>
+    <div class="logo">Hồ Bơi</div>
     <div class="nav-links">
-        <a href="staff_dashboard.jsp" class="nav-link">Home</a>
+        <a href="staff_dashboard.jsp" class="nav-link">Trang Chủ</a>
         <a href="purchase" class="nav-link">Vé Bơi</a>
-        <a href="equipment?mode=transaction_history" class="nav-link">📜 Transaction History</a>
+        <a href="equipment?mode=transaction_history" class="nav-link">📜 Lịch Sử Giao Dịch</a>
         <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">
-            🛒 Equipment Rental
+            🛒 Thuê Dụng Cụ
         </a>
         <a href="equipment?mode=buy" class="nav-link ${empty currentFilter ? 'active' : ''}">
-            🛒 Equipment Buy
+            🛒 Mua Dụng Cụ
         </a>
         <a href="cart" class="nav-link">
-            🛒 View Cart <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
+            🛒 Xem Giỏ Hàng <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
         </a>
     </div>
     <div class="auth">
         <% if (user == null) { %>
-        <a class="login-btn" href="login.jsp">Login</a>
-        <a class="register-btn" href="register.jsp">Register</a>
+        <a class="login-btn" href="login.jsp">Đăng Nhập</a>
+        <a class="register-btn" href="register.jsp">Đăng Ký</a>
         <% } else { %>
-        <span>Hello, <a href="userprofile" style="text-decoration:none; color:inherit;"><%= user.getFullName() %></a>!</span>
+        <span>Xin chào, <a href="userprofile" style="text-decoration:none; color:inherit;"><%= user.getFullName() %></a>!</span>
         <form action="logout" method="post" style="display:inline;">
-            <input type="submit" value="Logout">
+            <input type="submit" value="Đăng Xuất">
         </form>
         <% } %>
     </div>
@@ -195,8 +195,8 @@
 
 
 <div class="page-header">
-    <h1>Transaction History</h1>
-    <p>View the 100 most recent rental and sale transactions</p>
+    <h1>Lịch Sử Giao Dịch</h1>
+    <p>Xem 100 giao dịch thuê và bán gần đây nhất</p>
 </div>
 
 
@@ -209,22 +209,29 @@
     <table class="table">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Equipment</th>
-            <th>Customer</th>
-            <th>Quantity</th>
-            <th>Date</th>
-            <th>Total</th>
+            <th>Mã</th>
+            <th>Loại</th>
+            <th>Dụng Cụ</th>
+            <th>Khách Hàng</th>
+            <th>Số Lượng</th>
+            <th>Ngày</th>
+            <th>Tổng Tiền</th>
         </tr>
         </thead>
         <tbody>
         <c:forEach var="transaction" items="${transactions}">
             <tr>
                 <td>#${transaction.id}</td>
-                <td><span class="transaction-type ${transaction.type}">${transaction.type}</span></td>
+                <td>
+                    <span class="transaction-type ${transaction.type}">
+                        <c:choose>
+                            <c:when test="${transaction.type == 'rental'}">Thuê</c:when>
+                            <c:when test="${transaction.type == 'sale'}">Bán</c:when>
+                            <c:otherwise>${transaction.type}</c:otherwise>
+                        </c:choose>
+                    </span>
+                </td>
                 <td>${transaction.itemName}</td>
-                <td>${transaction.customerName}</td>
                 <td>${transaction.customerName}</td>
                 <td>${transaction.quantity}</td>
                 <td><fmt:formatDate value="${transaction.transactionDate}" pattern="dd/MM/yyyy HH:mm"/></td>
@@ -237,8 +244,8 @@
 
 
 <footer>
-    <p>© 2025 SwimmingPool. All rights reserved.</p>
-    <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
+    <p>© 2025 Hồ Bơi. Tất cả quyền được bảo lưu.</p>
+    <p>Liên hệ: contact@swimmingpool.com | +84 123 456 789</p>
 </footer>
 </body>
 </html>
