@@ -4,16 +4,27 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 public class InventoryRequest {
+    private int id;
     private int requestId;
     private int inventoryId;
-    private String itemName; // Tên thiết bị
+    private String itemName;
     private int requestedQuantity;
     private String reason;
     private String status;
     private Timestamp requestedAt;
     private Timestamp approvedAt;
+    private Timestamp completedAt;
 
     // Getters & Setters
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getRequestId() {
         return requestId;
     }
@@ -77,6 +88,14 @@ public class InventoryRequest {
     public void setApprovedAt(Timestamp approvedAt) {
         this.approvedAt = approvedAt;
     }
+    public Timestamp getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(Timestamp completedAt) {
+        this.completedAt = completedAt;
+    }
+
 }
 
 

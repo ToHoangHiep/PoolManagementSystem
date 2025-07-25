@@ -76,6 +76,19 @@
 
 <h2>Danh sách thiết bị bị hỏng</h2>
 
+<!-- Hiển thị thông báo -->
+<%
+    String message = (String) session.getAttribute("message");
+    if (message != null) {
+%>
+<div style="text-align: center; font-weight: bold; margin-bottom: 20px; color: <%= message.contains("thành công") ? "green" : "red" %>;">
+    <%= message %>
+</div>
+<%
+        session.removeAttribute("message"); // Xóa để tránh lặp lại
+    }
+%>
+
 <table>
     <thead>
     <tr>
@@ -109,25 +122,10 @@
     </c:forEach>
     </tbody>
 </table>
-<div style="text-align: center;">
-    <a href="staff_dashboard.jsp">Quay lại </a>
+
+<div style="text-align: center; margin-top: 20px;">
+    <a href="staff_dashboard.jsp">← Quay lại</a>
 </div>
-<%
-    String message = request.getParameter("message");
-    if ("success".equals(message)) {
-%>
-<div style="color: green; text-align: center; font-weight: bold; margin: 10px;">
-    Gửi yêu cầu sửa chữa thành công!
-</div>
-<%
-} else if ("error".equals(message)) {
-%>
-<div style="color: red; text-align: center; font-weight: bold; margin: 10px;">
-    Gửi yêu cầu sửa chữa thất bại. Vui lòng thử lại!
-</div>
-<%
-    }
-%>
 
 </body>
 </html>

@@ -44,19 +44,21 @@ public class InventoryServlet extends HttpServlet {
             case "requestList":
                 listInventoryRequests(request, response);
                 break;
-            case "requestForm":
-                showRequestForm(request, response);
-                break;
             case "broken":
                 listInventoryBroken(request, response);
                 break;
             case "approvedRequestHistory":
                 showApprovedRequestHistory(request, response);
                 break;
+            case "receivePending":
+                showReceivePendingList(request, response);
+                break;
             case "repairRequestList":
                 showRepairHistory(request, response);
                 break;
-
+            case "completedList":
+                showCompletedReceiveList(request, response);
+                break;
 
 
             default:
@@ -91,10 +93,18 @@ public class InventoryServlet extends HttpServlet {
             case "submitRepair":
                 submitRepairRequest(request, response);
                 break;
+            case "confirmReceive":
+                confirmInventoryReceive(request, response);
+                break;
+
+
+
+
+
 
             case "approveRequest":  // ✅ Thêm dòng này
             case "rejectRequest":   // (tuỳ logic nếu có)
-                handleApproveRequest(request, response);
+                approveOrRejectInventoryRequest(request, response);
                 break;
         }
     }
@@ -188,6 +198,27 @@ public class InventoryServlet extends HttpServlet {
         request.setAttribute("requestList", requestList);
         request.getRequestDispatcher("inventoryRequestList.jsp").forward(request, response);
     }
+    private void approveOrRejectInventoryRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int requestId = Integer.parseInt(request.getParameter("request_id"));
+        String action = request.getParameter("statusUD"); // "approve" hoặc "reject"
+
+        boolean success = false;
+
+        if ("approve".equalsIgnoreCase(action)) {
+            // ✅ Cập nhật trạng thái + thêm vào bảng Receive_Pending
+            InventoryRequestDAO.approveRequest(requestId);  // <-- dùng hàm có transaction
+            success = true;
+        } else if ("reject".equalsIgnoreCase(action)) {
+            success = InventoryRequestDAO.updateStatusOnly(requestId, "rejected");
+        }
+
+        HttpSession session = request.getSession();
+        session.setAttribute("message", success ? "Cập nhật yêu cầu thành công!" : "Cập nhật yêu cầu thất bại!");
+        response.sendRedirect("inventory?action=requestList");
+
+
+    }
+
 
 
 
@@ -212,30 +243,11 @@ public class InventoryServlet extends HttpServlet {
         InventoryRequestDAO dao = new InventoryRequestDAO();
         int requestId = Integer.parseInt(request.getParameter("request_id"));
         String status = request.getParameter("status");
-        dao.updateStatusAndStock(requestId, status); // DAO
+        dao.updateStatusOnly(requestId, status); // DAO
         response.sendRedirect("inventory?action=requestList");
     }
 
-    private void showRequestForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
 
-        List<Inventory> inventoryList = InventoryDAO.getAllInventories();
-        request.setAttribute("inventoryList", inventoryList);
-
-        String selectedId = request.getParameter("inventory_id");
-        if (selectedId != null) {
-            try {
-                int inventoryId = Integer.parseInt(selectedId);
-                Inventory inventory = InventoryDAO.getInventoryById(inventoryId);
-                request.setAttribute("inventory", inventory);
-                request.setAttribute("selectedInventoryId", inventoryId);
-            } catch (NumberFormatException e) {
-                System.out.println("Lỗi parse inventory_id: " + e.getMessage());
-            }
-        }
-
-        request.getRequestDispatcher("requestImportForm.jsp").forward(request, response);
-    }
     private void handleApproveRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int requestId = Integer.parseInt(request.getParameter("request_id"));
         String action = request.getParameter("statusUD");
@@ -249,7 +261,8 @@ public class InventoryServlet extends HttpServlet {
             status = "rejected";
         }
 
-        boolean success = InventoryRequestDAO.updateStatusAndStock(requestId, status);
+        boolean success = InventoryRequestDAO.updateStatusOnly(requestId, status);
+
 
         HttpSession session = request.getSession();
         session.setAttribute("message", success ? "Cập nhật yêu cầu thành công!" : "Cập nhật yêu cầu thất bại!");
@@ -258,6 +271,23 @@ public class InventoryServlet extends HttpServlet {
         System.out.println("Action nhận được: " + request.getParameter("action"));
 
     }
+
+    private void showReceivePendingList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<InventoryRequest> pendingList = InventoryRequestDAO.getReceivePendingList();
+        request.setAttribute("pendingList", pendingList);
+        request.getRequestDispatcher("receivePendingList.jsp").forward(request, response);
+    }
+
+    private void confirmInventoryReceive(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int requestId = Integer.parseInt(request.getParameter("request_id"));
+        boolean success = InventoryRequestDAO.confirmReceive(requestId);
+
+        HttpSession session = request.getSession();
+        session.setAttribute("message", success ? "Đã xác nhận nhập kho." : "Xác nhận thất bại.");
+        response.sendRedirect("inventory?action=receivePending");
+    }
+
 
 
     private void showApprovedRequestHistory(HttpServletRequest request, HttpServletResponse response)
@@ -285,7 +315,7 @@ public class InventoryServlet extends HttpServlet {
         HttpSession session = request.getSession();
         session.setAttribute("message", success ? "Gửi yêu cầu sửa chữa thành công!" : "Gửi yêu cầu thất bại!");
 
-        response.sendRedirect("inventory?action=lowstock");
+        response.sendRedirect("inventory?action=broken");
 
     }
 
@@ -306,6 +336,18 @@ public class InventoryServlet extends HttpServlet {
 
         response.sendRedirect("inventory?action=repairRequestList");
     }
+    private void showCompletedReceiveList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        List<InventoryRequest> completedList = InventoryRequestDAO.getCompletedReceiveRequests();
+        request.setAttribute("completedList", completedList);
+        request.getRequestDispatcher("completed_receive_list.jsp").forward(request, response);
+    }
+
+
+
+
+
 
 
 

@@ -108,6 +108,7 @@
     <th>Tên thiết bị</th>
     <th>Danh mục</th>
     <th>Số lượng</th>
+    <th>Nhập thêm</th>
     <th>Số lượng Min</th>
     <th>Trạng thái</th>
     <th>Cách sử dụng</th>
@@ -122,14 +123,19 @@
       <td>${inv.itemName}</td>
       <td>${inv.categoryName}</td>
       <td>${inv.quantity}</td>
+      <td>
+        <form action="inventory" method="post">
+          <input type="hidden" name="action" value="insertRequest">
+          <input type="hidden" name="inventory_id" value="${inv.inventoryId}">
+          <input type="number" name="requested_quantity" min="1" required>
+      </td>
       <td>${inv.categoryQuantity}</td>
       <td>${inv.status}</td>
       <td>${inv.usageName}</td>
       <td>${inv.lastUpdated}</td>
       <td>
-        <a href="inventory?action=requestForm&inventory_id=${inv.inventoryId}">
-          Nhập thêm
-        </a>
+        <button type="submit">Request</button>
+        </form>
       </td>
     </tr>
   </c:forEach>
@@ -139,6 +145,7 @@
 <br/>
 <div style="text-align: center;">
   <a href="staff_dashboard.jsp">Quay lại </a>
+  <a href="inventory?action=receivePending">Nhập kho </a>
 </div>
 <%
   String message = (String) session.getAttribute("message");

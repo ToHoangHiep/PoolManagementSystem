@@ -99,13 +99,12 @@
 <h2>Danh sách yêu cầu nhập kho</h2>
 <table border="1">
   <tr>
-    <th>Thiết bị</th><th>Số lượng</th><th>Lý do</th><th>Ngày yêu cầu</th><th>Trạng thái</th><th>Thao tác</th>
+    <th>Thiết bị</th><th>Số lượng</th><th>Ngày yêu cầu</th><th>Trạng thái</th><th>Thao tác</th>
   </tr>
   <c:forEach var="r" items="${requestList}">
     <tr>
       <td>${r.itemName}</td>
       <td>${r.requestedQuantity}</td>
-      <td>${r.reason}</td>
       <td>${r.requestedAt}</td>
       <td>${r.status}</td><td>
       <c:if test="${r.status == 'pending'}">
@@ -123,7 +122,9 @@
 </table>
 <div style="text-align: center;">
   <a href="inventory">Quay lại danh sách</a>
-  <a href="inventory?action=approvedRequestHistory">Lịch sử nhập</a>
+  <a href="inventory?action=approvedRequestHistory">Lịch sử đã phê duyệt</a>
+  <a href="inventory?action=completedList">Lịch sử nhập kho</a>
+
 </div>
 
 </body>

@@ -73,7 +73,6 @@
         <th>Mã yêu cầu</th>
         <th>Tên thiết bị</th>
         <th>Số lượng</th>
-        <th>Lý do</th>
         <th>Ngày yêu cầu</th>
         <th>Ngày duyệt</th>
     </tr>
@@ -84,7 +83,6 @@
             <td>${req.requestId}</td>
             <td>${req.itemName}</td>
             <td>${req.requestedQuantity}</td>
-            <td>${req.reason}</td>
             <td>${req.requestedAt}</td>
             <td>${req.approvedAt}</td>
         </tr>
@@ -93,7 +91,7 @@
 </table>
 
 <div class="back-btn">
-    <a href="inventory">Quay lại danh sách yêu cầu</a>
+    <a href="inventory?action=requestList">Quay lại danh sách yêu cầu</a>
 </div>
 
 </body>
