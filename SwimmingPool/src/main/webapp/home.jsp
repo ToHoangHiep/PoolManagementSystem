@@ -43,6 +43,7 @@
 
         <a href="#contact">Contact</a>
         <a href="blogs">Blogs</a>
+        <a href="course?action=create_form">Enroll</a>
 
         <%-- User List cho Admin --%>
         <% if (user != null && user.getRole() != null && "Admin".equalsIgnoreCase(user.getRole().getName())) { %>

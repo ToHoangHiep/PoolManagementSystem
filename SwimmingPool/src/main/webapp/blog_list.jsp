@@ -76,11 +76,39 @@
 </head>
 <body>
 
+<%
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
+    if (alertMessage != null) {
+        String alertAction = (String) request.getAttribute("alert_action");
+%>
+<script>
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
+</script>
+<%
+    }
+%>
+
 <div class="container-fluid my-5 px-4">
     <!-- Tiêu đề trang -->
     <div class="text-center mb-5">
         <h1 class="display-5">Danh mục của chúng tôi</h1>
         <p class="lead text-muted">Khám phá các khóa học chuyên nghiệp và gặp gỡ các huấn luyện viên chuyên môn của chúng tôi.</p>
+    </div>
+
+    <div class="mb-4">
+        <a href="home.jsp" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Quay về Trang chủ
+        </a>
     </div>
 
     <div class="mb-5">
