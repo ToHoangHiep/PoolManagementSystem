@@ -7,18 +7,12 @@
 
 <%
     // --- Bảo mật & Lấy dữ liệu ---
-    User adminUser = (User) session.getAttribute("user");
-    if (adminUser == null) {
+    User user = (User) session.getAttribute("user");
+    if (user == null) {
         response.sendRedirect("login.jsp");
         return;
     }
-    // Đảm bảo chỉ nhân viên được ủy quyền mới có thể xem trang này (ví dụ: không phải khách hàng)
-    if (adminUser.getRole().getId() == 4) {
-        session.setAttribute("alert_message", "Bạn không có quyền truy cập trang này.");
-        response.sendRedirect("course?action=list"); // Chuyển hướng đến danh sách khóa học chính
-        return;
-    }
-
+    
     CourseForm form = (CourseForm) request.getAttribute("courseForm");
     Course course = (Course) request.getAttribute("course");
     Coach coach = (Coach) request.getAttribute("coach");
@@ -204,7 +198,7 @@
                 </div>
 
                 <%-- Chân Card với Nút hành động --%>
-                <% if (form.getHas_processed() == 0 && isManagement) { %>
+                <% if (form.getHas_processed() == 0 && isManagement && form.getUser_id() != user.getId()) { %>
                 <div class="card-footer bg-light p-3">
                     <form id="decisionForm" method="post" novalidate>
                         <input type="hidden" name="formId" value="<%= form.getId() %>">
