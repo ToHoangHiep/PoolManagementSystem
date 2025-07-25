@@ -1,10 +1,15 @@
 Manifest-Version: 1.0
 Created-By: IntelliJ IDEA
 <<<<<<< HEAD
+<<<<<<< HEAD
 Built-By: LAPTOP
 Build-Jdk: Oracle OpenJDK 21.0.2
 =======
 Built-By: Admin
 Build-Jdk: Oracle OpenJDK 23
 >>>>>>> Huypqhe172172
+=======
+Built-By: ADMIN
+Build-Jdk: Amazon Corretto 17.0.15
+>>>>>>> origin/ngocnthe176424
 

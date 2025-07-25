@@ -12,7 +12,7 @@ public class Customer {
     private String address;
     private String profilePicture;
     private String email;
-
+    private Role role;
     public Customer() {}
 
     public Customer(int userId, String fullName, String phoneNumber, Date dob, String gender,
@@ -25,6 +25,15 @@ public class Customer {
         this.address = address;
         this.profilePicture = profilePicture;
         this.email = email;
+    }
+
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     // Getters and Setters

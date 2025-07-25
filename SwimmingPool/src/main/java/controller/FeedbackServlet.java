@@ -94,7 +94,7 @@ public class FeedbackServlet extends HttpServlet {
                             Course course = CourseDAO.getCourseById(feedback.getCourseId());
                             request.setAttribute("relatedCourse", course); // Pass the course object to the JSP
                         } else if ("Coach".equals(feedback.getFeedbackType()) && feedback.getCoachId() > 0) {
-                            Coach coach = CoachDAO.getById(feedback.getCoachId());
+                            Coach coach = CoachDAO.getCoachById(feedback.getCoachId());
                             request.setAttribute("relatedCoach", coach); // Pass the coach object to the JSP
                         }
                     } catch (SQLException e) {
@@ -171,7 +171,7 @@ public class FeedbackServlet extends HttpServlet {
             // --- NEW LOGIC ---
             // Fetch lists for the dropdowns from your DAOs
             List<Course> courses = CourseDAO.getAllCourses();
-            List<Coach> coaches = CoachDAO.getAll();
+            List<Coach> coaches = CoachDAO.getAllCoaches();
 
             // Set the lists as request attributes so the JSP can access them
             request.setAttribute("courses", courses);
@@ -375,7 +375,7 @@ public class FeedbackServlet extends HttpServlet {
 
             // 2. Fetch all courses and coaches to easily look up their names
             List<Course> allCourses = CourseDAO.getAllCourses();
-            List<Coach> allCoaches = CoachDAO.getAll();
+            List<Coach> allCoaches = CoachDAO.getAllCoaches();
 
             // 3. Convert lists to Maps for efficient O(1) lookups in the JSP
             // This prevents multiple database calls inside a loop

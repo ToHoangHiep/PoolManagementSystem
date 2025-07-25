@@ -13,6 +13,7 @@ public class SwimCourseDAO {
         this.conn = conn;
     }
 
+    // Lấy tất cả khóa học
     public List<SwimCourse> getAllCourses() throws SQLException {
         List<SwimCourse> list = new ArrayList<>();
         String sql = "SELECT * FROM Courses";
@@ -35,6 +36,7 @@ public class SwimCourseDAO {
         return list;
     }
 
+    // Thêm khóa học mới
     public void addCourse(SwimCourse course) throws SQLException {
         String sql = "INSERT INTO Courses (name, description, price, duration, estimated_session_time, student_description, schedule_description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -50,6 +52,7 @@ public class SwimCourseDAO {
         }
     }
 
+    // Lấy thông tin khóa học theo ID
     public SwimCourse getCourseById(int id) throws SQLException {
         String sql = "SELECT * FROM Courses WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -72,6 +75,7 @@ public class SwimCourseDAO {
         return null;
     }
 
+    // Cập nhật khóa học
     public void updateCourse(SwimCourse course) throws SQLException {
         String sql = "UPDATE Courses SET name=?, description=?, price=?, duration=?, estimated_session_time=?, student_description=?, schedule_description=?, status=? WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -88,35 +92,17 @@ public class SwimCourseDAO {
         }
     }
 
+    // Xóa khóa học và các feedback liên quan
     public void deleteCourse(int courseId) throws SQLException {
         String[] queries = {
-                // 1. Xóa FeedbackReplies trước (liên kết qua Feedbacks)
-                "DELETE FROM FeedbackReplies WHERE feedback_id IN (SELECT id FROM Feedbacks WHERE course_id = ?)",
-
-                // 2. Xóa Feedbacks liên quan đến Course
+                // Chỉ xóa Feedbacks liên quan đến khóa học
                 "DELETE FROM Feedbacks WHERE course_id = ?",
-
-                // 3. Xóa Blog_Comments trước (liên kết qua Blogs)
-                "DELETE FROM Blog_Comments WHERE blog_id IN (SELECT id FROM Blogs WHERE course_id = ?)",
-
-                // 4. Xóa Blogs liên quan đến Course
-                "DELETE FROM Blogs WHERE course_id = ?",
-
-                // 5. Xóa Class_Registrations liên quan đến Class trong khóa học
-                "DELETE FROM Class_Registrations WHERE class_id IN (SELECT id FROM Classes WHERE course_id = ?)",
-
-                // 6. Xóa Schedules liên quan đến Class trong khóa học
-                "DELETE FROM Schedules WHERE class_id IN (SELECT id FROM Classes WHERE course_id = ?)",
-
-                // 7. Xóa Classes thuộc Course
-                "DELETE FROM Classes WHERE course_id = ?",
-
-                // 8. Cuối cùng, xóa Course
+                // Xóa chính khóa học
                 "DELETE FROM Courses WHERE id = ?"
         };
 
         try (Connection conn = DBConnect.getConnection()) {
-            conn.setAutoCommit(false); // dùng transaction
+            conn.setAutoCommit(false);
 
             try {
                 for (String sql : queries) {
@@ -125,15 +111,13 @@ public class SwimCourseDAO {
                         stmt.executeUpdate();
                     }
                 }
-
-                conn.commit(); // tất cả thành công
+                conn.commit();
             } catch (SQLException ex) {
-                conn.rollback(); // lỗi thì rollback lại toàn bộ
+                conn.rollback();
                 throw ex;
             } finally {
                 conn.setAutoCommit(true);
             }
         }
     }
-
 }

@@ -128,7 +128,7 @@ public class CourseServlet extends HttpServlet {
 
             // Fetch all data needed for the form dropdowns
             List<Course> courses = CourseDAO.getAllCourses();
-            List<Coach> coaches = CoachDAO.getAll();
+            List<Coach> coaches = CoachDAO.getAllCoaches();
             request.setAttribute("courses", courses);
             request.setAttribute("coaches", coaches);
 
@@ -152,7 +152,7 @@ public class CourseServlet extends HttpServlet {
             CourseForm courseForm = CourseFormDAO.getById(formId);
 
             Course course = CourseDAO.getCourseById(courseForm.getCourse_id());
-            Coach coach = CoachDAO.getById(courseForm.getCoach_id());
+            Coach coach = CoachDAO.getCoachById(courseForm.getCoach_id());
 
             boolean isManagement = user.getRole().getId() != 3;
 
@@ -332,7 +332,7 @@ public class CourseServlet extends HttpServlet {
             }
 
             Course course = CourseDAO.getCourseById(form.getCourse_id());
-            Coach coach = CoachDAO.getById(form.getCoach_id());
+            Coach coach = CoachDAO.getCoachById(form.getCoach_id());
 
             if (course == null || coach == null) {
                 request.getSession().setAttribute(alert_message, "Could not retrieve full details (missing course or coach). Cannot send emails.");

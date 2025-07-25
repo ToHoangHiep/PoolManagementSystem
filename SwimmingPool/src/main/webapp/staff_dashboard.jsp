@@ -17,16 +17,12 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; }
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        /* Topbar */
         .topbar {
             background: linear-gradient(to right, #0078d7, #005a9e);
             color: white;
-            padding: 16px 24px;
+            padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -38,32 +34,67 @@
             font-weight: bold;
         }
 
-        .auth {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .auth a {
-            color: white;
-            text-decoration: underline;
-            font-weight: 500;
-        }
-
-        .auth input[type="submit"] {
-            padding: 6px 14px;
-            border: none;
-            background-color: white;
-            color: #005a9e;
-            border-radius: 6px;
-            font-weight: bold;
+        .dropdown {
+            position: relative;
+            display: inline-block;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
-        .auth input[type="submit"]:hover {
-            background-color: #ffcc00;
-            color: #003d6a;
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            transition: 0.3s;
+        }
+
+        .user-avatar:hover {
+            border-color: #ffcc00;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            color: #333;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 6px;
+            padding: 12px;
+            z-index: 999;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu .greeting {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .dropdown-menu a,
+        .dropdown-menu button {
+            display: block;
+            width: 100%;
+            padding: 8px 10px;
+            margin: 4px 0;
+            border: none;
+            background: none;
+            color: #0078d7;
+            text-align: left;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .dropdown-menu a:hover,
+        .dropdown-menu button:hover {
+            background-color: #f1f1f1;
         }
 
         .main-wrapper {
@@ -71,7 +102,6 @@
             height: calc(100vh - 60px);
         }
 
-        /* Sidebar */
         .sidebar {
             width: 220px;
             background-color: rgba(255, 255, 255, 0.6);
@@ -103,59 +133,6 @@
             min-width: 20px;
         }
 
-        /* Dropdown container */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        /* Nút chính */
-        .dropbtn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 18px;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        /* Nội dung dropdown */
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 210px;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 4px;
-        }
-
-        /* Các link trong dropdown */
-        .dropdown-content a {
-            color: black;
-            padding: 10px 14px;
-            text-decoration: none;
-            display: block;
-            font-size: 14px;
-        }
-
-        /* Hover */
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        /* Hiển thị dropdown khi hover */
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .dropdown:hover .dropbtn {
-            background-color: #3e8e41;
-        }
-
-
-        /* Background */
         .hero-section {
             flex: 1;
             background-image: url('https://images.pexels.com/photos/6437583/pexels-photo-6437583.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
@@ -170,11 +147,16 @@
 <!-- Topbar -->
 <div class="topbar">
     <h1>Swimming Pool</h1>
-    <div class="auth">
-        Xin chào, <a href="userprofile"><%= user.getFullName() %></a>
-        <form action="logout" method="post" style="display:inline;">
-            <input type="submit" value="Đăng xuất">
-        </form>
+    <div class="dropdown">
+        <img class="user-avatar" src="images/<%= user.getProfilePicture() != null && !user.getProfilePicture().isEmpty() ? user.getProfilePicture() : "default-avatar.png" %>" alt="Avatar" />
+        <div class="dropdown-menu">
+            <div class="greeting">Xin chào, <strong><%= user.getFullName() %></strong></div>
+            <a href="userprofile"><i class="fas fa-id-card"></i> Hồ sơ của tôi</a>
+            <a href="change-password.jsp"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+            <form action="logout" method="post">
+                <button type="submit"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -182,12 +164,9 @@
 <div class="main-wrapper">
     <!-- Sidebar -->
     <div class="sidebar">
-        <a href="equipment?mode=rental"><i class="fas fa-handshake"></i> Thuê thiết bị
-        </a>
-        <a href="equipment?mode=buy"><i class="fas fa-shopping-cart"></i> Mua thiết bị
-        </a>
-        <a href="purchase"><i class="fas fa-ticketpurchase"></i> Vé bơi
-        </a>
+        <a href="equipment?mode=rental"><i class="fas fa-handshake"></i> Thuê thiết bị</a>
+        <a href="equipment?mode=buy"><i class="fas fa-shopping-cart"></i> Mua thiết bị</a>
+        <a href="purchase"><i class="fas fa-ticket-alt"></i> Vé bơi</a>
         <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
         <div class="dropdown">
             <button class="dropbtn"><i class="fas fa-box"></i> Danh mục thiết bị</button>

@@ -13,6 +13,8 @@ public class User {
     private String gender; // Male, Female, Other
     private String userStatus; // Active, Deactive, Banned
     private Role role;
+    private String profilePicture;
+
     private Date createdAt;
     private Date updatedAt;
 
@@ -108,6 +110,14 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
