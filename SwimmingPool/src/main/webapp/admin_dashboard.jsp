@@ -170,20 +170,22 @@
 
 <div class="main-wrapper">
     <div class="sidebar">
-        <a href="admin-user"><i class="fas fa-users-cog"></i> Quản lý người dùng</a>
-        <a href="inventory"><i class="fas fa-warehouse"></i> Quản lý kho</a>
+        <div style="padding-left: 20px;">
+            <div style="font-weight:bold; margin-bottom:8px; color:#0078d7;"><i class="fas fa-swimmer"></i> Quản lý tài khoản</div>
+            <a href="admin-user" style="padding-left: 30px;"><i class="fas fa-book"></i> Quản lý người dùng </a>
+            <a href="staff-registration" style="padding-left: 30px;"><i class="fas fa-user-plus"></i> Tạo tài khoản cho nhân viên</a>
+        </div>
 
         <div style="padding-left: 20px;">
             <div style="font-weight:bold; margin-bottom:8px; color:#0078d7;"><i class="fas fa-swimmer"></i> Quản lý khóa học</div>
             <a href="swimcourse" style="padding-left: 30px;"><i class="fas fa-book"></i> Khóa học</a>
             <a href="course?action=list_form" style="padding-left: 30px;"><i class="fas fa-user-plus"></i> Đăng kí mới</a>
         </div>
-
+        <a href="inventory"><i class="fas fa-warehouse"></i> Quản lý kho</a>
         <a href="feedback?action=list"><i class="fas fa-file"></i> Quản lý Phản hồi</a>
         <a href="MaintenanceServlet"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
         <a href="coach-list"><i class="fas fa-user-tie"></i> Quản lý huấn luyện viên</a>
         <a href="pool-area"><i class="fas fa-warehouse"></i> Quản bể bơi</a>
-        <a href="staff-registration"><i class="fas fa-user-plus"></i> Tạo tài khoản cho nhân viên</a>
         <a href="course?action=list_form"><i class="fa-brands fa-discourse"></i> Lịch sử Đăng kí khóa học</a>
     </div>
 

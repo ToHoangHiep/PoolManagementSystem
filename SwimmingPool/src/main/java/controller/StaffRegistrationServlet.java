@@ -3,7 +3,8 @@ package controller;
 import dal.UserDAO;
 import dal.StaffInitialSetupDAO;
 import model.User;
-import model.Role; // Import Role model
+import model.Role;
+import utils.EmailUtils; // Import EmailUtils
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -84,15 +85,40 @@ public class StaffRegistrationServlet extends HttpServlet {
                         System.err.println("ERROR (StaffRegistrationServlet): Role 'Staff' (ID 5) not found in database.");
                     } else {
                         // Transaction 2: Chèn user mới với thông tin tối thiểu
-                        // user_status có thể là "Active" hoặc "Pending_Setup" tùy vào quy trình của bạn
-                        int newUserId = UserDAO.insertUserMinimal(email, password, staffRole.getId(), "Active"); // Hoặc "Pending_Setup"
+                        int newUserId = UserDAO.insertUserMinimal(email, password, staffRole.getId(), "Active");
 
                         if (newUserId != -1) {
                             // Transaction 3: Thêm bản ghi vào StaffInitialSetup
                             staffSetupDAO.insertStaffInitialSetup(newUserId);
+
+                            // ---- BẮT ĐẦU PHẦN TÍCH HỢP GỬI EMAIL ----
+                            String subject = "Thông tin tài khoản Nhân viên của bạn";
+                            // Lấy URL cơ sở của ứng dụng
+                            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+                            String loginUrl = baseUrl + "/login";
+
+                            String emailBody = "Chào bạn,\n\n"
+                                    + "Một tài khoản nhân viên đã được tạo cho bạn trong hệ thống quản lý bể bơi của chúng tôi.\n"
+                                    + "Dưới đây là thông tin đăng nhập của bạn:\n\n"
+                                    + "Email: " + email + "\n"
+                                    + "Mật khẩu: " + password + "\n\n"
+                                    + "Vì lý do bảo mật, bạn **phải đổi mật khẩu** khi đăng nhập lần đầu tiên.\n"
+                                    + "Vui lòng truy cập hệ thống tại: " + loginUrl + "\n\n"
+                                    + "Trân trọng,\n"
+                                    + "Hệ thống quản lý bể bơi.";
+
+                            try {
+                                EmailUtils.sendEmail(email, subject, emailBody);
+                                System.out.println("DEBUG (StaffRegistrationServlet): Email sent successfully to " + email);
+                            } catch (Exception emailEx) {
+                                System.err.println("ERROR (StaffRegistrationServlet): Failed to send email to " + email + " - " + emailEx.getMessage());
+
+                            }
+
+
                             System.out.println("DEBUG (StaffRegistrationServlet): New staff account created successfully for email: " + email + ", User ID: " + newUserId);
-                            session.setAttribute("successMessage", "Đăng ký tài khoản nhân viên thành công cho email: " + email);
-                            response.sendRedirect("staff-registration"); // Chuyển hướng về trang đăng ký để tiếp tục hoặc hiển thị thông báo
+                            session.setAttribute("successMessage", "Đăng ký tài khoản nhân viên thành công cho email: " + email + ". Thông tin đã được gửi đến email này.");
+                            response.sendRedirect("staff-registration");
                             return;
                         } else {
                             errorMessage = "Không thể tạo tài khoản nhân viên. Vui lòng thử lại.";
@@ -112,7 +138,7 @@ public class StaffRegistrationServlet extends HttpServlet {
         }
 
         request.setAttribute("errorMessage", errorMessage);
-        request.setAttribute("email", email); // Giữ lại email đã nhập
+        request.setAttribute("email", email);
         request.getRequestDispatcher("register-staff.jsp").forward(request, response);
     }
 }
