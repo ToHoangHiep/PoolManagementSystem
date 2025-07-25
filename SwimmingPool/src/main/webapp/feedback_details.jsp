@@ -5,27 +5,28 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 
 <%
-    // --- Data Retrieval from Servlet ---
+    // --- Lấy dữ liệu từ Servlet ---
     Feedback feedback = (Feedback) request.getAttribute("feedback");
     if (feedback == null) {
-        session.setAttribute("alert_message", "The requested feedback could not be found.");
+        session.setAttribute("alert_message", "Không tìm thấy phản hồi được yêu cầu.");
         response.sendRedirect("feedback?action=list");
         return;
     }
 
-    // Get related objects passed from the servlet
+    // Lấy các đối tượng liên quan được truyền từ servlet
     Course relatedCourse = (Course) request.getAttribute("relatedCourse");
     Coach relatedCoach = (Coach) request.getAttribute("relatedCoach");
 
-    SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, yyyy 'at' HH:mm");
+    // Định dạng ngày tháng cho phù hợp với tiếng Việt
+    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm 'ngày' dd/MM/yyyy");
 %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback Details</title>
+    <title>Chi tiết Phản hồi</title>
     <!-- Bootstrap CSS -->
     <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -48,6 +49,28 @@
 </head>
 <body>
 
+<%
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
+    if (alertMessage != null) {
+        String alertAction = (String) request.getAttribute("alert_action");
+%>
+<script>
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
+</script>
+<%
+    }
+%>
+
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-9">
@@ -55,47 +78,53 @@
                 <div class="card-header bg-white py-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">
-                            <i class="fas fa-comment-dots me-2 text-primary"></i>Feedback Details
+                            <i class="fas fa-comment-dots me-2 text-primary"></i>Chi tiết Phản hồi
                         </h3>
                         <a href="feedback?action=list" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Back to Feedback List
+                            <i class="fas fa-arrow-left me-1"></i>Quay lại Danh sách Phản hồi
                         </a>
                     </div>
                 </div>
 
                 <div class="card-body p-4">
-                    <!-- User and Date Info -->
+                    <!-- Thông tin người dùng và ngày tháng -->
                     <div class="d-flex flex-wrap justify-content-between text-muted mb-4 pb-3 border-bottom">
                         <div>
-                            <span class="details-label">Submitted by:</span>
+                            <span class="details-label">Gửi bởi:</span>
                             <%= feedback.getUserName() %> (<a href="mailto:<%= feedback.getUserEmail() %>"><%= feedback.getUserEmail() %></a>)
                         </div>
                         <div>
-                            <span class="details-label">Date:</span>
+                            <span class="details-label">Ngày gửi:</span>
                             <%= sdf.format(feedback.getCreatedAt()) %>
                         </div>
                     </div>
 
                     <div class="row">
-                        <!-- Feedback Target -->
+                        <!-- Đối tượng Phản hồi -->
                         <div class="col-md-7 mb-4">
-                            <h5 class="mb-3">Feedback Target</h5>
-                            <%-- This block dynamically shows the feedback target --%>
+                            <h5 class="mb-3">Đối tượng Phản hồi</h5>
+                            <%-- Khối này hiển thị động đối tượng phản hồi --%>
                             <% if ("Course".equals(feedback.getFeedbackType()) && relatedCourse != null) { %>
-                            <p class="mb-1"><strong class="details-label">Type:</strong> Course</p>
-                            <p><strong class="details-label">Name:</strong> <%= relatedCourse.getName() %></p>
+                            <p class="mb-1"><strong class="details-label">Loại:</strong> Khóa học</p>
+                            <p><strong class="details-label">Tên:</strong> <%= relatedCourse.getName() %></p>
                             <% } else if ("Coach".equals(feedback.getFeedbackType()) && relatedCoach != null) { %>
-                            <p class="mb-1"><strong class="details-label">Type:</strong> Coach</p>
-                            <p><strong class="details-label">Name:</strong> <%= relatedCoach.getFullName() %></p>
-                            <% } else { %>
-                            <p class="mb-1"><strong class="details-label">Type:</strong> General</p>
-                            <p><strong class="details-label">Category:</strong> <%= feedback.getGeneralFeedbackType() %></p>
+                            <p class="mb-1"><strong class="details-label">Loại:</strong> Huấn luyện viên</p>
+                            <p><strong class="details-label">Tên:</strong> <%= relatedCoach.getFullName() %></p>
+                            <% } else {
+                                String generalType = feedback.getGeneralFeedbackType();
+                                String translatedGeneralType = "Khác"; // Mặc định
+                                if ("Food".equals(generalType)) translatedGeneralType = "Đồ ăn & Dịch vụ";
+                                if ("Service".equals(generalType)) translatedGeneralType = "Dịch vụ Khách hàng";
+                                if ("Facility".equals(generalType)) translatedGeneralType = "Cơ sở vật chất";
+                            %>
+                            <p class="mb-1"><strong class="details-label">Loại:</strong> Chung</p>
+                            <p><strong class="details-label">Chủ đề:</strong> <%= translatedGeneralType %></p>
                             <% } %>
                         </div>
 
-                        <!-- Rating -->
+                        <!-- Đánh giá -->
                         <div class="col-md-5 mb-4">
-                            <h5 class="mb-3">Overall Rating</h5>
+                            <h5 class="mb-3">Đánh giá Tổng thể</h5>
                             <div class="d-flex align-items-center">
                                 <span class="rating-display me-3"><%= feedback.getRating() %> / 10</span>
                                 <div class="flex-grow-1">
@@ -109,9 +138,9 @@
 
                     <hr class="my-3">
 
-                    <!-- Content -->
+                    <!-- Nội dung -->
                     <div>
-                        <h5 class="mb-3">Feedback Content</h5>
+                        <h5 class="mb-3">Nội dung Phản hồi</h5>
                         <p class="text-secondary" style="white-space: pre-wrap;"><%= feedback.getContent() %></p>
                     </div>
                 </div>
@@ -123,19 +152,19 @@
 <!-- Bootstrap JS -->
 <script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-    // This script dynamically colors the rating bar based on the score
+    // Script này tô màu thanh đánh giá một cách linh động dựa trên điểm số
     document.addEventListener('DOMContentLoaded', function() {
         const rating = <%= feedback.getRating() %>;
         const ratingBarInner = document.getElementById('ratingBarInner');
-        const percentage = rating * 10; // Convert rating to percentage
+        const percentage = rating * 10; // Chuyển đổi điểm đánh giá sang phần trăm
 
         let color;
         if (rating <= 3) {
-            color = 'var(--bs-danger)';
+            color = 'var(--bs-danger)'; // Màu đỏ
         } else if (rating <= 7) {
-            color = 'var(--bs-warning)';
+            color = 'var(--bs-warning)'; // Màu vàng
         } else {
-            color = 'var(--bs-success)';
+            color = 'var(--bs-success)'; // Màu xanh
         }
 
         ratingBarInner.style.width = percentage + '%';

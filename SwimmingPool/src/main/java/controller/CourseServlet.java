@@ -6,7 +6,6 @@ import dal.CoachDAO;
 import dal.CourseDAO;
 import dal.CourseFormDAO;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +31,11 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
+        if (action == null) {
+            listCourse(request, response);
+            return;
+        }
+
         switch (action) {
             case "create" -> createCourse(request, response);
             case "view" -> detailCourse(request, response);
@@ -45,7 +49,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void createCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_create.jsp");
+        if (isUserNotAllowed(request, response, "course_create.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         request.getRequestDispatcher("course_create.jsp").forward(request, response);
     }
@@ -69,7 +76,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void editCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_edit.jsp");
+        if (isUserNotAllowed(request, response, "course_edit.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         Course course = CourseDAO.getCourseById(courseId);
@@ -78,7 +88,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void deleteCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_delete.jsp");
+        if (isUserNotAllowed(request, response, "course_delete.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         Course course = CourseDAO.getCourseById(courseId);
@@ -114,7 +127,7 @@ public class CourseServlet extends HttpServlet {
 
             // Fetch all data needed for the form dropdowns
             List<Course> courses = CourseDAO.getAllCourses();
-            List<Coach> coaches = CoachDAO.getAll();
+            List<Coach> coaches = CoachDAO.getAllCoaches();
             request.setAttribute("courses", courses);
             request.setAttribute("coaches", coaches);
 
@@ -126,15 +139,34 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_form_details.jsp");
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(login_link);
+            return;
+        }
 
         try {
             int formId = Integer.parseInt(request.getParameter("formId"));
             CourseForm courseForm = CourseFormDAO.getById(formId);
 
             Course course = CourseDAO.getCourseById(courseForm.getCourse_id());
-            Coach coach = CoachDAO.getById(courseForm.getCoach_id());
+            Coach coach = CoachDAO.getCoachById(courseForm.getCoach_id());
 
+            boolean isManagement = user.getRole().getId() != 3;
+
+            if (!isManagement && courseForm.getUser_id() != user.getId()) {
+                request.setAttribute(alert_message, "You are not allowed to view this form!");
+                request.setAttribute(alert_action, "course_form_manage");
+                request.getRequestDispatcher("course_form_details.jsp").forward(request, response);
+                return;
+            }
+
+            if (courseForm.getUser_id() != -1){
+                request.setAttribute("user", UserDAO.getUserById(courseForm.getUser_id()));
+            }
+
+            request.setAttribute("isManagement", isManagement);
             request.setAttribute("course", course);
             request.setAttribute("coach", coach);
             request.setAttribute("courseForm", courseForm);
@@ -145,9 +177,27 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormManage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_form_manage.jsp");
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(login_link);
+            return;
+        }
+
+        boolean isManagement = user.getRole().getId() != 3;
 
         List<CourseForm> courseForms = CourseFormDAO.getAll();
+
+        if (!isManagement) {
+            courseForms = courseForms.stream()
+                    .filter(form -> form.getUser_id() == user.getId())
+                    .toList();
+        } else {
+            courseForms = courseForms.stream()
+                    .filter(form -> form.getHas_processed() == 0 || form.getUser_id() == user.getId())
+                    .toList();
+        }
+
         request.setAttribute("courseForms", courseForms);
         request.getRequestDispatcher("course_form_manage.jsp").forward(request, response);
     }
@@ -161,12 +211,34 @@ public class CourseServlet extends HttpServlet {
             case "delete" -> deleteCoursePost(request, response);
             case "create_form" -> createCourseFormPost(request, response);
             case "form_confirmed" -> confirmForm(request, response);
+            case "form_rejected" -> cancelForm(request, response);
+            case "deactivate" -> deactivateCourse(request, response);
             default -> listCourse(request, response);
         }
     }
 
+    private void deactivateCourse(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            CourseDAO courseDAO = new CourseDAO();
+            boolean success = courseDAO.updateCourseStatus(courseId, "Inactive");
+
+            if (success) {
+                request.getSession().setAttribute("alert_message", "Khóa học đã được tạm ngưng thành công.");
+            } else {
+                request.getSession().setAttribute("alert_message", "Tạm ngưng khóa học thất bại.");
+            }
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("alert_message", "Mã khóa học không hợp lệ.");
+        }
+        response.sendRedirect("course?action=list");
+    }
+
     private void createCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_create.jsp");
+        if (isUserNotAllowed(request, response, "course_create.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         Course c = new Course();
         c.setName(request.getParameter("name"));
@@ -186,7 +258,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void editCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_edit.jsp");
+        if (isUserNotAllowed(request, response, "course_edit.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         String name = request.getParameter("name");
@@ -216,7 +291,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void deleteCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_delete.jsp");
+        if (isUserNotAllowed(request, response, "course_delete.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         if (!CourseDAO.deleteCourse(courseId)){
@@ -227,7 +305,10 @@ public class CourseServlet extends HttpServlet {
 
     private void confirmForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Authorization Check
-        isUserAllowed(request, response, "course_form_manage.jsp");
+        if (isUserNotAllowed(request, response, "course_form_details.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int formId;
         try {
@@ -248,14 +329,14 @@ public class CourseServlet extends HttpServlet {
             }
 
             // Prevent re-sending emails for an already confirmed form
-            if (form.isHas_processed()) {
+            if (form.getHas_processed() != 0) {
                 request.getSession().setAttribute(alert_message, "This form has already been confirmed.");
                 response.sendRedirect("course?action=list_form");
                 return;
             }
 
             Course course = CourseDAO.getCourseById(form.getCourse_id());
-            Coach coach = CoachDAO.getById(form.getCoach_id());
+            Coach coach = CoachDAO.getCoachById(form.getCoach_id());
 
             if (course == null || coach == null) {
                 request.getSession().setAttribute(alert_message, "Could not retrieve full details (missing course or coach). Cannot send emails.");
@@ -285,7 +366,7 @@ public class CourseServlet extends HttpServlet {
             }
 
             // 4. Update the form status in the database
-            if (!CourseFormDAO.setFormStatus(formId)){
+            if (!CourseFormDAO.setFormStatus(formId, 1, null)){
                 request.getSession().setAttribute(alert_message, "Failed to update form status.");
                 return;
             }
@@ -326,6 +407,105 @@ public class CourseServlet extends HttpServlet {
         response.sendRedirect("course?action=list_form");
     }
 
+    private void cancelForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 1. Authorization Check
+        if (isUserNotAllowed(request, response, "course_form_details.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
+
+        int formId;
+        try {
+            formId = Integer.parseInt(request.getParameter("formId"));
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute(alert_message, "Invalid Form ID provided.");
+            response.sendRedirect("course?action=list_form");
+            return;
+        }
+
+        try {
+            // 2. Fetch all required data from the database
+            CourseForm form = CourseFormDAO.getById(formId);
+            if (form == null) {
+                request.getSession().setAttribute(alert_message, "Course form with ID " + formId + " not found.");
+                response.sendRedirect("course?action=list_form");
+                return;
+            }
+
+            // Prevent re-sending emails for an already confirmed form
+            if (form.getHas_processed() != 0) {
+                request.getSession().setAttribute(alert_message, "This form has already been confirmed.");
+                response.sendRedirect("course?action=list_form");
+                return;
+            }
+
+            Course course = CourseDAO.getCourseById(form.getCourse_id());
+            Coach coach = CoachDAO.getCoachById(form.getCoach_id());
+
+            if (course == null || coach == null) {
+                request.getSession().setAttribute(alert_message, "Could not retrieve full details (missing course or coach). Cannot send emails.");
+                response.sendRedirect("course?action=list_form");
+                return;
+            }
+
+            // 3. Determine student's name and email
+            String studentEmail;
+            String studentName;
+            if (form.getUser_id() > 0) {
+                // Case 1: A registered user signed up
+                User student = UserDAO.getUserById(form.getUser_id());
+                if (student != null) {
+                    studentEmail = student.getEmail();
+                    studentName = student.getFullName(); // Assumes User model has getFullName()
+                } else {
+                    // This is an edge case, but good to handle
+                    request.getSession().setAttribute(alert_message, "Registered user with ID " + form.getUser_id() + " not found. Cannot send email.");
+                    response.sendRedirect("course?action=list_form");
+                    return;
+                }
+            } else {
+                // Case 2: A guest signed up
+                studentEmail = form.getUser_email();
+                studentName = form.getUser_fullName();
+            }
+
+
+            String reason = request.getParameter("reason");
+
+            // 4. Update the form status in the database
+            if (!CourseFormDAO.setFormStatus(formId, 2, reason)){
+                request.getSession().setAttribute(alert_message, "Failed to update form status.");
+                return;
+            }
+
+            // 5. Compose and send emails
+            // --- Email to Student ---
+            String studentSubject = "Course Registration Confirmed: " + course.getName();
+            String studentBody = "Dear " + studentName + ",\n\n"
+                    + "We are unable get you the course: '" + course.getName() + "'.\n"
+                    + "Your assigned coach is " + coach.getFullName() + ".\n\n"
+                    + "The reason is: " + reason + ".\n\n"
+                    + "We are sadden to tell you this new.\n\n"
+                    + "You are always welcome to sign up for new courses at our website.\n\n"
+                    + "Best regards,\n"
+                    + "The Swimming Pool Management Team";
+            EmailUtils.sendEmail(studentEmail, studentSubject, studentBody);
+
+            request.getSession().setAttribute(alert_message, "Form rejected successfully. Emails have been sent to the student.");
+
+        } catch (SQLException e) {
+            log("Database error during form confirmation: " + e.getMessage());
+            request.getSession().setAttribute(alert_message, "A database error occurred. Please try again.");
+        } catch (Exception e) {
+            // This will catch potential email sending errors
+            log("Error sending confirmation email: " + e.getMessage());
+            request.getSession().setAttribute(alert_message, "An error occurred while sending emails. The form status may not have been updated.");
+        }
+
+        // 6. Redirect back to the management page to prevent re-submission on refresh
+        response.sendRedirect("course?action=list_form");
+    }
+
     private void createCourseFormPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         int courseId = Integer.parseInt(request.getParameter("courseId"));
@@ -351,20 +531,24 @@ public class CourseServlet extends HttpServlet {
         response.sendRedirect("home.jsp"); // Redirect to a success page
     }
 
-    private void isUserAllowed(HttpServletRequest request, HttpServletResponse response, String current_page) throws ServletException, IOException {
+    private boolean isUserNotAllowed(HttpServletRequest request, HttpServletResponse response, String current_page) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
 
         if (user == null) {
             response.sendRedirect(login_link);
-            return;
+            return true;
         }
 
-        boolean isAllowed = user.getRole().getId() == 3;
+        boolean isAllowed = user.getRole().getId() != 3;
 
         if (!isAllowed) {
             request.setAttribute(alert_message, "You are not allowed to access this page!");
             request.setAttribute(alert_action, "course");
             request.getRequestDispatcher(current_page).forward(request, response);
+
+            return true;
         }
+
+        return false;
     }
 }

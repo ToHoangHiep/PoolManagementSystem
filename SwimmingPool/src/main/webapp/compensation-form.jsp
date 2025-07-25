@@ -1,12 +1,20 @@
+<%@ page import="model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user == null || user.getRole() == null || user.getRole().getId() != 5) {
+        response.sendRedirect("error.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Compensation - Swimming Pool</title>
+    <title>Tạo Bồi Thường - Hồ Bơi</title>
     <style>
         * {
             margin: 0;
@@ -302,24 +310,24 @@
 <body>
 <!-- Header -->
 <nav class="navbar">
-    <div class="logo">🏊‍♂️ Swimming Pool</div>
+    <div class="logo">🏊‍♂️ Hồ Bơi</div>
     <div class="auth">
-        <a href="${pageContext.request.contextPath}/profile" class="login-btn">Profile</a>
-        <a href="${pageContext.request.contextPath}/logout" class="register-btn">Logout</a>
+        <a href="${pageContext.request.contextPath}/profile" class="login-btn">Hồ Sơ</a>
+        <a href="${pageContext.request.contextPath}/logout" class="register-btn">Đăng Xuất</a>
     </div>
 </nav>
 
 <!-- Main Content -->
 <div class="content">
     <div class="page-header">
-        <h1>Create Equipment Compensation</h1>
-        <p>Record compensation for damaged, lost, or overdue equipment</p>
+        <h1>Tạo Bồi Thường Dụng Cụ</h1>
+        <p>Ghi nhận bồi thường cho dụng cụ bị hỏng, mất hoặc quá hạn</p>
     </div>
 
     <!-- Error Messages -->
     <c:if test="${not empty error}">
         <div class="alert alert-danger">
-            <strong>Error:</strong> ${error}
+            <strong>Lỗi:</strong> ${error}
         </div>
     </c:if>
 
@@ -327,41 +335,41 @@
         <!-- Rental Information (if selected) -->
         <c:if test="${not empty rental}">
             <div class="rental-info">
-                <h3>📋 Rental Information</h3>
+                <h3>📋 Thông tin thuê</h3>
                 <div class="info-grid">
                     <div class="info-item">
-                        <strong>Rental ID</strong>
+                        <strong>Mã thuê</strong>
                         #${rental.rentalId}
                     </div>
                     <div class="info-item">
-                        <strong>Customer</strong>
+                        <strong>Khách hàng</strong>
                             ${rental.customerName}
                     </div>
                     <div class="info-item">
-                        <strong>ID Card</strong>
+                        <strong>CMND/CCCD</strong>
                             ${rental.customerIdCard}
                     </div>
                     <div class="info-item">
-                        <strong>Equipment</strong>
+                        <strong>Dụng cụ</strong>
                             ${rental.itemName}
                     </div>
                     <div class="info-item">
-                        <strong>Quantity</strong>
-                            ${rental.quantity} units
+                        <strong>Số lượng</strong>
+                            ${rental.quantity} cái
                     </div>
                     <div class="info-item">
-                        <strong>Rental Date</strong>
+                        <strong>Ngày thuê</strong>
                         <fmt:formatDate value="${rental.rentalDate}" pattern="dd/MM/yyyy"/>
                     </div>
                     <div class="info-item">
-                        <strong>Status</strong>
+                        <strong>Trạng thái</strong>
                         <span style="color: ${rental.status == 'active' ? 'green' : 'orange'}">
                                 ${rental.status}
                         </span>
                     </div>
                     <c:if test="${not empty equipment}">
                         <div class="info-item">
-                            <strong>Import Price</strong>
+                            <strong>Giá nhập</strong>
                             <fmt:formatNumber value="${equipment.importPrice}" type="currency" currencyCode="VND"/>
                         </div>
                     </c:if>
@@ -373,15 +381,15 @@
         <form action="${pageContext.request.contextPath}/compensation" method="post" id="compensationForm">
             <!-- Rental Selection -->
             <div class="form-group">
-                <label for="rentalId">Select Rental <span style="color: red;">*</span></label>
+                <label for="rentalId">Chọn phiếu thuê <span style="color: red;">*</span></label>
                 <select id="rentalId" name="rentalId" required onchange="loadRentalInfo()">
-                    <option value="">-- Select a rental --</option>
+                    <option value="">-- Chọn phiếu thuê --</option>
                     <c:forEach var="activeRental" items="${activeRentals}">
                         <option value="${activeRental.rentalId}"
                             ${(rental != null && rental.rentalId == activeRental.rentalId) ||
                                     (selectedRentalId != null && selectedRentalId == activeRental.rentalId) ? 'selected' : ''}>
                             #${activeRental.rentalId} - ${activeRental.customerName} - ${activeRental.itemName}
-                            (Qty: ${activeRental.quantity})
+                            (SL: ${activeRental.quantity})
                         </option>
                     </c:forEach>
                 </select>
@@ -390,59 +398,59 @@
             <!-- Compensation Details -->
             <div class="form-row">
                 <div class="form-group">
-                    <label for="compensationType">Compensation Type <span style="color: red;">*</span></label>
+                    <label for="compensationType">Loại bồi thường <span style="color: red;">*</span></label>
                     <select id="compensationType" name="compensationType" required onchange="updateForm()">
-                        <option value="">-- Select type --</option>
-                        <option value="damaged" ${compensationType == 'damaged' ? 'selected' : ''}>🔧 Damaged Equipment</option>
-                        <option value="lost" ${compensationType == 'lost' ? 'selected' : ''}>❌ Lost Equipment</option>
-                        <option value="overdue_fee" ${compensationType == 'overdue_fee' ? 'selected' : ''}>⏰ Overdue Fee</option>
+                        <option value="">-- Chọn loại --</option>
+                        <option value="damaged" ${compensationType == 'damaged' ? 'selected' : ''}>🔧 Dụng cụ bị hỏng</option>
+                        <option value="lost" ${compensationType == 'lost' ? 'selected' : ''}>❌ Dụng cụ bị mất</option>
+                        <option value="overdue_fee" ${compensationType == 'overdue_fee' ? 'selected' : ''}>⏰ Phí quá hạn</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="compensationRate">Compensation Rate <span style="color: red;">*</span></label>
+                    <label for="compensationRate">Tỷ lệ bồi thường <span style="color: red;">*</span></label>
                     <select id="compensationRate" name="compensationRate" required>
-                        <option value="">-- Select rate --</option>
-                        <option value="0.1" ${compensationRate == 0.1 ? 'selected' : ''}>10% - Overdue Fee</option>
-                        <option value="0.2" ${compensationRate == 0.2 ? 'selected' : ''}>20% - Minor Damage</option>
-                        <option value="0.4" ${compensationRate == 0.4 ? 'selected' : ''}>40% - Moderate Damage</option>
-                        <option value="0.6" ${compensationRate == 0.6 ? 'selected' : ''}>60% - Major Damage</option>
-                        <option value="0.8" ${compensationRate == 0.8 ? 'selected' : ''}>80% - Severe Damage</option>
-                        <option value="1.0" ${compensationRate == 1.0 ? 'selected' : ''}>100% - Total Loss</option>
+                        <option value="">-- Chọn tỷ lệ --</option>
+                        <option value="0.1" ${compensationRate == 0.1 ? 'selected' : ''}>10% - Phí quá hạn</option>
+                        <option value="0.2" ${compensationRate == 0.2 ? 'selected' : ''}>20% - Hỏng nhẹ</option>
+                        <option value="0.4" ${compensationRate == 0.4 ? 'selected' : ''}>40% - Hỏng vừa</option>
+                        <option value="0.6" ${compensationRate == 0.6 ? 'selected' : ''}>60% - Hỏng nặng</option>
+                        <option value="0.8" ${compensationRate == 0.8 ? 'selected' : ''}>80% - Hỏng rất nặng</option>
+                        <option value="1.0" ${compensationRate == 1.0 ? 'selected' : ''}>100% - Mất hoàn toàn</option>
                     </select>
-                    <small style="color: #666;">Select appropriate compensation rate based on damage severity</small>
+                    <small style="color: #666;">Chọn tỷ lệ bồi thường phù hợp với mức độ hư hỏng</small>
                 </div>
             </div>
 
             <!-- Description -->
             <div class="form-group">
-                <label for="damageDescription">Description <span style="color: red;">*</span></label>
+                <label for="damageDescription">Mô tả <span style="color: red;">*</span></label>
                 <textarea id="damageDescription" name="damageDescription" required
-                          placeholder="Describe the damage, loss circumstances, or overdue details...">${param.damageDescription}</textarea>
+                          placeholder="Mô tả chi tiết về hư hỏng, mất mát hoặc tình trạng quá hạn...">${param.damageDescription}</textarea>
             </div>
 
             <!-- Server Calculation Result -->
             <c:if test="${not empty calculationResult}">
                 <div class="calculation-box">
-                    <h4>💰 Compensation Calculation</h4>
+                    <h4>💰 Tính toán bồi thường</h4>
                     <div class="calc-row">
-                        <span>Import Price (per unit):</span>
+                        <span>Giá nhập (mỗi cái):</span>
                         <span><fmt:formatNumber value="${calculationResult.importPrice}" type="currency" currencyCode="VND"/></span>
                     </div>
                     <div class="calc-row">
-                        <span>Quantity:</span>
+                        <span>Số lượng:</span>
                         <span>${calculationResult.quantity}</span>
                     </div>
                     <div class="calc-row">
-                        <span>Total Import Price:</span>
+                        <span>Tổng giá nhập:</span>
                         <span><fmt:formatNumber value="${calculationResult.importPriceTotal}" type="currency" currencyCode="VND"/></span>
                     </div>
                     <div class="calc-row">
-                        <span>Compensation Rate:</span>
+                        <span>Tỷ lệ bồi thường:</span>
                         <span><fmt:formatNumber value="${calculationResult.rate}" type="percent"/></span>
                     </div>
                     <div class="calc-row total">
-                        <span>Compensation Amount:</span>
+                        <span>Số tiền bồi thường:</span>
                         <span><fmt:formatNumber value="${calculationResult.totalAmount}" type="currency" currencyCode="VND"/></span>
                     </div>
                 </div>
@@ -455,24 +463,24 @@
                         <!-- Show Create button if calculation is done -->
                         <input type="hidden" name="action" value="create">
                         <button type="submit" class="btn btn-primary" onclick="console.log('=== Nhấn Create Button - Bắt đầu submit ===');">
-                            💾 Create Compensation
+                            💾 Tạo bồi thường
                         </button>
                         <!-- Thêm nút Recalculate -->
                         <button type="button" class="btn btn-success" onclick="recalculate()">
-                            🔄 Recalculate
+                            🔄 Tính lại
                         </button>
                     </c:when>
                     <c:otherwise>
                         <!-- Show Calculate button if no calculation yet -->
                         <input type="hidden" name="action" value="calculate" id="actionInput">
                         <button type="submit" class="btn btn-success" id="calculateBtn">
-                            🧮 Calculate Compensation
+                            🧮 Tính bồi thường
                         </button>
                     </c:otherwise>
                 </c:choose>
 
                 <a href="${pageContext.request.contextPath}/compensation" class="btn btn-secondary">
-                    ❌ Cancel
+                    ❌ Hủy
                 </a>
             </div>
         </form>
@@ -481,8 +489,8 @@
 
 <!-- Footer -->
 <footer>
-    <p>&copy; 2024 Swimming Pool Management System</p>
-    <p>Equipment Compensation & Rental Management</p>
+    <p>&copy; 2024 Hệ thống quản lý hồ bơi</p>
+    <p>Quản lý bồi thường & cho thuê dụng cụ</p>
 </footer>
 
 <script>
@@ -537,10 +545,6 @@
         form.submit();
     }
 
-
-
-
-
     // Form validation
     document.getElementById('compensationForm').addEventListener('submit', function(e) {
         const action = document.querySelector('input[name="action"]').value;
@@ -550,19 +554,19 @@
         const damageDescription = document.getElementById('damageDescription').value;
 
         if (!rentalId) {
-            alert('Please select a rental.');
+            alert('Vui lòng chọn phiếu thuê.');
             e.preventDefault();
             return;
         }
 
         if (!compensationType) {
-            alert('Please select compensation type.');
+            alert('Vui lòng chọn loại bồi thường.');
             e.preventDefault();
             return;
         }
 
         if (!compensationRate) {
-            alert('Please select compensation rate.');
+            alert('Vui lòng chọn tỷ lệ bồi thường.');
             e.preventDefault();
             return;
         }
@@ -570,13 +574,13 @@
         // For create action, check description
         if (action === 'create') {
             if (!damageDescription.trim()) {
-                alert('Please enter a description.');
+                alert('Vui lòng nhập mô tả.');
                 e.preventDefault();
                 return;
             }
 
             // Confirm creation
-            if (!confirm('Are you sure you want to create this compensation?\n\nThis will generate an invoice for the customer.')) {
+            if (!confirm('Bạn có chắc chắn muốn tạo bồi thường này?\n\nViệc này sẽ tạo hóa đơn cho khách hàng.')) {
                 e.preventDefault();
                 return;
             }
@@ -587,9 +591,9 @@
         if (submitBtn) {
             submitBtn.disabled = true;
             if (action === 'calculate') {
-                submitBtn.textContent = '🔄 Calculating...';
+                submitBtn.textContent = '🔄 Đang tính...';
             } else {
-                submitBtn.textContent = '⏳ Creating...';
+                submitBtn.textContent = '⏳ Đang tạo...';
             }
         }
     });
@@ -653,7 +657,7 @@
         form.submit();
     }
 
-    <%--Cải thiện UX:--%>
+    // Cải thiện UX:
     document.addEventListener('DOMContentLoaded', function() {
         const rentalId = document.getElementById('rentalId');
         const compensationType = document.getElementById('compensationType');
@@ -663,7 +667,7 @@
         function checkFormReady() {
             if (rentalId.value && compensationType.value && compensationRate.value) {
                 calculateBtn.classList.add('btn-warning');
-                calculateBtn.innerHTML = '🧮 Ready to Calculate!';
+                calculateBtn.innerHTML = '🧮 Sẵn sàng tính toán!';
             }
         }
 
@@ -671,7 +675,6 @@
         compensationType.addEventListener('change', checkFormReady);
         compensationRate.addEventListener('change', checkFormReady);
     });
-
 
     document.addEventListener('DOMContentLoaded', function() {
         console.clear();  // Clear console để sạch
@@ -690,12 +693,6 @@
         console.log('Form URL:', this.action);
         // Không e.preventDefault() để submit thật
     });
-
-    // Log cho button Create (thêm onclick tạm vào button trong HTML JSP)
-    // Trong JSP, sửa button Create thành:
-    // <button type="submit" class="btn btn-primary" onclick="console.log('=== Nhấn Create Button - Bắt đầu submit ===');">
-    //     💾 Create Compensation
-    // </button>
 
     // Log cho Recalculate
     function recalculate() {

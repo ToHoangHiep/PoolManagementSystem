@@ -4,10 +4,7 @@ import model.Feedback;
 import utils.DBConnect;
 import utils.Utils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,24 +17,24 @@ public class FeedbackDAO {
             ps.setInt(1, userId);
             ps.setString(2, feedbackType);
 
-            // Handle nullable values for coachId and courseId
-            if (coachId != null) {
-                ps.setInt(3, coachId);
-            } else {
-                ps.setNull(3, java.sql.Types.INTEGER);
-            }
-
-            if (courseId != null) {
-                ps.setInt(4, courseId);
-            } else {
-                ps.setNull(4, java.sql.Types.INTEGER);
-            }
-
-            // Handle nullable value for generalFeedbackType
-            if (Utils.CheckIfEmpty(generalFeedbackType)) {
-                ps.setString(5, generalFeedbackType);
-            } else {
-                ps.setNull(5, java.sql.Types.VARCHAR);
+            switch (feedbackType) {
+                case "Coach":
+                    ps.setInt(3, coachId);
+                    ps.setNull(4, Types.INTEGER);
+                    ps.setNull(5, Types.VARCHAR);
+                    break;
+                case "Course":
+                    ps.setNull(3, Types.INTEGER);
+                    ps.setInt(4, courseId);
+                    ps.setNull(5, Types.VARCHAR);
+                    break;
+                case "General":
+                    ps.setNull(3, Types.INTEGER);
+                    ps.setNull(4, Types.INTEGER);
+                    ps.setString(5, generalFeedbackType);
+                    break;
+                default:
+                    return false;
             }
 
             ps.setString(6, content);
@@ -124,12 +121,6 @@ public class FeedbackDAO {
         try {
             conn = DBConnect.getConnection();
             conn.setAutoCommit(false);
-
-            // Delete replies first
-            String deleteRepliesSql = "DELETE FROM FeedbackReplies WHERE feedback_id = ?";
-            deleteRepliesStmt = conn.prepareStatement(deleteRepliesSql);
-            deleteRepliesStmt.setInt(1, feedbackId);
-            deleteRepliesStmt.executeUpdate();
 
             // Delete feedback
             String deleteFeedbackSql = "DELETE FROM Feedbacks WHERE id = ?";

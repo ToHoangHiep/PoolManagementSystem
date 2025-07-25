@@ -8,20 +8,20 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 
 <%
-    // --- Security & Data Retrieval ---
+    // --- Kiểm tra bảo mật & Lấy dữ liệu ---
     User adminUser = (User) session.getAttribute("user");
     if (adminUser == null) {
         response.sendRedirect("login.jsp");
         return;
     }
-    // Example: Role 4 (Customer) cannot manage feedback.
+    // Ví dụ: Vai trò 4 (Khách hàng) không thể quản lý phản hồi.
     if (adminUser.getRole().getId() == 4) {
-        session.setAttribute("alert_message", "You do not have permission to access this page.");
+        session.setAttribute("alert_message", "Bạn không có quyền truy cập trang này.");
         response.sendRedirect("home.jsp");
         return;
     }
 
-    // Data from Servlet
+    // Dữ liệu từ Servlet
     List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedbackList");
     Map<Integer, Course> courseMap = (Map<Integer, Course>) request.getAttribute("courseMap");
     Map<Integer, Coach> coachMap = (Map<Integer, Coach>) request.getAttribute("coachMap");
@@ -29,11 +29,11 @@
 %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Feedback</title>
+    <title>Quản lý Phản hồi</title>
     <!-- Bootstrap CSS -->
     <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -46,14 +46,23 @@
 </head>
 <body>
 
-<%-- Session-based alert message handler --%>
 <%
-    String alertMessage = (String) session.getAttribute("alert_message");
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
     if (alertMessage != null) {
-        session.removeAttribute("alert_message");
+        String alertAction = (String) request.getAttribute("alert_action");
 %>
 <script>
-    alert('<%= alertMessage.replace("'", "\\'") %>');
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
 </script>
 <%
     }
@@ -61,28 +70,31 @@
 
 <div class="container my-5">
     <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h2 class="mb-0 h4">
-                <i class="fas fa-comments me-2 text-primary"></i>Manage User Feedback
+                <i class="fas fa-comments me-2 text-primary"></i>Quản lý Phản hồi Người dùng
             </h2>
+            <a href="admin_dashboard.jsp" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay về Trang quản lí
+            </a>
         </div>
         <div class="card-body">
             <% if (feedbackList == null || feedbackList.isEmpty()) { %>
             <div class="alert alert-info text-center">
-                There is no feedback to display at the moment.
+                Hiện tại không có phản hồi nào để hiển thị.
             </div>
             <% } else { %>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Submitted By</th>
-                        <th class="text-center">Type</th>
-                        <th>Target</th>
-                        <th class="text-center">Rating</th>
-                        <th>Date</th>
-                        <th class="text-end">Actions</th>
+                        <th>Mã</th>
+                        <th>Người gửi</th>
+                        <th class="text-center">Loại</th>
+                        <th>Đối tượng</th>
+                        <th class="text-center">Đánh giá</th>
+                        <th>Ngày gửi</th>
+                        <th class="text-end">Hành động</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -94,20 +106,37 @@
                             <%
                                 String type = feedback.getFeedbackType();
                                 String badgeClass = "bg-secondary";
-                                if ("Course".equals(type)) badgeClass = "bg-warning text-dark";
-                                if ("Coach".equals(type)) badgeClass = "bg-info text-dark";
-                                if ("General".equals(type)) badgeClass = "bg-success";
+                                String translatedType = "Chung"; // Mặc định
+                                if ("Course".equals(type)) {
+                                    badgeClass = "bg-primary";
+                                    translatedType = "Khóa học";
+                                }
+                                if ("Coach".equals(type)) {
+                                    badgeClass = "bg-info text-dark";
+                                    translatedType = "Huấn luyện viên";
+                                }
+                                if ("General".equals(type)) {
+                                    badgeClass = "bg-success";
+                                }
                             %>
-                            <span class="badge <%= badgeClass %>"><%= type %></span>
+                            <span class="badge <%= badgeClass %>"><%= translatedType %></span>
                         </td>
                         <td>
-                            <%-- Dynamically display the feedback target --%>
+                            <%-- Hiển thị động đối tượng phản hồi --%>
                             <% if ("Course".equals(type) && courseMap.containsKey(feedback.getCourseId())) { %>
                             <%= courseMap.get(feedback.getCourseId()).getName() %>
                             <% } else if ("Coach".equals(type) && coachMap.containsKey(feedback.getCoachId())) { %>
                             <%= coachMap.get(feedback.getCoachId()).getFullName() %>
+                            <% } else if ("General".equals(type)) {
+                                String generalType = feedback.getGeneralFeedbackType();
+                                String translatedGeneralType = "Khác"; // Mặc định
+                                if ("Food".equals(generalType)) translatedGeneralType = "Đồ ăn & Dịch vụ";
+                                if ("Service".equals(generalType)) translatedGeneralType = "Dịch vụ Khách hàng";
+                                if ("Facility".equals(generalType)) translatedGeneralType = "Cơ sở vật chất";
+                            %>
+                            <%= translatedGeneralType %>
                             <% } else { %>
-                            <%= feedback.getGeneralFeedbackType() %>
+                            <span class="text-muted">N/A</span>
                             <% } %>
                         </td>
                         <td class="text-center">
@@ -117,7 +146,7 @@
                         <td><%= sdf.format(feedback.getCreatedAt()) %></td>
                         <td class="text-end">
                             <a href="feedback?action=details&id=<%= feedback.getId() %>" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-eye me-1"></i>View Details
+                                <i class="fas fa-eye me-1"></i>Xem Chi tiết
                             </a>
                         </td>
                     </tr>

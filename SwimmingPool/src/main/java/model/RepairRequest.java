@@ -1,12 +1,16 @@
 package model;
-import java.util.Date;
+import java.sql.Timestamp;
 public class RepairRequest {
     private int requestId;
     private int inventoryId;
     private String itemName;
     private String reason;
-    private Date requestDate;
     private String status;
+    private Timestamp requestedAt;
+    private Timestamp reviewedAt;
+
+
+    // Getter, Setter
 
     public int getRequestId() {
         return requestId;
@@ -40,14 +44,6 @@ public class RepairRequest {
         this.reason = reason;
     }
 
-    public Date getRequestDate() {
-        return requestDate;
-    }
-
-    public void setRequestDate(Date requestDate) {
-        this.requestDate = requestDate;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -55,4 +51,24 @@ public class RepairRequest {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public Timestamp getRequestedAt() {
+        return requestedAt;
+    }
+
+    public void setRequestedAt(Timestamp requestedAt) {
+        this.requestedAt = requestedAt;
+    }
+
+    public Timestamp getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setReviewedAt(Timestamp reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
+
+
 }
+

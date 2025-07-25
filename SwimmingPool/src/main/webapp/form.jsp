@@ -1,10 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="model.Inventory" %>
+<%@ page import="model.User" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
   Inventory inv = (Inventory) request.getAttribute("inventory");
   String action = (inv != null) ? "update" : "insert";
 %>
+<%
+  User user = (User) session.getAttribute("user");
+  int managerId = user != null ? user.getId() : 2; // hoặc getManagerId() tùy thuộc hệ thống
+%>
+
 <html>
 <head>
   <title><%= inv != null ? "Cập nhật thiết bị" : "Thêm thiết bị mới" %></title>
@@ -20,51 +26,55 @@
   <input type="hidden" name="id" value="<%= inv.getInventoryId() %>"/>
   <% } %>
 
-  <label>Manager ID:</label>
-  <input type="number" name="manager_id" value="<%= inv != null ? inv.getManagerId() : "" %>" required/>
 
-  <label>Item Name:</label>
+  <input type="hidden" name="manager_id" value="<%= inv != null ? inv.getManagerId() : managerId %>" />
+
+
+  <label>Tên thiết bị:</label>
   <input type="text" name="item_name" value="<%= inv != null ? inv.getItemName() : "" %>" required/>
 
-  <label>Category:</label>
+  <label>Danh mục:</label>
   <select name="category_id" required>
     <c:forEach var="cat" items="${categoryList}">
       <option value="${cat.categoryId}"
               <c:if test="${inv != null and inv.categoryId == cat.categoryId}">selected</c:if>>
-          ${cat.categoryName}/${cat.categoryId}
+          ${cat.categoryName}
       </option>
     </c:forEach>
   </select>
 
-  <label>Quantity:</label>
-  <input type="number" name="quantity" value="<%= inv != null ? inv.getQuantity() : "" %>" required/>
+  <label>Số lượng:</label>
+  <input type="number" name="quantity" min="1"
+         oninput="validity.valid||(value='');"
+         value="<%= inv != null ? inv.getQuantity() : "" %>" required/>
 
-  <label>Unit:</label>
+  <label>Đơn vị:</label>
   <input type="text" name="unit" value="<%= inv != null ? inv.getUnit() : "" %>" required/>
 
-  <label>Giá nhập:</label>
-  <input type="number" step="0.01" name="import_price" value="<%= inv != null ? inv.getImportPrice() : "" %>" required/>
+  <label>Giá nhập (VNĐ):</label>
+  <input type="number" step="0.01" min="0"
+         oninput="validity.valid||(value='');"
+         name="import_price" value="<%= inv != null ? inv.getImportPrice() : "" %>" required/>
 
-  <label>Status:</label>
+  <label>Trạng thái:</label>
   <select name="status">
-    <option value="Available" <%= (inv != null && "Available".equals(inv.getStatus())) ? "selected" : "" %>>Available</option>
-    <option value="In Use" <%= (inv != null && "In Use".equals(inv.getStatus())) ? "selected" : "" %>>In Use</option>
-    <option value="Maintenance" <%= (inv != null && "Maintenance".equals(inv.getStatus())) ? "selected" : "" %>>Maintenance</option>
-    <option value="Broken" <%= (inv != null && "Broken".equals(inv.getStatus())) ? "selected" : "" %>>Broken</option>
+    <option value="Available" <%= (inv != null && "Available".equals(inv.getStatus())) ? "selected" : "" %>>Sẵn sàng</option>
+    <option value="In Use" <%= (inv != null && "In Use".equals(inv.getStatus())) ? "selected" : "" %>>Đang sử dụng</option>
+    <option value="Maintenance" <%= (inv != null && "Maintenance".equals(inv.getStatus())) ? "selected" : "" %>>Bảo trì</option>
+    <option value="Broken" <%= (inv != null && "Broken".equals(inv.getStatus())) ? "selected" : "" %>>Hỏng</option>
   </select>
 
-  <label>Usage:</label>
+  <label>Loại sử dụng:</label>
   <select name="usage_id">
-    <option value="1">item for rent</option>
-    <option value="2">item for maintainance</option>
-    <option value="3">item for sold</option>
-    <option value="1">item for facility</option>
-
+    <option value="1">Thiết bị cho thuê</option>
+    <option value="2">Thiết bị bảo trì</option>
+    <option value="3">Thiết bị bán</option>
+    <option value="4">Thiết bị cơ sở vật chất</option>
   </select>
 
   <br><br>
-  <input type="submit" value="Save"/>
-  <a href="inventory">Return</a>
+  <input type="submit" value="Lưu"/>
+  <a href="inventory">Quay lại</a>
 </form>
 
 </body>

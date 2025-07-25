@@ -258,96 +258,6 @@ public class CompensationDAO {
 
     // ===================== REPAIR METHODS =====================
 
-    /**
-     * Tạo repair record
-     */
-    public static boolean createRepair(EquipmentRepair repair) {
-        String sql = "INSERT INTO Equipment_Repairs (compensation_id, inventory_id, repair_description, " +
-                "repair_cost, repair_vendor, estimated_completion) VALUES (?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setInt(1, repair.getCompensationId());
-            stmt.setInt(2, repair.getInventoryId());
-            stmt.setString(3, repair.getRepairDescription());
-            stmt.setBigDecimal(4, repair.getRepairCost());
-            stmt.setString(5, repair.getRepairVendor());
-
-            if (repair.getEstimatedCompletion() != null) {
-                stmt.setDate(6, new java.sql.Date(repair.getEstimatedCompletion().getTime()));
-            } else {
-                stmt.setNull(6, Types.DATE);
-            }
-
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        repair.setRepairId(rs.getInt(1));
-                    }
-                }
-                return true;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Update repair status
-     */
-    public static boolean updateRepairStatus(int repairId, String status) {
-        String sql = "UPDATE Equipment_Repairs SET repair_status = ?, " +
-                "started_at = CASE WHEN ? = 'in_progress' AND started_at IS NULL THEN NOW() ELSE started_at END, " +
-                "completed_at = CASE WHEN ? = 'completed' THEN NOW() ELSE completed_at END " +
-                "WHERE repair_id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, status);
-            stmt.setString(2, status);
-            stmt.setString(3, status);
-            stmt.setInt(4, repairId);
-
-            return stmt.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Lấy repairs theo compensation ID
-     */
-    public static List<EquipmentRepair> getRepairsByCompensationId(int compensationId) {
-        String sql = "SELECT * FROM Equipment_Repairs WHERE compensation_id = ? ORDER BY created_at DESC";
-        List<EquipmentRepair> repairs = new ArrayList<>();
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, compensationId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    repairs.add(mapResultSetToRepair(rs));
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return repairs;
-    }
 
     // ===================== HELPER METHODS =====================
 
@@ -380,33 +290,7 @@ public class CompensationDAO {
     /**
      * Helper method: Map ResultSet to EquipmentRepair
      */
-    private static EquipmentRepair mapResultSetToRepair(ResultSet rs) throws SQLException {
-        EquipmentRepair repair = new EquipmentRepair();
 
-        repair.setRepairId(rs.getInt("repair_id"));
-        repair.setCompensationId(rs.getInt("compensation_id"));
-        repair.setInventoryId(rs.getInt("inventory_id"));
-        repair.setRepairDescription(rs.getString("repair_description"));
-        repair.setRepairCost(rs.getBigDecimal("repair_cost"));
-        repair.setRepairVendor(rs.getString("repair_vendor"));
-        repair.setRepairStatus(rs.getString("repair_status"));
-        repair.setStartedAt(rs.getTimestamp("started_at"));
-        repair.setCompletedAt(rs.getTimestamp("completed_at"));
-
-        java.sql.Date estimatedDate = rs.getDate("estimated_completion");
-        if (estimatedDate != null) {
-            repair.setEstimatedCompletion(estimatedDate);
-        }
-
-        repair.setPostRepairCondition(rs.getString("post_repair_condition"));
-
-        Boolean canReturn = rs.getObject("can_return_to_inventory", Boolean.class);
-        repair.setCanReturnToInventory(canReturn);
-
-        repair.setCreatedAt(rs.getTimestamp("created_at"));
-
-        return repair;
-    }
     public static boolean createCompensationAndDeductInventory(
             EquipmentCompensation compensation,
             int inventoryId,

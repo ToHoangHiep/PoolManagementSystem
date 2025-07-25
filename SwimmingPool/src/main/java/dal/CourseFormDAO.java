@@ -1,9 +1,6 @@
 package dal;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +10,10 @@ import utils.DBConnect;
 public class CourseFormDAO {
     public static List<CourseForm> getAll() {
         List<CourseForm> list = new ArrayList<>();
-        String sql = "SELECT * FROM courseform";
+        String sql = "SELECT * FROM course_form";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
-
 
             while (rs.next()) {
                 CourseForm courseForm = new CourseForm();
@@ -29,7 +25,8 @@ public class CourseFormDAO {
                 courseForm.setCoach_id(rs.getInt("coach_id"));
                 courseForm.setCourse_id(rs.getInt("course_id"));
                 courseForm.setRequest_date(rs.getDate("request_date"));
-                courseForm.setHas_processed(rs.getBoolean("has_processed"));
+                courseForm.setHas_processed(rs.getInt("has_processed"));
+                courseForm.setRejected_reason(rs.getString("rejected_reason"));
 
                 list.add(courseForm);
             }
@@ -41,7 +38,7 @@ public class CourseFormDAO {
     }
 
     public static CourseForm getById(int id) {
-        String sql = "SELECT * FROM courseform WHERE id = ?";
+        String sql = "SELECT * FROM course_form WHERE id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
@@ -58,7 +55,8 @@ public class CourseFormDAO {
                 courseForm.setCoach_id(rs.getInt("coach_id"));
                 courseForm.setCourse_id(rs.getInt("course_id"));
                 courseForm.setRequest_date(rs.getDate("request_date"));
-                courseForm.setHas_processed(rs.getBoolean("has_processed"));
+                courseForm.setHas_processed(rs.getInt("has_processed"));
+                courseForm.setRejected_reason(rs.getString("rejected_reason"));
 
                 return courseForm;
             }
@@ -74,9 +72,9 @@ public class CourseFormDAO {
         String sql = "";
 
         if (courseForm.getUser_id() == -1) {
-            sql = "INSERT INTO courseform ( user_fullName, user_email, user_phone, coach_id, course_id) VALUES (?,?,?,?,?)";
+            sql = "INSERT INTO course_form ( user_fullName, user_email, user_phone, coach_id, course_id) VALUES (?,?,?,?,?)";
         } else {
-            sql = "INSERT INTO courseform (user_id, coach_id, course_id) VALUES (?,?,?)";
+            sql = "INSERT INTO course_form (user_id, coach_id, course_id) VALUES (?,?,?)";
         }
 
         try (Connection conn = DBConnect.getConnection();
@@ -101,12 +99,20 @@ public class CourseFormDAO {
         }
     }
 
-    public static boolean setFormStatus(int formId) {
-        String sql = "UPDATE courseform SET has_processed = true WHERE id = ?";
+    public static boolean setFormStatus(int formId, int status, String reason) {
+        String sql = "UPDATE course_form SET has_processed = ?, rejected_reason = ? WHERE id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, formId);
+            ps.setInt(1, status);
+
+            if (status == 2 && reason != null && !reason.trim().isEmpty()) {
+                ps.setString(2, reason);
+            } else {
+                ps.setNull(2, Types.VARCHAR);
+            }
+
+            ps.setInt(3, formId);
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         }

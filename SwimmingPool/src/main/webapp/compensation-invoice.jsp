@@ -1,12 +1,20 @@
+<%@ page import="model.User" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+    User user = (User) session.getAttribute("user");
+    if (user == null || user.getRole() == null || user.getRole().getId() != 5) {
+        response.sendRedirect("error.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compensation Invoice - ${invoiceNumber}</title>
+    <title>Hóa Đơn Bồi Thường - ${invoiceNumber}</title>
     <style>
         * {
             margin: 0;
@@ -262,40 +270,40 @@
 </head>
 <body>
 <div class="invoice-container">
-    <div class="watermark">INVOICE</div>
+    <div class="watermark">HÓA ĐƠN</div>
 
     <!-- Invoice Header -->
     <div class="invoice-header">
-        <h1>🏊 SWIMMING POOL</h1>
-        <div class="invoice-number">Invoice No: ${invoiceNumber}</div>
-        <div class="invoice-date">Date: <fmt:formatDate value="${compensation.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div>
+        <h1>🏊 HỒ BƠI</h1>
+        <div class="invoice-number">Số hóa đơn: ${invoiceNumber}</div>
+        <div class="invoice-date">Ngày: <fmt:formatDate value="${compensation.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div>
     </div>
 
     <!-- Invoice Body -->
     <div class="invoice-body">
         <!-- Success Message -->
         <div class="success-box">
-            <strong>✅ Compensation Record Created Successfully!</strong><br>
+            <strong>✅ Tạo phiếu bồi thường thành công!</strong><br>
         </div>
 
         <!-- Customer Information -->
         <div class="section">
-            <h3 class="section-title">Customer Information</h3>
+            <h3 class="section-title">Thông tin khách hàng</h3>
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Customer Name</div>
+                    <div class="info-label">Tên khách hàng</div>
                     <div class="info-value">${rental.customerName}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">ID Card</div>
+                    <div class="info-label">CMND/CCCD</div>
                     <div class="info-value">${rental.customerIdCard}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Rental ID</div>
+                    <div class="info-label">Mã thuê</div>
                     <div class="info-value">#${rental.rentalId}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Rental Date</div>
+                    <div class="info-label">Ngày thuê</div>
                     <div class="info-value"><fmt:formatDate value="${rental.rentalDate}" pattern="dd/MM/yyyy"/></div>
                 </div>
             </div>
@@ -303,22 +311,22 @@
 
         <!-- Equipment Information -->
         <div class="section">
-            <h3 class="section-title">Equipment Details</h3>
+            <h3 class="section-title">Chi tiết dụng cụ</h3>
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Equipment Name</div>
+                    <div class="info-label">Tên dụng cụ</div>
                     <div class="info-value">${rental.itemName}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Quantity</div>
-                    <div class="info-value">${rental.quantity} units</div>
+                    <div class="info-label">Số lượng</div>
+                    <div class="info-value">${rental.quantity} cái</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Import Price (per unit)</div>
+                    <div class="info-label">Giá nhập (mỗi cái)</div>
                     <div class="info-value"><fmt:formatNumber value="${equipment.importPrice}" type="currency" currencyCode="VND"/></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Category</div>
+                    <div class="info-label">Danh mục</div>
                     <div class="info-value">${equipment.category}</div>
                 </div>
             </div>
@@ -326,58 +334,58 @@
 
         <!-- Compensation Details -->
         <div class="section">
-            <h3 class="section-title">Compensation Details</h3>
+            <h3 class="section-title">Chi tiết bồi thường</h3>
             <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Compensation Type</div>
+                    <div class="info-label">Loại bồi thường</div>
                     <div class="info-value">
                         <c:choose>
-                            <c:when test="${compensation.compensationType == 'damaged'}">🔧 Equipment Damaged</c:when>
-                            <c:when test="${compensation.compensationType == 'lost'}">❌ Equipment Lost</c:when>
-                            <c:when test="${compensation.compensationType == 'overdue_fee'}">⏰ Overdue Fee</c:when>
+                            <c:when test="${compensation.compensationType == 'damaged'}">🔧 Dụng cụ bị hỏng</c:when>
+                            <c:when test="${compensation.compensationType == 'lost'}">❌ Dụng cụ bị mất</c:when>
+                            <c:when test="${compensation.compensationType == 'overdue_fee'}">⏰ Phí quá hạn</c:when>
                             <c:otherwise>${compensation.compensationType}</c:otherwise>
                         </c:choose>
                     </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Compensation Rate</div>
+                    <div class="info-label">Tỷ lệ bồi thường</div>
                     <div class="info-value"><fmt:formatNumber value="${compensation.compensationRate}" type="percent"/></div>
                 </div>
             </div>
 
             <div class="description-box">
-                <div class="description-label">📝 Damage Description:</div>
+                <div class="description-label">📝 Mô tả hư hỏng:</div>
                 ${compensation.damageDescription}
             </div>
         </div>
 
         <!-- Calculation Breakdown -->
         <div class="section">
-            <h3 class="section-title">Calculation Breakdown</h3>
+            <h3 class="section-title">Chi tiết tính toán</h3>
             <table class="calculation-table">
                 <thead>
                 <tr>
-                    <th>Description</th>
-                    <th class="text-right">Quantity</th>
-                    <th class="text-right">Unit Price</th>
-                    <th class="text-right">Amount</th>
+                    <th>Mô tả</th>
+                    <th class="text-right">Số lượng</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Thành tiền</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>Import Price - ${rental.itemName}</td>
+                    <td>Giá nhập - ${rental.itemName}</td>
                     <td class="text-right">${rental.quantity}</td>
                     <td class="text-right"><fmt:formatNumber value="${equipment.importPrice}" type="currency" currencyCode="VND"/></td>
                     <td class="text-right"><fmt:formatNumber value="${compensation.importPriceTotal}" type="currency" currencyCode="VND"/></td>
                 </tr>
                 <tr>
-                    <td>Compensation Rate Applied</td>
+                    <td>Tỷ lệ bồi thường áp dụng</td>
                     <td class="text-right">-</td>
                     <td class="text-right"><fmt:formatNumber value="${compensation.compensationRate}" type="percent"/></td>
                     <td class="text-right">-</td>
                 </tr>
                 <tr class="total-row">
-                    <td colspan="3">Total Compensation Amount</td>
+                    <td colspan="3">Tổng số tiền bồi thường</td>
                     <td class="text-right"><fmt:formatNumber value="${compensation.totalAmount}" type="currency" currencyCode="VND"/></td>
                 </tr>
                 </tbody>
@@ -386,26 +394,26 @@
 
         <!-- Payment Information -->
         <div class="section">
-            <h3 class="section-title">Payment Information</h3>
+            <h3 class="section-title">Thông tin thanh toán</h3>
             <div class="alert-box">
-                <strong>⚠️ Payment Required</strong><br>
-                Total Amount Due: <strong><fmt:formatNumber value="${compensation.totalAmount}" type="currency" currencyCode="VND"/></strong><br>
-                Please proceed to payment counter or use the payment options below.
+                <strong>⚠️ Yêu cầu thanh toán</strong><br>
+                Tổng số tiền cần thanh toán: <strong><fmt:formatNumber value="${compensation.totalAmount}" type="currency" currencyCode="VND"/></strong><br>
+                Vui lòng đến quầy thanh toán hoặc sử dụng các phương thức thanh toán bên dưới.
             </div>
         </div> <!-- 🛠️ THÊM THẺ ĐÓNG DIV Ở ĐÂY -->
 
         <!-- Footer Note -->
         <div class="footer-note">
-            <p>This is a computer-generated invoice and requires no signature.</p>
-            <p>For inquiries, please contact: +84 123 456 789 | support@swimmingpool.com</p>
-            <p>Thank you for your cooperation in maintaining our equipment quality!</p>
+            <p>Đây là hóa đơn được tạo bởi máy tính và không cần chữ ký.</p>
+            <p>Để được hỗ trợ, vui lòng liên hệ: +84 123 456 789 | support@swimmingpool.com</p>
+            <p>Cảm ơn quý khách đã hợp tác trong việc duy trì chất lượng dụng cụ của chúng tôi!</p>
         </div>
     </div>
 
     <!-- Action Buttons -->
     <div class="action-buttons">
         <button class="btn btn-primary" onclick="window.print()">
-            🖨️ Print Invoice
+            🖨️ In hóa đơn
         </button>
         <%--        <a href="${pageContext.request.contextPath}/compensation?action=payment&compensationId=${compensation.compensationId}"--%>
         <%--           class="btn btn-success">--%>
@@ -414,22 +422,22 @@
         <!-- THÊM BACK TO RENTALS BUTTON: -->
         <a href="${pageContext.request.contextPath}/equipment?mode=rental"
            class="btn btn-success">
-            🔙 Back to Rentals
+            🔙 Quay lại danh sách thuê
         </a>
-        <%--        <a href="${pageContext.request.contextPath}/compensation?action=view&id=${compensation.compensationId}"--%>
-        <%--           class="btn btn-secondary">--%>
-        <%--            📋 View Details--%>
-        <%--        </a>--%>
+<%--                <a href="${pageContext.request.contextPath}/compensation?action=view&id=${compensation.compensationId}"--%>
+<%--                   class="btn btn-secondary">--%>
+<%--                    📋 Xem thông tin--%>
+<%--                </a>--%>
     </div>
 </div>
 
 <!-- Print-only footer -->
 <div class="print-only" style="margin-top: 50px; text-align: center;">
     <p>-----------------------------------</p>
-    <p>Customer Signature</p>
+    <p>Chữ ký khách hàng</p>
     <br><br>
     <p>-----------------------------------</p>
-    <p>Staff Signature</p>
+    <p>Chữ ký nhân viên</p>
 </div>
 
 <script>

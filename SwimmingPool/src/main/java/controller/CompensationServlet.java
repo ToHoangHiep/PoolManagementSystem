@@ -178,13 +178,11 @@ public class CompensationServlet extends HttpServlet {
                     List<Payment> payments = PaymentDAO.getPaymentsByReference("compensation", compensationId);
 
 
-                    // Lấy repairs nếu có
-                    List<EquipmentRepair> repairs = CompensationDAO.getRepairsByCompensationId(compensationId);
+
 
                     request.setAttribute("compensation", compensation);
                     request.setAttribute("rental", rental);
                     request.setAttribute("payments", payments);  // Giờ là List<Payment> thay vì List<CompensationPayment>
-                    request.setAttribute("repairs", repairs);
 
                 } else {
                     request.setAttribute("error", "Compensation not found");

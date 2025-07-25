@@ -1,29 +1,32 @@
 <%@ page import="model.User" %>
-<%@ page import="model.Feedback" %>
 <%@ page import="model.Course" %>
 <%@ page import="model.Coach" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Collections" %>
 <%
+    // --- Kiểm tra người dùng đã đăng nhập ---
     User user = (User) session.getAttribute("user");
     if (user == null) {
         response.sendRedirect("login.jsp");
         return;
     }
-    Feedback feedback = (Feedback) request.getAttribute("feedback");
-    boolean existing = feedback != null;
 
-    // --- Data for Dropdowns (from Servlet) ---
+    // --- Lấy dữ liệu cho các Dropdown (từ Servlet) ---
     List<Course> courses = (List<Course>) request.getAttribute("courses");
     List<Coach> coaches = (List<Coach>) request.getAttribute("coaches");
+
+    // Biện pháp bảo vệ để tránh lỗi NullPointerException
+    if (courses == null) courses = Collections.emptyList();
+    if (coaches == null) coaches = Collections.emptyList();
 %>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback Form</title>
+    <title>Gửi Phản hồi</title>
     <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -32,9 +35,9 @@
         .card {
             border: 1px solid #dee2e6;
         }
-        /* Custom styles for the colored slider track */
+        /* CSS tùy chỉnh cho thanh trượt đánh giá có màu */
         .form-range {
-            --track-color: #0d6efd; /* Default Bootstrap primary blue */
+            --track-color: #ffc107; /* Bắt đầu với màu vàng */
         }
         .form-range::-webkit-slider-runnable-track {
             background-color: var(--track-color);
@@ -46,102 +49,101 @@
 </head>
 <body>
 
+<%
+    // This block checks for a message and an optional action from the servlet.
+    String alertMessage = (String) request.getAttribute("alert_message");
+    if (alertMessage != null) {
+        String alertAction = (String) request.getAttribute("alert_action");
+%>
+<script>
+    // Using an IIFE to keep variables out of the global scope.
+    (function() {
+        // Display the alert. We escape single quotes to prevent JS errors.
+        alert('<%= alertMessage.replace("'", "\\'") %>');
+
+        // If an action URL was provided, redirect the user after they click "OK".
+        <% if (alertAction != null && !alertAction.isEmpty()) { %>
+        window.location.href = '<%= alertAction %>';
+        <% } %>
+    })();
+</script>
+<%
+    }
+%>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    <h1 class="h3 mb-0"><%= existing ? "Edit Your Feedback" : "Share Your Experience" %></h1>
+                    <h1 class="h3 mb-0">Chia sẻ Trải nghiệm của bạn</h1>
                 </div>
                 <div class="card-body">
-                    <%-- Display any alert messages passed from the servlet --%>
-                    <% if (request.getAttribute("alert_message") != null) { %>
-                    <script>
-                        alert('<%= request.getAttribute("alert_message") %>');
-                    </script>
-                    <% } %>
 
-                    <form action="feedback?action=<%= existing ? "edit" : "create" %>" method="post">
-                        <% if (existing) { %>
-                        <input type="hidden" name="postId" value="<%= feedback.getId() %>"/>
-                        <% } %>
-
-                        <!-- Feedback Category -->
+                    <form action="feedback?action=create" method="post">
+                        <!-- Loại Phản hồi -->
                         <div class="mb-3">
-                            <label for="feedback_type" class="form-label">Feedback Category</label>
+                            <label for="feedback_type" class="form-label">Loại Phản hồi</label>
                             <select name="feedback_type" id="feedback_type" class="form-select" required onchange="showHideFields()">
-                                <option value="" disabled <%= !existing ? "selected" : "" %>>Select a category...</option>
-                                <option value="General" <%= existing && "General".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
-                                    General Feedback
-                                </option>
-                                <%-- UPDATED: Enabled Course and Coach options --%>
-                                <option value="Course" <%= existing && "Course".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
-                                    Course Feedback
-                                </option>
-                                <option value="Coach" <%= existing && "Coach".equals(feedback.getFeedbackType()) ? "selected" : "" %>>
-                                    Coach Feedback
-                                </option>
+                                <option value="" disabled selected>Chọn một loại...</option>
+                                <option value="General">Phản hồi Chung</option>
+                                <option value="Course">Phản hồi về Khóa học</option>
+                                <option value="Coach">Phản hồi về Huấn luyện viên</option>
                             </select>
                         </div>
 
-                        <!-- Specific Category (for General feedback) -->
+                        <!-- Chủ đề Cụ thể (cho phản hồi chung) -->
                         <div class="mb-3 d-none" id="general_feedback_type_group">
-                            <label for="general_feedback_type" class="form-label">Specific Category</label>
+                            <label for="general_feedback_type" class="form-label">Chủ đề Cụ thể</label>
                             <select name="general_feedback_type" id="general_feedback_type" class="form-select">
-                                <option value="" disabled <%= !existing || feedback.getGeneralFeedbackType() == null ? "selected" : "" %>>Select specific category...</option>
-                                <option value="Food" <%= existing && "Food".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Food & Dining</option>
-                                <option value="Service" <%= existing && "Service".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Customer Service</option>
-                                <option value="Facility" <%= existing && "Facility".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Facilities & Amenities</option>
-                                <option value="Other" <%= existing && "Other".equals(feedback.getGeneralFeedbackType()) ? "selected" : "" %>>Other</option>
+                                <option value="" disabled selected>Chọn chủ đề cụ thể...</option>
+                                <option value="Food">Đồ ăn & Dịch vụ ăn uống</option>
+                                <option value="Service">Dịch vụ Khách hàng</option>
+                                <option value="Facility">Cơ sở vật chất & Tiện nghi</option>
+                                <option value="Other">Khác</option>
                             </select>
                         </div>
 
-                        <%-- NEW: Dropdown for Course Feedback --%>
+                        <%-- Dropdown cho Phản hồi Khóa học --%>
                         <div class="mb-3 d-none" id="course_feedback_group">
-                            <label for="course_id" class="form-label">Select Course</label>
+                            <label for="course_id" class="form-label">Chọn Khóa học</label>
                             <select name="course_id" id="course_id" class="form-select">
-                                <option value="" disabled selected>-- Choose a course --</option>
-                                <% if (courses != null) {
-                                    for (Course c : courses) { %>
-                                <option value="<%= c.getId() %>" <%= existing && feedback.getCourseId() != null && feedback.getCourseId() == c.getId() ? "selected" : "" %>><%= c.getName() %></option>
-                                <%  }
-                                } %>
+                                <option value="" disabled selected>-- Chọn một khóa học --</option>
+                                <% for (Course c : courses) { %>
+                                <option value="<%= c.getId() %>"><%= c.getName() %></option>
+                                <% } %>
                             </select>
                         </div>
 
-                        <%-- NEW: Dropdown for Coach Feedback --%>
+                        <%-- Dropdown cho Phản hồi Huấn luyện viên --%>
                         <div class="mb-3 d-none" id="coach_feedback_group">
-                            <label for="coach_id" class="form-label">Select Coach</label>
+                            <label for="coach_id" class="form-label">Chọn Huấn luyện viên</label>
                             <select name="coach_id" id="coach_id" class="form-select">
-                                <option value="" disabled selected>-- Choose a coach --</option>
-                                <% if (coaches != null) {
-                                    for (Coach c : coaches) { %>
-                                <option value="<%= c.getId() %>" <%= existing && feedback.getCoachId() != null && feedback.getCoachId() == c.getId() ? "selected" : "" %>><%= c.getFullName() %></option>
-                                <%  }
-                                } %>
+                                <option value="" disabled selected>-- Chọn một huấn luyện viên --</option>
+                                <% for (Coach c : coaches) { %>
+                                <option value="<%= c.getId() %>"><%= c.getFullName() %></option>
+                                <% } %>
                             </select>
                         </div>
 
-                        <!-- Feedback Content -->
+                        <!-- Nội dung Phản hồi -->
                         <div class="mb-3">
-                            <label for="content" class="form-label">Your Detailed Feedback</label>
-                            <textarea name="content" id="content" rows="5" class="form-control" required placeholder="Please share your thoughts..."><%= existing ? feedback.getContent() : "" %></textarea>
+                            <label for="content" class="form-label">Nội dung Phản hồi Chi tiết</label>
+                            <textarea name="content" id="content" rows="5" class="form-control" required placeholder="Vui lòng chia sẻ suy nghĩ của bạn..."></textarea>
                         </div>
 
-                        <!-- Rating Slider -->
+                        <!-- Thanh trượt Đánh giá -->
                         <div class="mb-4">
                             <label for="rating" class="form-label">
-                                Overall Rating: <span id="ratingValueDisplay" class="fw-bold"><%= existing ? feedback.getRating() : 5 %></span>/10
+                                Đánh giá Tổng thể: <span id="ratingValueDisplay" class="fw-bold">5</span>/10
                             </label>
-                            <input type="range" class="form-range" id="rating" name="rating" min="0" max="10" step="1" value="<%= existing ? feedback.getRating() : 5 %>">
+                            <input type="range" class="form-range" id="rating" name="rating" min="0" max="10" step="1" value="5">
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Nút hành động -->
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="home.jsp" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <%= existing ? "Update Feedback" : "Submit Feedback" %>
-                            </button>
+                            <a href="home.jsp" class="btn btn-secondary">Hủy</a>
+                            <button type="submit" class="btn btn-primary">Gửi Phản hồi</button>
                         </div>
                     </form>
                 </div>
@@ -153,7 +155,7 @@
 <script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Get all the elements we need to interact with
+        // Lấy tất cả các phần tử cần tương tác
         const feedbackTypeSelect = document.getElementById('feedback_type');
         const generalGroup = document.getElementById('general_feedback_type_group');
         const generalSelect = document.getElementById('general_feedback_type');
@@ -164,11 +166,11 @@
         const ratingSlider = document.getElementById('rating');
         const ratingValueDisplay = document.getElementById('ratingValueDisplay');
 
-        // Function to show/hide the specific category dropdowns
+        // Hàm để hiển thị/ẩn các dropdown danh mục cụ thể
         window.showHideFields = function() {
             const selectedType = feedbackTypeSelect.value;
 
-            // Hide all groups first and remove their 'required' attribute
+            // Ẩn tất cả các nhóm trước và bỏ thuộc tính 'required'
             generalGroup.classList.add('d-none');
             generalSelect.required = false;
             courseGroup.classList.add('d-none');
@@ -176,7 +178,7 @@
             coachGroup.classList.add('d-none');
             coachSelect.required = false;
 
-            // Show the relevant group based on selection and make it required
+            // Hiển thị nhóm liên quan dựa trên lựa chọn và đặt nó là bắt buộc
             if (selectedType === 'General') {
                 generalGroup.classList.remove('d-none');
                 generalSelect.required = true;
@@ -189,27 +191,27 @@
             }
         };
 
-        // Function to update the slider's value display and track color
+        // Hàm để cập nhật hiển thị giá trị và màu sắc của thanh trượt
         function updateRating() {
             const value = ratingSlider.value;
-            ratingValueDisplay.textContent = value; // Update the number display
+            ratingValueDisplay.textContent = value; // Cập nhật hiển thị số
 
             let color;
             if (value <= 3) {
-                color = '#dc3545'; // Bootstrap Danger Red
+                color = '#dc3545'; // Màu đỏ (Danger) của Bootstrap
             } else if (value <= 7) {
-                color = '#ffc107'; // Bootstrap Warning Yellow
+                color = '#ffc107'; // Màu vàng (Warning) của Bootstrap
             } else {
-                color = '#198754'; // Bootstrap Success Green
+                color = '#198754'; // Màu xanh lá (Success) của Bootstrap
             }
-            // Set the CSS variable which the stylesheet uses
+            // Đặt biến CSS mà stylesheet sử dụng
             ratingSlider.style.setProperty('--track-color', color);
         }
 
-        // Add event listener for the slider
+        // Thêm trình lắng nghe sự kiện cho thanh trượt
         ratingSlider.addEventListener('input', updateRating);
 
-        // Initial setup on page load to ensure correct fields are shown
+        // Thiết lập ban đầu khi tải trang để đảm bảo các trường được hiển thị đúng
         showHideFields();
         updateRating();
     });

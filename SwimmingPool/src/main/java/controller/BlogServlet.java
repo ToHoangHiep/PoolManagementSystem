@@ -52,7 +52,7 @@ public class BlogServlet extends HttpServlet {
     private void viewCoach(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
         try {
             int coachId = Integer.parseInt(request.getParameter("coachId"));
-            Coach coach = CoachDAO.getById(coachId);
+            Coach coach = CoachDAO.getCoachById(coachId);
 
             if (coach == null) {
                 request.getSession().setAttribute("alert_message", "The requested coach could not be found.");
@@ -84,7 +84,7 @@ public class BlogServlet extends HttpServlet {
             }
 
             // Get the registration count for this specific course
-            Map<Integer, Integer> courseCounts = CourseDAO.getCourseRegistrationCounts();
+            Map<Integer, Integer> courseCounts = CourseDAO.getProcessedCourseRegistrationCounts();
             int registrationCount = courseCounts.getOrDefault(courseId, 0);
 
             request.setAttribute("course", course);
@@ -97,17 +97,17 @@ public class BlogServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Fetches all data needed for the main directory page (blogs.jsp) and forwards to it.
-     */
     private void listDirectory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
-        // ... (this method remains the same)
+        // 1. Fetch all data for the lists
         List<Course> courses = CourseDAO.getAllCourses();
-        List<Coach> coaches = CoachDAO.getAll();
-        Map<Integer, Integer> courseCounts = CourseDAO.getCourseRegistrationCounts();
+        List<Coach> coaches = CoachDAO.getAllCoaches();
+        Map<Integer, Integer> courseCounts = CourseDAO.getProcessedCourseRegistrationCounts();
         request.setAttribute("courses", courses != null ? courses : Collections.emptyList());
         request.setAttribute("coaches", coaches != null ? coaches : Collections.emptyList());
         request.setAttribute("courseCounts", courseCounts != null ? courseCounts : Collections.emptyMap());
+        // Note: The coachCounts attribute is no longer needed and has been removed.
+
+        // 4. Forward to the JSP
         request.getRequestDispatcher("blog_list.jsp").forward(request, response);
     }
 

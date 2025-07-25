@@ -44,7 +44,6 @@ public class TicketPurchaseServlet extends HttpServlet {
 
             if (typeStr == null || quantityStr == null || customerName == null || customerIdCard == null ||
                     typeStr.isEmpty() || quantityStr.isEmpty() || customerName.isEmpty() || customerIdCard.isEmpty()) {
-                System.out.println("Debug: Error - Missing input fields");
                 request.setAttribute("error", "Vui lòng điền đầy đủ thông tin.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
@@ -57,7 +56,6 @@ public class TicketPurchaseServlet extends HttpServlet {
                     throw new NumberFormatException();
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Debug: Error - Invalid quantity: " + quantityStr);
                 request.setAttribute("error", "Số lượng vé phải là số nguyên dương.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
@@ -66,9 +64,7 @@ public class TicketPurchaseServlet extends HttpServlet {
             TicketTypeName ticketType = TicketTypeName.valueOf(typeStr);
 
             BigDecimal price = TicketDAO.getTicketTypePrice(ticketType);
-            System.out.println("Debug: Price from DB for " + ticketType + ": " + price);
             if (price == null) {
-                System.out.println("Debug: Error - Price null from DB");
                 request.setAttribute("error", "Không lấy được giá vé từ hệ thống. Vui lòng thử lại sau.");
                 request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
                 return;
@@ -95,14 +91,12 @@ public class TicketPurchaseServlet extends HttpServlet {
             cart.setCustomerName(customerName);
             cart.setCustomerIdCard(customerIdCard);
 
-            System.out.println("Debug: Cart after add - Items: " + cart.getItems().size() + ", Total: " + cart.getTotal());
 
             session.setAttribute("success", "Đã thêm vé vào giỏ hàng!");
             response.sendRedirect("ticketPurchase.jsp");
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Debug: Exception in doPost: " + e.getMessage());
             request.setAttribute("error", "Đã xảy ra lỗi: " + e.getMessage());
             request.getRequestDispatcher("ticketPurchase.jsp").forward(request, response);
         }

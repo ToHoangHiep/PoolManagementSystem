@@ -2,18 +2,14 @@
 <%@ page import="java.util.List" %>
 <%@ page import="model.Inventory" %>
 <%@ page import="model.User" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     User user = (User) session.getAttribute("user");
-%>
-<%
     String keyword = request.getParameter("keyword");
 %>
 <html>
 <head>
     <title>Inventory List</title>
     <link rel="stylesheet" href="./Resources/CSS/inventory.css">
-
 </head>
 <body>
 
@@ -24,10 +20,8 @@
     <div class="nav-left">
         <a href="admin_dashboard.jsp" class="nav-btn">🏠 Home</a>
         <a href="inventory?action=new" class="nav-btn green">➕ Add New Item</a>
-        <a href="inventory?action=lowstock" class="nav-btn blue" >Thiết bị sắp hết kho</a>
-        <a href="inventory?action=requestList" class="nav-btn purple">Xem yêu cầu nhập kho</a>
-
-
+        <a href="inventory?action=requestList" class="nav-btn blue">📦 Yêu cầu nhập kho</a>
+        <a href="inventory?action=repairRequestList" class="nav-btn blue">🔧 Yêu cầu sửa chữa</a>
     </div>
 
     <div class="nav-right">
@@ -65,7 +59,6 @@
             <button type="submit" class="filter-button">Filter</button>
         </form>
 
-
         <form method="get" action="inventory" class="inline-form">
             <input type="hidden" name="action" value="search" />
             <input type="text" name="keyword" placeholder="Search item..." class="nav-input" />
@@ -74,26 +67,23 @@
     </div>
 </div>
 
-
 <table>
     <thead>
     <tr>
-        <th>ID</th>
-        <th>Manager ID</th>
-        <th>Item Name</th>
-        <th>Category</th>
-        <th>Quantity</th>
-        <th>Unit</th>
-        <th>Status</th>
-        <th>Last Updated</th>
-        <th>Actions</th>
+        <th>Mã thiết bị</th>
+        <th>Quản lý</th>
+        <th>Tên thiết bị</th>
+        <th>Danh mục</th>
+        <th>Số lượng</th>
+        <th>Đơn vị</th>
+        <th>Trạng thái</th>
+        <th>Cập nhật lần cuối</th>
+        <th>Thao tác</th>
     </tr>
     </thead>
     <tbody>
     <%
         List<Inventory> inventoryList = (List<Inventory>) request.getAttribute("inventoryList");
-        Integer currentPage = (Integer) request.getAttribute("currentPage");
-        Integer totalPages = (Integer) request.getAttribute("totalPages");
 
         if (inventoryList != null && !inventoryList.isEmpty()) {
             for (Inventory inv : inventoryList) {
@@ -113,7 +103,6 @@
                onclick="return confirm('Bạn có chắc chắn muốn xóa?');">Delete</a>
         </td>
     </tr>
-
     <%
         }
     } else {
@@ -124,24 +113,6 @@
     %>
     </tbody>
 </table>
-<% if (totalPages != null && currentPage != null && totalPages > 1) { %>
-<div class="pagination" style="margin-top: 20px;">
-    <% for (int i = 1; i <= totalPages; i++) { %>
-    <a href="inventory?page=<%= i %><%= keyword != null ? "&keyword=" + keyword : "" %>"
-       class="<%= (i == currentPage) ? "active" : "" %>"><%= i %></a>
-    <% } %>
-</div>
-<% } %>
-<c:if test="${not empty lowStockItems}">
-    <h3>Danh sách thiết bị sắp hết kho</h3>
-    <ul>
-        <c:forEach var="item" items="${lowStockItems}">
-            <li>${item.getItemName()} (Còn: ${item.getQuantity()}, Mức cảnh báo: ${item.categoryQuantity})</li>
-        </c:forEach>
-    </ul>
-</c:if>
-
-
 
 </body>
 </html>

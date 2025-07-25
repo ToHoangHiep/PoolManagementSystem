@@ -3,8 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
     User user = (User) session.getAttribute("user");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
+    if (user == null || user.getRole() == null || user.getRole().getId() != 5) {
+        response.sendRedirect("error.jsp");
         return;
     }
 %>
@@ -12,7 +12,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Ticket Purchase</title>
+    <title>Mua Vé</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
@@ -186,18 +186,20 @@
 <div class="bg-cover"></div>
 
 <div class="navbar">
-    <div class="logo">SwimmingPool</div>
+    <div class="logo">Hồ Bơi</div>
     <div class="nav-links">
-        <a href="staff_dashboard.jsp">Home</a>
-        <a href="about">About Us</a>
-        <a href="home.jsp">Services</a>
-        <a href="gallery">Gallery</a>
-        <a href="contact">Contact</a>
+        <a href="staff_dashboard.jsp" class="nav-link">Trang chủ</a>
+        <a href="purchase" class="nav-link">🎟️ Vé bơi</a>
+        <a href="equipment?mode=rental" class="nav-link ${empty currentFilter ? 'active' : ''}">📦 Thuê thiết bị</a>
+        <a href="equipment?mode=buy" class="nav-link ${empty currentFilter ? 'active' : ''}">🛍️ Mua thiết bị</a>
+        <a href="cart" class="nav-link">
+            🛒 Giỏ hàng <span>(${not empty sessionScope.cart ? sessionScope.cart.items.size() : 0})</span>
+        </a>
     </div>
     <div class="auth">
-        <span>Hello, <%= user.getFullName() %>!</span>
+        <span>Xin chào, <%= user.getFullName() %>!</span>
         <form action="logout" method="post">
-            <input type="submit" value="Logout">
+            <input type="submit" value="Đăng xuất">
         </form>
     </div>
 </div>
@@ -205,27 +207,50 @@
 <div style="height: 80px;"></div>
 
 <div class="hero">
-    <h1>Buy Swimming Ticket</h1>
+    <h1>Mua vé bơi</h1>
 </div>
 
 <div class="container">
-    <h2>Ticket Purchase Form</h2>
-    <form action="purchase" method="post">
+    <h2>Thông tin mua vé</h2>
+    <form action="purchase" method="post" onsubmit="return validateForm()">
         <table>
-            <tr><th>Customer Name</th><td><input type="text" name="customerName" required placeholder="Enter customer name"></td></tr>
-            <tr><th>Customer ID Card</th><td><input type="text" name="customerIdCard" required placeholder="Enter ID card"></td></tr>
-            <tr><th>Ticket Type</th><td>
-                <select name="ticketType" id="ticketType" onchange="updateEndDate()" required>
-                    <option value="Single">Single (1 day)</option>
-                    <option value="Monthly">Monthly (30 days)</option>
-                    <option value="ThreeMonthly">ThreeMonths</option>
-                    <option value="SixMonthly">SixMonths</option>
-                    <option value="Year">Year</option>
-                </select></td></tr>
-            <tr><th>Quantity</th><td><input type="number" name="quantity" id="quantity" value="1" min="1" required></td></tr>
-            <tr><th>Start Date</th><td><input type="date" id="startDate" name="startDate" required readonly></td></tr>
-            <tr><th>End Date</th><td><input type="date" id="endDate" name="endDate" required readonly></td></tr>
-            <tr><td colspan="2" style="text-align:right;"><button type="submit" class="btn">Add to Cart</button></td></tr>
+            <tr>
+                <th>Họ tên khách hàng</th>
+                <td><input type="text" name="customerName" required placeholder="Nhập họ tên khách hàng"></td>
+            </tr>
+            <tr>
+                <th>Số CMND/CCCD</th>
+                <td><input type="text" name="customerIdCard" required placeholder="Nhập số giấy tờ tùy thân" maxlength="10" pattern="\d{10}" title="Số CMND/CCCD phải là 10 chữ số" onkeypress="return event.charCode >= 48 && event.charCode <= 57"></td>
+            </tr>
+            <tr>
+                <th>Loại vé</th>
+                <td>
+                    <select name="ticketType" id="ticketType" onchange="updateEndDate()" required>
+                        <option value="Single">Vé ngày (1 ngày)</option>
+                        <option value="Monthly">Vé tháng (30 ngày)</option>
+                        <option value="ThreeMonthly">Vé 3 tháng</option>
+                        <option value="SixMonthly">Vé 6 tháng</option>
+                        <option value="Year">Vé năm</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>Số lượng</th>
+                <td><input type="number" name="quantity" id="quantity" value="1" min="1" required></td>
+            </tr>
+            <tr>
+                <th>Ngày bắt đầu</th>
+                <td><input type="date" id="startDate" name="startDate" required readonly></td>
+            </tr>
+            <tr>
+                <th>Ngày kết thúc</th>
+                <td><input type="date" id="endDate" name="endDate" required readonly></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:right;">
+                    <button type="submit" class="btn">Thêm vào giỏ hàng</button>
+                </td>
+            </tr>
         </table>
     </form>
 
@@ -239,11 +264,12 @@
         </c:if>
     </div>
 
-    <a href="cart" class="cart-link">View Cart & Checkout</a>
+    <a href="cart" class="cart-link">Xem giỏ hàng & Thanh toán</a>
 </div>
+
 <div class="footer">
-    <p>&copy; 2025 SwimmingPool. All rights reserved.</p>
-    <p>Contact us: contact@swimmingpool.com | +84 123 456 789</p>
+    <p>© 2025 Hồ Bơi. Mọi quyền được bảo lưu.</p>
+    <p>Liên hệ: contact@swimmingpool.com | +84 123 456 789</p>
 </div>
 
 <script>
@@ -268,6 +294,15 @@
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + daysToAdd);
         endDateInput.value = endDate.toISOString().split("T")[0];
+    }
+
+    function validateForm() {
+        const customerIdCard = document.querySelector('input[name="customerIdCard"]').value.trim();
+        if (!/^\d{10}$/.test(customerIdCard)) {
+            alert('Số CMND/CCCD phải là 10 chữ số.');
+            return false;
+        }
+        return true;
     }
 </script>
 </body>
