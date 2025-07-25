@@ -11,7 +11,8 @@ public class CourseForm {
     private int coach_id;
     private int course_id;
     private Date request_date;
-    private boolean has_processed;
+    private int has_processed;
+    private String rejected_reason;
 
     public CourseForm() {
     }
@@ -19,7 +20,7 @@ public class CourseForm {
 
 
     public CourseForm(int id, int user_id, String user_fullName, String user_email, String user_phone, int coach_id,
-			int course_id, Date request_date, boolean has_processed) {
+			int course_id, Date request_date, int has_processed, String rejected_reason) {
 		this.id = id;
 		this.user_id = user_id;
 		this.user_fullName = user_fullName;
@@ -29,9 +30,8 @@ public class CourseForm {
 		this.course_id = course_id;
 		this.request_date = request_date;
 		this.has_processed = has_processed;
+        this.rejected_reason = rejected_reason;
 	}
-
-
 
 	public int getId() {
         return id;
@@ -49,43 +49,29 @@ public class CourseForm {
         this.user_id = user_id;
     }
 
-    
-
     public String getUser_fullName() {
 		return user_fullName;
 	}
-
-
 
 	public void setUser_fullName(String user_fullName) {
 		this.user_fullName = user_fullName;
 	}
 
-
-
 	public String getUser_email() {
 		return user_email;
 	}
-
-
 
 	public void setUser_email(String user_email) {
 		this.user_email = user_email;
 	}
 
-
-
 	public String getUser_phone() {
 		return user_phone;
 	}
 
-
-
 	public void setUser_phone(String user_phone) {
 		this.user_phone = user_phone;
 	}
-
-
 
 	public int getCoach_id() {
         return coach_id;
@@ -111,11 +97,17 @@ public class CourseForm {
         this.request_date = request_date;
     }
 
-    public boolean isHas_processed() {
+    public int getHas_processed() {
         return has_processed;
     }
 
-    public void setHas_processed(boolean has_processed) {
+    public void setHas_processed(int has_processed) {
         this.has_processed = has_processed;
     }
+
+    private String getRejected_reason() {
+        return rejected_reason;
+    }
+
+    public void setRejected_reason(String rejected_reason) { this.rejected_reason = rejected_reason; }
 }

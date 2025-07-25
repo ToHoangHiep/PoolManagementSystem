@@ -193,6 +193,10 @@ public class CourseServlet extends HttpServlet {
             courseForms = courseForms.stream()
                     .filter(form -> form.getUser_id() == user.getId())
                     .toList();
+        } else {
+            courseForms = courseForms.stream()
+                    .filter(form -> form.getHas_processed() == 0)
+                    .toList();
         }
 
         request.setAttribute("courseForms", courseForms);
@@ -208,6 +212,7 @@ public class CourseServlet extends HttpServlet {
             case "delete" -> deleteCoursePost(request, response);
             case "create_form" -> createCourseFormPost(request, response);
             case "form_confirmed" -> confirmForm(request, response);
+            case "form_rejected" -> cancelForm(request, response);
             case "deactivate" -> deactivateCourse(request, response);
             default -> listCourse(request, response);
         }
@@ -325,7 +330,7 @@ public class CourseServlet extends HttpServlet {
             }
 
             // Prevent re-sending emails for an already confirmed form
-            if (form.isHas_processed()) {
+            if (form.getHas_processed() != 0) {
                 request.getSession().setAttribute(alert_message, "This form has already been confirmed.");
                 response.sendRedirect("course?action=list_form");
                 return;
@@ -362,7 +367,7 @@ public class CourseServlet extends HttpServlet {
             }
 
             // 4. Update the form status in the database
-            if (!CourseFormDAO.setFormStatus(formId)){
+            if (!CourseFormDAO.setFormStatus(formId, 1, null)){
                 request.getSession().setAttribute(alert_message, "Failed to update form status.");
                 return;
             }
@@ -429,7 +434,7 @@ public class CourseServlet extends HttpServlet {
             }
 
             // Prevent re-sending emails for an already confirmed form
-            if (form.isHas_processed()) {
+            if (form.getHas_processed() != 0) {
                 request.getSession().setAttribute(alert_message, "This form has already been confirmed.");
                 response.sendRedirect("course?action=list_form");
                 return;
@@ -465,13 +470,14 @@ public class CourseServlet extends HttpServlet {
                 studentName = form.getUser_fullName();
             }
 
+
+            String reason = request.getParameter("reason");
+
             // 4. Update the form status in the database
-            if (!CourseFormDAO.setFormStatus(formId)){
+            if (!CourseFormDAO.setFormStatus(formId, 2, reason)){
                 request.getSession().setAttribute(alert_message, "Failed to update form status.");
                 return;
             }
-
-            String reason = request.getParameter("reason");
 
             // 5. Compose and send emails
             // --- Email to Student ---
@@ -486,7 +492,7 @@ public class CourseServlet extends HttpServlet {
                     + "The Swimming Pool Management Team";
             EmailUtils.sendEmail(studentEmail, studentSubject, studentBody);
 
-            request.getSession().setAttribute(alert_message, "Form confirmed successfully. Emails have been sent to the student and coach.");
+            request.getSession().setAttribute(alert_message, "Form rejected successfully. Emails have been sent to the student.");
 
         } catch (SQLException e) {
             log("Database error during form confirmation: " + e.getMessage());

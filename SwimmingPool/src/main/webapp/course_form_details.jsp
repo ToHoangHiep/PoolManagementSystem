@@ -121,8 +121,29 @@
                         <div>
                             <p class="details-label mb-1">Trạng thái</p>
                             <p class="details-value mb-0">
-                                <span class="badge fs-6 <%= form.isHas_processed() ? "bg-success" : "bg-warning text-dark" %>">
-                                    <%= form.isHas_processed() ? "Đã xác nhận" : "Chờ xác nhận" %>
+                                <%
+                                    // Determine the status text and CSS class based on the integer value
+                                    String statusText;
+                                    String statusClass;
+                                    int status = form.getHas_processed(); // Use getHas_processed() which returns an int
+
+                                    statusClass = switch (status) {
+                                        case 1 -> {
+                                            statusText = "Đã xác nhận";
+                                            yield "bg-success";
+                                        }
+                                        case 2 -> {
+                                            statusText = "Đã từ chối";
+                                            yield "bg-danger";
+                                        }
+                                        default -> {
+                                            statusText = "Chờ xác nhận";
+                                            yield "bg-warning text-dark";
+                                        }
+                                    };
+                                %>
+                                <span class="badge fs-6 <%= statusClass %>">
+                                    <%= statusText %>
                                 </span>
                             </p>
                         </div>
@@ -176,15 +197,37 @@
                     </div>
                 </div>
 
-                <!-- Chân Card với Nút hành động -->
-                <%-- Nút xác nhận chỉ hiển thị nếu đơn chưa được xử lý --%>
-                <% if (!form.isHas_processed() && isManagement) { %>
-                <div class="card-footer text-end bg-light p-3">
-                    <form action="course?action=form_confirmed" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn đăng ký này không? Hành động này sẽ gửi email cho người dùng và huấn luyện viên.');">
+                <%-- Chân Card với Nút hành động --%>
+                <% if (form.getHas_processed() == 0 && isManagement) { %>
+                <div class="card-footer bg-light p-3">
+                    <form id="decisionForm" method="post" novalidate>
                         <input type="hidden" name="formId" value="<%= form.getId() %>">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-check-circle me-1"></i>Xác nhận Đơn đăng ký
-                        </button>
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <!-- Left side: Controls for confirmation and rejection -->
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-switch fs-5">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="confirmSwitch" checked>
+                                    <label class="form-check-label pt-1" for="confirmSwitch" id="switchLabel">Xác nhận</label>
+                                </div>
+
+                                <!-- This container will only appear when rejecting -->
+                                <div id="rejectionReasonContainer" class="d-none">
+                                    <select class="form-select form-select-sm" name="reason" id="rejectionReason" required>
+                                        <option value="" selected disabled>Chọn lý do từ chối...</option>
+                                        <option value="Lịch học không phù hợp">Lịch học không phù hợp</option>
+                                        <option value="Khóa học đã đủ học viên">Khóa học đã đủ học viên</option>
+                                        <option value="Thông tin đăng ký không hợp lệ">Thông tin đăng ký không hợp lệ</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Right side: The dynamic submit button -->
+                            <button type="submit" id="submitButton" class="btn btn-success">
+                                <i class="fas fa-check-circle me-1"></i>Xác nhận Đơn đăng ký
+                            </button>
+                        </div>
                     </form>
                 </div>
                 <% } %>
@@ -196,5 +239,58 @@
 <!-- Bootstrap JS -->
 <script src="Resources/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+<%-- Add this new script block for the dynamic form --%>
+<script>
+    // This script only runs if the decision form is present on the page
+    const decisionForm = document.getElementById('decisionForm');
+    if (decisionForm) {
+        const confirmSwitch = document.getElementById('confirmSwitch');
+        const switchLabel = document.getElementById('switchLabel');
+        const reasonContainer = document.getElementById('rejectionReasonContainer');
+        const reasonSelect = document.getElementById('rejectionReason');
+        const submitButton = document.getElementById('submitButton');
+
+        function updateFormState() {
+            if (confirmSwitch.checked) {
+                // --- STATE: CONFIRM ---
+                switchLabel.textContent = 'Xác nhận';
+                reasonContainer.classList.add('d-none');
+                reasonSelect.required = false; // No reason needed for confirmation
+
+                decisionForm.action = 'course?action=form_confirmed';
+                submitButton.className = 'btn btn-success';
+                submitButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>Xác nhận Đơn đăng ký';
+
+                // Update the confirmation prompt
+                decisionForm.onsubmit = () => confirm('Bạn có chắc chắn muốn XÁC NHẬN đơn đăng ký này không? Email sẽ được gửi đi.');
+
+            } else {
+                // --- STATE: REJECT ---
+                switchLabel.textContent = 'Từ chối';
+                reasonContainer.classList.remove('d-none');
+                reasonSelect.required = true; // Reason is required for rejection
+
+                decisionForm.action = 'course?action=form_rejected';
+                submitButton.className = 'btn btn-danger';
+                submitButton.innerHTML = '<i class="fas fa-times-circle me-1"></i>Từ chối Đơn đăng ký';
+
+                // Update the confirmation prompt
+                decisionForm.onsubmit = () => {
+                    if (!reasonSelect.value) {
+                        alert('Vui lòng chọn lý do từ chối.');
+                        return false;
+                    }
+                    return confirm('Bạn có chắc chắn muốn TỪ CHỐI đơn đăng ký này không? Email sẽ được gửi đi.');
+                };
+            }
+        }
+
+        // Add event listener to the switch
+        confirmSwitch.addEventListener('change', updateFormState);
+
+        // Run once on page load to set the initial correct state
+        document.addEventListener('DOMContentLoaded', updateFormState);
+    }
+</script>
 </body>
 </html>

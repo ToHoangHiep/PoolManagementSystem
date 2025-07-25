@@ -1,9 +1,6 @@
 package dal;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +25,8 @@ public class CourseFormDAO {
                 courseForm.setCoach_id(rs.getInt("coach_id"));
                 courseForm.setCourse_id(rs.getInt("course_id"));
                 courseForm.setRequest_date(rs.getDate("request_date"));
-                courseForm.setHas_processed(rs.getBoolean("has_processed"));
+                courseForm.setHas_processed(rs.getInt("has_processed"));
+                courseForm.setRejected_reason(rs.getString("rejected_reason"));
 
                 list.add(courseForm);
             }
@@ -57,7 +55,8 @@ public class CourseFormDAO {
                 courseForm.setCoach_id(rs.getInt("coach_id"));
                 courseForm.setCourse_id(rs.getInt("course_id"));
                 courseForm.setRequest_date(rs.getDate("request_date"));
-                courseForm.setHas_processed(rs.getBoolean("has_processed"));
+                courseForm.setHas_processed(rs.getInt("has_processed"));
+                courseForm.setRejected_reason(rs.getString("rejected_reason"));
 
                 return courseForm;
             }
@@ -100,12 +99,20 @@ public class CourseFormDAO {
         }
     }
 
-    public static boolean setFormStatus(int formId) {
-        String sql = "UPDATE course_form SET has_processed = true WHERE id = ?";
+    public static boolean setFormStatus(int formId, int status, String reason) {
+        String sql = "UPDATE course_form SET has_processed = ?, rejected_reason = ? WHERE id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, formId);
+            ps.setInt(1, status);
+
+            if (status == 2 && reason != null && !reason.trim().isEmpty()) {
+                ps.setString(2, reason);
+            } else {
+                ps.setNull(2, Types.VARCHAR);
+            }
+
+            ps.setInt(3, formId);
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         }

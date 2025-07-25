@@ -186,7 +186,7 @@ CREATE TABLE Course_Form(
     coach_id INT,
     course_id INT,
     request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    has_processed BOOLEAN DEFAULT FALSE,
+    has_processed int DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES Users(id),
     FOREIGN KEY (coach_id) REFERENCES Coaches(id),
     FOREIGN KEY (course_id) REFERENCES Courses(id)
