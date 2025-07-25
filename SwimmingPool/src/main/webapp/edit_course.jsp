@@ -119,6 +119,12 @@
       background-color: #2980b9;
     }
 
+    .checkbox-group label {
+      display: inline-block;
+      margin-right: 12px;
+      margin-bottom: 8px;
+    }
+
     @media screen and (max-width: 600px) {
       .button-group {
         flex-direction: column;
@@ -131,29 +137,48 @@
     function kiemTraForm() {
       var ten = document.getElementById("name").value.trim();
       var moTa = document.getElementById("description").value.trim();
-      var gia = document.getElementById("price").value.trim();
       var soBuoi = document.getElementById("duration").value.trim();
       var thoiLuong = document.getElementById("estimatedSessionTime").value.trim();
       var soLuongHV = document.getElementById("studentDescription").value.trim();
-      var lichHoc = document.getElementById("scheduleDescription").value.trim();
 
-      if (!ten || !moTa || !gia || !soBuoi || !thoiLuong || !soLuongHV || !lichHoc) {
-        alert("Vui lòng điền đầy đủ tất cả các trường.");
+      if (!ten || !moTa || !soBuoi || !thoiLuong || !soLuongHV) {
+        alert("Vui lòng điền đủ tất cả các trường.");
         return false;
       }
 
-      if (parseFloat(gia) <= 0) {
-        alert("Giá tiền phải lớn hơn 0.");
-        return false;
-      }
-
-      if (parseInt(soBuoi) <= 0) {
-        alert("Số buổi phải lớn hơn 0.");
+      const duration = parseInt(soBuoi);
+      if (isNaN(duration) || duration < 1 || duration > 30) {
+        alert("Số buổi học phải từ 1 đến 30.");
         return false;
       }
 
       return true;
     }
+
+    function tinhTien() {
+      const soBuoi = parseInt(document.getElementById("duration").value);
+      const price = isNaN(soBuoi) ? 0 : Math.min(soBuoi, 30) * 100000;
+      document.getElementById("price").value = price;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      tinhTien();
+
+      // ✅ Lấy lịch đã lưu và đánh dấu lại checkbox tương ứng
+      const savedSchedule = document.getElementById("scheduleDescription").value;
+      const selectedDays = savedSchedule.split(",").map(d => d.trim());
+
+      document.querySelectorAll('input[name="days"]').forEach(checkbox => {
+        if (selectedDays.includes(checkbox.value)) {
+          checkbox.checked = true;
+        }
+
+        checkbox.addEventListener('change', () => {
+          const selected = Array.from(document.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value);
+          document.getElementById("scheduleDescription").value = selected.join(', ');
+        });
+      });
+    });
   </script>
 </head>
 <body>
@@ -179,13 +204,13 @@
     </label>
 
     <label>
-      Giá tiền:
-      <input type="number" name="price" id="price" value="<%= course.getPrice() %>" min="0">
+      Thời gian dự kiến hoàn thành (số buổi):
+      <input type="number" name="duration" id="duration" value="<%= course.getDuration() %>" min="1" max="30" onchange="tinhTien()">
     </label>
 
     <label>
-      Thời gian dự kiến hoàn thành (số buổi):
-      <input type="number" name="duration" id="duration" value="<%= course.getDuration() %>" min="1">
+      Giá tiền:
+      <input type="number" name="price" id="price" value="<%= course.getPrice() %>" readonly>
     </label>
 
     <label>
@@ -200,12 +225,22 @@
 
     <label>
       Lịch học:
-      <input type="text" name="scheduleDescription" id="scheduleDescription" value="<%= course.getScheduleDescription() %>">
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="days" value="Thứ 2"> Thứ 2</label>
+        <label><input type="checkbox" name="days" value="Thứ 3"> Thứ 3</label>
+        <label><input type="checkbox" name="days" value="Thứ 4"> Thứ 4</label>
+        <label><input type="checkbox" name="days" value="Thứ 5"> Thứ 5</label>
+        <label><input type="checkbox" name="days" value="Thứ 6"> Thứ 6</label>
+        <label><input type="checkbox" name="days" value="Thứ 7"> Thứ 7</label>
+        <label><input type="checkbox" name="days" value="Chủ Nhật"> Chủ Nhật</label>
+        <label><input type="checkbox" name="days" value="Linh hoạt"> Linh hoạt</label>
+      </div>
+      <input type="hidden" name="scheduleDescription" id="scheduleDescription" value="<%= course.getScheduleDescription() %>">
     </label>
 
     <div class="button-group">
       <a class="btn-cancel" href="swimcourse">❌ Hủy</a>
-      <button type="submit" class="btn-submit">💾 Cập nhật</button>
+      <button type="submit" class="btn-submit">📀 Cập nhật</button>
     </div>
   </form>
 </div>

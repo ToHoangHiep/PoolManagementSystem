@@ -6,7 +6,7 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import model.Customer;
-import model.User;
+import model.User; // Đảm bảo lớp User tồn tại và có getId()
 import utils.DBConnect;
 
 import java.io.File;
@@ -15,23 +15,24 @@ import java.nio.file.Paths;
 import java.sql.Date;
 
 @WebServlet("/userprofile")
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2,
-        maxFileSize = 1024 * 1024 * 10,
-        maxRequestSize = 1024 * 1024 * 50)
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10, // 10MB
+        maxRequestSize = 1024 * 1024 * 50) // 50MB
 public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("login.jsp"); // Chuyển hướng nếu chưa đăng nhập
             return;
         }
 
-        User userSession = (User) session.getAttribute("user");
+        User userSession = (User) session.getAttribute("user"); // Lấy đối tượng User từ session
 
         try (var conn = DBConnect.getConnection()) {
             CustomerDAO dao = new CustomerDAO(conn);
+            // Lấy profile khách hàng từ DB; bây giờ nó sẽ có thông tin Role
             Customer profile = dao.getCustomerById(userSession.getId());
 
             if (profile == null) {
@@ -39,13 +40,14 @@ public class CustomerServlet extends HttpServlet {
                 return;
             }
 
+            // Xử lý thông báo (nếu có)
             String message = (String) session.getAttribute("message");
             if (message != null) {
                 request.setAttribute("message", message);
                 session.removeAttribute("message");
             }
 
-            request.setAttribute("user", profile);
+            request.setAttribute("user", profile); // Đặt đối tượng Customer (có Role) vào request
             request.getRequestDispatcher("userprofile.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,7 +66,7 @@ public class CustomerServlet extends HttpServlet {
         }
 
         User userSession = (User) session.getAttribute("user");
-        int userId = userSession.getId();
+        int userId = userSession.getId(); // Lấy ID người dùng từ session
 
         String fullName = request.getParameter("fullName");
         String phone = request.getParameter("phoneNumber");
@@ -78,46 +80,58 @@ public class CustomerServlet extends HttpServlet {
             try {
                 dob = Date.valueOf(dobString);
             } catch (IllegalArgumentException ignored) {
+                // Xử lý lỗi chuyển đổi ngày tháng nếu cần
             }
         }
 
         Part filePart = request.getPart("avatar");
         String avatarPath = null;
 
+        // Đường dẫn thư mục tải lên
         String uploadDirPath = getServletContext().getRealPath("/uploads");
         File uploadDir = new File(uploadDirPath);
         if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
+            uploadDir.mkdirs(); // Tạo thư mục nếu nó không tồn tại
         }
 
+        // Xử lý tải lên ảnh đại diện
         if (filePart != null && filePart.getSize() > 0) {
             String submittedFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            // Tạo tên file duy nhất
             String fileName = "user_" + userId + "_" + System.currentTimeMillis() + "_" +
                     submittedFileName.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_");
             String savePath = uploadDirPath + File.separator + fileName;
             filePart.write(savePath);
-            avatarPath = "uploads/" + fileName;
+            avatarPath = "uploads/" + fileName; // Lưu đường dẫn tương đối để dễ sử dụng trong JSP
         }
 
         try (var conn = DBConnect.getConnection()) {
             CustomerDAO dao = new CustomerDAO(conn);
-            Customer existing = dao.getCustomerById(userId);
+            Customer existing = dao.getCustomerById(userId); // Lấy thông tin hiện có
 
+            // Nếu không có ảnh mới, giữ ảnh cũ
             if (avatarPath == null || avatarPath.isEmpty()) {
                 avatarPath = existing != null ? existing.getProfilePicture() : null;
             }
 
+            // Tạo đối tượng Customer đã cập nhật
             Customer updated = new Customer(userId, fullName, phone, dob, gender, address, avatarPath, email);
-            boolean success = dao.updateUser(updated);
+            // Lưu ý: Vai trò không được cập nhật từ form này, nó giữ nguyên từ DB.
+
+            boolean success = dao.updateUser(updated); // Cập nhật thông tin người dùng
 
             if (success) {
                 session.setAttribute("message", "Profile updated successfully!");
-                userSession.setFullName(updated.getFullName());
-                session.setAttribute("user", userSession);
+                // Cập nhật thông tin user trong session (ví dụ: fullName)
+                // Tuy nhiên, để đảm bảo Role luôn được cập nhật, bạn có thể tải lại User từ DB và đặt vào session
+                // Hoặc đơn giản là không cần cập nhật User session ở đây,
+                // vì doGet sẽ tải lại dữ liệu từ DB mỗi khi trang profile được truy cập.
+                userSession.setFullName(updated.getFullName()); // Cập nhật tên trong session nếu cần
+                session.setAttribute("user", userSession); // Cập nhật session (không cần thiết lắm vì doGet sẽ tải lại)
             } else {
                 session.setAttribute("message", "Failed to update profile!");
             }
-            response.sendRedirect("userprofile");
+            response.sendRedirect("userprofile"); // Chuyển hướng lại trang profile
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error updating profile");

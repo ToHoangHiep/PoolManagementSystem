@@ -7,142 +7,27 @@
     <title>Danh sách Huấn luyện viên</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f6f9;
-            padding: 30px;
-            margin: 0;
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; padding: 30px; margin: 0; }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .top-bar { max-width: 1200px; margin: auto auto 20px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .top-bar a { text-decoration: none; padding: 10px 20px; border-radius: 6px; color: white; font-weight: bold; font-size: 15px; margin: 5px; }
+        .btn-home { background-color: #2ecc71; } .btn-home:hover { background-color: #27ae60; }
+        .btn-add { background-color: #3498db; } .btn-add:hover { background-color: #2980b9; }
+        .search-box input[type="text"] { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+        .search-box input[type="submit"] { padding: 8px 12px; background-color: #16a085; color: white; border: none; border-radius: 4px; margin-left: 5px; }
+        table { width: 100%; max-width: 1200px; margin: auto; border-collapse: collapse; background-color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; vertical-align: middle; }
+        th { background-color: #ecf0f1; }
+        img.coach-photo { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #ccc; }
+        .action { display: flex; gap: 6px; align-items: center; }
+        .btn-edit, .btn-delete {
+            padding: 6px 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; color: white; text-decoration: none;
         }
-
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-
-        .top-bar {
-            max-width: 1200px;
-            margin: 0 auto 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .top-bar a,
-        .top-bar form {
-            margin: 5px;
-        }
-
-        .top-bar a {
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            color: white;
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .btn-home {
-            background-color: #2ecc71;
-        }
-
-        .btn-home:hover {
-            background-color: #27ae60;
-        }
-
-        .btn-add {
-            background-color: #3498db;
-        }
-
-        .btn-add:hover {
-            background-color: #2980b9;
-        }
-
-        .search-box input[type="text"] {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-
-        .search-box input[type="submit"] {
-            padding: 8px 12px;
-            background-color: #16a085;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            margin-left: 5px;
-            cursor: pointer;
-        }
-
-        .search-box input[type="submit"]:hover {
-            background-color: #138d75;
-        }
-
-        table {
-            width: 100%;
-            max-width: 1200px;
-            margin: auto;
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        th {
-            background-color: #ecf0f1;
-        }
-
-        img.coach-photo {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        .action {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-edit {
-            background-color: #f39c12;
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-edit:hover {
-            background-color: #d68910;
-        }
-
-        .status-active {
-            color: green;
-            font-weight: bold;
-        }
-
-        .status-inactive {
-            color: red;
-            font-weight: bold;
-        }
-
-        .no-data {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-        }
+        .btn-edit { background-color: #f39c12; } .btn-edit:hover { background-color: #d68910; }
+        .btn-delete { background-color: #e74c3c; } .btn-delete:hover { background-color: #c0392b; }
+        .status-active { color: green; font-weight: bold; }
+        .status-inactive { color: red; font-weight: bold; }
+        .no-data { text-align: center; color: #888; padding: 20px; }
     </style>
 </head>
 <body>
@@ -154,7 +39,6 @@
         <a href="admin_dashboard.jsp" class="btn-home"><i class="fas fa-home"></i> Trang chủ</a>
         <a href="coach-list?action=add" class="btn-add"><i class="fas fa-user-plus"></i> Thêm Huấn luyện viên</a>
     </div>
-
     <form action="coach-list" method="get" class="search-box">
         <input type="text" name="keyword" placeholder="Tìm theo tên..." value="<%= request.getParameter("keyword") != null ? request.getParameter("keyword") : "" %>"/>
         <input type="submit" value="Tìm kiếm"/>
@@ -179,8 +63,7 @@
 
         if (list != null && !list.isEmpty()) {
             for (Coach c : list) {
-                if (keyword == null || keyword.trim().isEmpty()
-                        || c.getFullName().toLowerCase().contains(keyword.toLowerCase())) {
+                if (keyword == null || keyword.trim().isEmpty() || c.getFullName().toLowerCase().contains(keyword.toLowerCase())) {
                     hasResult = true;
     %>
     <tr>
@@ -191,14 +74,15 @@
         <td><%= c.getBio() %></td>
         <td><img src="images/<%= c.getProfilePicture() %>" class="coach-photo" alt="Ảnh"/></td>
         <td>
-            <% if (c.isActive()) { %>
-            <span class="status-active">Đang hoạt động</span>
-            <% } else { %>
-            <span class="status-inactive">Ngưng hoạt động</span>
-            <% } %>
+            <%= c.isActive() ? "<span class='status-active'>Đang hoạt động</span>" : "<span class='status-inactive'>Ngưng hoạt động</span>" %>
         </td>
         <td class="action">
             <a class="btn-edit" href="coach-list?action=edit&id=<%= c.getId() %>">Sửa</a>
+            <form method="post" action="coach-list" onsubmit="return confirm('Bạn có chắc muốn xóa huấn luyện viên này?');">
+                <input type="hidden" name="action" value="delete"/>
+                <input type="hidden" name="id" value="<%= c.getId() %>"/>
+                <button type="submit" class="btn-delete">Xóa</button>
+            </form>
         </td>
     </tr>
     <%

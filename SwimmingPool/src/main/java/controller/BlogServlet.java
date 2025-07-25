@@ -52,7 +52,7 @@ public class BlogServlet extends HttpServlet {
     private void viewCoach(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
         try {
             int coachId = Integer.parseInt(request.getParameter("coachId"));
-            Coach coach = CoachDAO.getById(coachId);
+            Coach coach = CoachDAO.getCoachById(coachId);
 
             if (coach == null) {
                 request.getSession().setAttribute("alert_message", "The requested coach could not be found.");
@@ -103,7 +103,7 @@ public class BlogServlet extends HttpServlet {
     private void listDirectory(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SQLException {
         // ... (this method remains the same)
         List<Course> courses = CourseDAO.getAllCourses();
-        List<Coach> coaches = CoachDAO.getAll();
+        List<Coach> coaches = CoachDAO.getAllCoaches();
         Map<Integer, Integer> courseCounts = CourseDAO.getCourseRegistrationCounts();
         request.setAttribute("courses", courses != null ? courses : Collections.emptyList());
         request.setAttribute("coaches", coaches != null ? coaches : Collections.emptyList());

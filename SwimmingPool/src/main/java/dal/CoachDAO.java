@@ -1,11 +1,8 @@
 package dal;
 
 import model.Coach;
-import utils.DBConnect;
-
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CoachDAO {
     private static Connection conn;
@@ -14,79 +11,89 @@ public class CoachDAO {
         this.conn = conn;
     }
 
-    public static List<Coach> getAll() throws SQLException {
+    // Lấy danh sách tất cả huấn luyện viên
+    public static List<Coach> getAllCoaches() throws SQLException {
         List<Coach> list = new ArrayList<>();
         String sql = "SELECT * FROM Coaches";
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
-                list.add(mapCoach(rs));
+                Coach coach = new Coach();
+                coach.setId(rs.getInt("id"));
+                coach.setFullName(rs.getString("full_name"));
+                coach.setEmail(rs.getString("email"));
+                coach.setPhone(rs.getString("phone_number"));
+                coach.setGender(rs.getString("gender"));
+                coach.setBio(rs.getString("bio"));
+                coach.setProfilePicture(rs.getString("profile_picture"));
+                coach.setActive(rs.getBoolean("active"));
+                list.add(coach);
             }
         }
         return list;
     }
 
-    public static Coach getById(int id) throws SQLException {
+    // Lấy huấn luyện viên theo ID
+    public static Coach getCoachById(int id) throws SQLException {
         String sql = "SELECT * FROM Coaches WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return mapCoach(rs);
+                    Coach coach = new Coach();
+                    coach.setId(rs.getInt("id"));
+                    coach.setFullName(rs.getString("full_name"));
+                    coach.setEmail(rs.getString("email"));
+                    coach.setPhone(rs.getString("phone_number"));
+                    coach.setGender(rs.getString("gender"));
+                    coach.setBio(rs.getString("bio"));
+                    coach.setProfilePicture(rs.getString("profile_picture"));
+                    coach.setActive(rs.getBoolean("active"));
+                    return coach;
                 }
             }
         }
         return null;
     }
 
-    public void insert(Coach c) throws SQLException {
+    // Thêm huấn luyện viên mới
+    public void insertCoach(Coach coach) throws SQLException {
         String sql = "INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture, active) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, c.getFullName());
-            ps.setString(2, c.getEmail());
-            ps.setString(3, c.getPhone());
-            ps.setString(4, c.getGender());
-            ps.setString(5, c.getBio());
-            ps.setString(6, c.getProfilePicture());
-            ps.setBoolean(7, c.isActive());
+            ps.setString(1, coach.getFullName());
+            ps.setString(2, coach.getEmail());
+            ps.setString(3, coach.getPhone());
+            ps.setString(4, coach.getGender());
+            ps.setString(5, coach.getBio());
+            ps.setString(6, coach.getProfilePicture());
+            ps.setBoolean(7, coach.isActive());
             ps.executeUpdate();
         }
     }
 
-    public void update(Coach c) throws SQLException {
-        String sql = "UPDATE Coaches SET full_name = ?, email = ?, phone_number = ?, gender = ?, bio = ?, profile_picture = ?, active = ? WHERE id = ?";
+    // Cập nhật huấn luyện viên
+    public void updateCoach(Coach coach) throws SQLException {
+        String sql = "UPDATE Coaches SET full_name=?, email=?, phone_number=?, gender=?, bio=?, profile_picture=?, active=? WHERE id=?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, c.getFullName());
-            ps.setString(2, c.getEmail());
-            ps.setString(3, c.getPhone());
-            ps.setString(4, c.getGender());
-            ps.setString(5, c.getBio());
-            ps.setString(6, c.getProfilePicture());
-            ps.setBoolean(7, c.isActive());
-            ps.setInt(8, c.getId());
+            ps.setString(1, coach.getFullName());
+            ps.setString(2, coach.getEmail());
+            ps.setString(3, coach.getPhone());
+            ps.setString(4, coach.getGender());
+            ps.setString(5, coach.getBio());
+            ps.setString(6, coach.getProfilePicture());
+            ps.setBoolean(7, coach.isActive());
+            ps.setInt(8, coach.getId());
             ps.executeUpdate();
         }
     }
 
-    public boolean isCoachUsed(int coachId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM Classes WHERE coach_id = ?";
+    // Xóa huấn luyện viên
+    public void deleteCoach(int id) throws SQLException {
+        String sql = "DELETE FROM Coaches WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, coachId);
-            ResultSet rs = ps.executeQuery();
-            return rs.next() && rs.getInt(1) > 0;
+            ps.setInt(1, id);
+            ps.executeUpdate();
         }
-    }
-
-    private static Coach mapCoach(ResultSet rs) throws SQLException {
-        Coach c = new Coach();
-        c.setId(rs.getInt("id"));
-        c.setFullName(rs.getString("full_name"));
-        c.setEmail(rs.getString("email"));
-        c.setPhone(rs.getString("phone_number"));
-        c.setGender(rs.getString("gender"));
-        c.setBio(rs.getString("bio"));
-        c.setProfilePicture(rs.getString("profile_picture"));
-        c.setActive(rs.getBoolean("active"));
-        return c;
     }
 }
