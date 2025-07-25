@@ -5,14 +5,14 @@
     // --- Security & Data Retrieval ---
     // Ensures only logged-in, authorized users can see this page.
     User user = (User) session.getAttribute("user");
-    if (user == null) {
+    if (user == null) { //
         response.sendRedirect("login.jsp");
         return;
     }
     // Example: Role 4 (Customer) cannot edit courses.
     // This check should also be in your servlet for stronger security.
     if (user.getRole().getId() == 4) {
-        session.setAttribute("alert_message", "You do not have permission to access this page.");
+        session.setAttribute("alert_message", "Bạn không có quyền truy cập trang này.");
         response.sendRedirect("course");
         return;
     }
@@ -21,18 +21,18 @@
     if (course == null) {
         // If the course object is missing, we can't display the page.
         // Redirect to the list with a session-based alert.
-        session.setAttribute("alert_message", "The requested course could not be found for editing.");
+        session.setAttribute("alert_message", "Không tìm thấy khóa học được yêu cầu để chỉnh sửa.");
         response.sendRedirect("course"); // Redirect to the main course list
         return;
     }
 %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Course: <%= course.getName() %></title>
+    <title>Chỉnh sửa Khóa học: <%= course.getName() %></title>
     <!-- Bootstrap CSS -->
     <link href="Resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -53,7 +53,14 @@
 %>
 <script>
     (function() {
-        alert('<%= alertMessage.replace("'", "\\'") %>');
+        let message = '<%= alertMessage.replace("'", "\\'") %>';
+        // Dịch các thông báo phổ biến
+        if (message.includes("Course updated successfully")) {
+            message = "Khóa học đã được cập nhật thành công.";
+        } else if (message.includes("Failed to update course")) {
+            message = "Cập nhật khóa học thất bại.";
+        }
+        alert(message);
         <% if (alertAction != null && !alertAction.isEmpty()) { %>
         window.location.href = '<%= request.getContextPath() %>/<%= alertAction %>';
         <% } %>
@@ -69,7 +76,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h2 class="mb-0 h4">
-                        <i class="fas fa-edit me-2"></i>Edit Course
+                        <i class="fas fa-edit me-2"></i>Chỉnh sửa Khóa học
                     </h2>
                 </div>
 
@@ -88,25 +95,25 @@
 
                         <!-- Course Name -->
                         <div class="mb-3">
-                            <label for="name" class="form-label fw-bold">Course Name</label>
+                            <label for="name" class="form-label fw-bold">Tên Khóa học</label>
                             <input type="text" class="form-control" id="name" name="name" value="<%= course.getName() %>" required>
                         </div>
 
                         <!-- Description -->
                         <div class="mb-3">
-                            <label for="description" class="form-label fw-bold">Description</label>
+                            <label for="description" class="form-label fw-bold">Mô tả</label>
                             <textarea class="form-control" id="description" name="description" rows="4" required><%= course.getDescription() %></textarea>
                         </div>
 
                         <div class="row">
                             <!-- Price -->
                             <div class="col-md-6 mb-3">
-                                <label for="price" class="form-label fw-bold">Price ($)</label>
-                                <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" value="<%= course.getPrice() %>" required>
+                                <label for="price" class="form-label fw-bold">Giá (VNĐ)</label>
+                                <input type="number" class="form-control" id="price" name="price" step="1" min="0" value="<%= (long) course.getPrice() %>" required>
                             </div>
                             <!-- Duration -->
                             <div class="col-md-6 mb-3">
-                                <label for="duration" class="form-label fw-bold">Duration (sessions)</label>
+                                <label for="duration" class="form-label fw-bold">Thời lượng (buổi)</label>
                                 <input type="number" class="form-control" id="duration" name="duration" min="1" value="<%= course.getDuration() %>" required>
                             </div>
                         </div>
@@ -114,32 +121,32 @@
                         <div class="row">
                             <!-- Estimated Session Time -->
                             <div class="col-md-6 mb-3">
-                                <label for="estimated_session_time" class="form-label fw-bold">Session Time</label>
+                                <label for="estimated_session_time" class="form-label fw-bold">Thời gian mỗi buổi</label>
                                 <input type="text" class="form-control" id="estimated_session_time" name="estimated_session_time" value="<%= course.getEstimated_session_time() %>" required>
                             </div>
                             <!-- Status -->
                             <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label fw-bold">Status</label>
+                                <label for="status" class="form-label fw-bold">Trạng thái</label>
                                 <select class="form-select" id="status" name="status" required>
-                                    <option value="Active" <%= "Active".equals(course.getStatus()) ? "selected" : "" %>>Active</option>
-                                    <option value="Inactive" <%= "Inactive".equals(course.getStatus()) ? "selected" : "" %>>Inactive</option>
+                                    <option value="Active" <%= "Active".equals(course.getStatus()) ? "selected" : "" %>>Hoạt động</option>
+                                    <option value="Inactive" <%= "Inactive".equals(course.getStatus()) ? "selected" : "" %>>Tạm ngưng</option>
                                 </select>
                             </div>
                         </div>
 
                         <!-- Schedule Description -->
                         <div class="mb-4">
-                            <label for="schedule_description" class="form-label fw-bold">Schedule Description</label>
+                            <label for="schedule_description" class="form-label fw-bold">Mô tả Lịch học</label>
                             <input type="text" class="form-control" id="schedule_description" name="schedule_description" value="<%= course.getSchedule_description() %>" required>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-3">
-                            <a href="course?action=view&courseId=<%= course.getId() %>" class="btn btn-secondary">
-                                <i class="fas fa-times me-1"></i>Cancel
+                            <a href="course?action=list" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Hủy
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Save Changes
+                                <i class="fas fa-save me-1"></i>Lưu thay đổi
                             </button>
                         </div>
                     </form>

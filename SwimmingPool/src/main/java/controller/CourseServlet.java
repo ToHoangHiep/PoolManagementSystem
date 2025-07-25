@@ -32,6 +32,11 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
+        if (action == null) {
+            listCourse(request, response);
+            return;
+        }
+
         switch (action) {
             case "create" -> createCourse(request, response);
             case "view" -> detailCourse(request, response);
@@ -45,7 +50,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void createCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_create.jsp");
+        if (!isUserAllowed(request, response, "course_create.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         request.getRequestDispatcher("course_create.jsp").forward(request, response);
     }
@@ -69,7 +77,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void editCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_edit.jsp");
+        if (!isUserAllowed(request, response, "course_edit.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         Course course = CourseDAO.getCourseById(courseId);
@@ -78,7 +89,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void deleteCourse(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_delete.jsp");
+        if (!isUserAllowed(request, response, "course_delete.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         Course course = CourseDAO.getCourseById(courseId);
@@ -126,7 +140,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormDetails(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_form_details.jsp");
+        if (!isUserAllowed(request, response, "course_form_details.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         try {
             int formId = Integer.parseInt(request.getParameter("formId"));
@@ -134,6 +151,10 @@ public class CourseServlet extends HttpServlet {
 
             Course course = CourseDAO.getCourseById(courseForm.getCourse_id());
             Coach coach = CoachDAO.getById(courseForm.getCoach_id());
+
+            if (courseForm.getUser_id() != -1){
+                request.setAttribute("user", UserDAO.getUserById(courseForm.getUser_id()));
+            }
 
             request.setAttribute("course", course);
             request.setAttribute("coach", coach);
@@ -145,9 +166,23 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void courseFormManage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_form_manage.jsp");
+        User user = (User) request.getSession().getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(login_link);
+            return;
+        }
+
+        boolean isManagement = user.getRole().getId() != 3;
 
         List<CourseForm> courseForms = CourseFormDAO.getAll();
+
+        if (!isManagement) {
+            courseForms = courseForms.stream()
+                    .filter(form -> form.getUser_id() == user.getId())
+                    .toList();
+        }
+
         request.setAttribute("courseForms", courseForms);
         request.getRequestDispatcher("course_form_manage.jsp").forward(request, response);
     }
@@ -161,12 +196,33 @@ public class CourseServlet extends HttpServlet {
             case "delete" -> deleteCoursePost(request, response);
             case "create_form" -> createCourseFormPost(request, response);
             case "form_confirmed" -> confirmForm(request, response);
+            case "deactivate" -> deactivateCourse(request, response);
             default -> listCourse(request, response);
         }
     }
 
+    private void deactivateCourse(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            CourseDAO courseDAO = new CourseDAO();
+            boolean success = courseDAO.updateCourseStatus(courseId, "Inactive");
+
+            if (success) {
+                request.getSession().setAttribute("alert_message", "Khóa học đã được tạm ngưng thành công.");
+            } else {
+                request.getSession().setAttribute("alert_message", "Tạm ngưng khóa học thất bại.");
+            }
+        } catch (NumberFormatException e) {
+            request.getSession().setAttribute("alert_message", "Mã khóa học không hợp lệ.");
+        }
+        response.sendRedirect("course?action=list");
+    }
+
     private void createCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_create.jsp");
+        if (!isUserAllowed(request, response, "course_create.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         Course c = new Course();
         c.setName(request.getParameter("name"));
@@ -186,7 +242,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void editCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_edit.jsp");
+        if (!isUserAllowed(request, response, "course_edit.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         String name = request.getParameter("name");
@@ -216,7 +275,10 @@ public class CourseServlet extends HttpServlet {
     }
 
     private void deleteCoursePost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        isUserAllowed(request, response, "course_delete.jsp");
+        if (!isUserAllowed(request, response, "course_delete.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         if (!CourseDAO.deleteCourse(courseId)){
@@ -227,7 +289,10 @@ public class CourseServlet extends HttpServlet {
 
     private void confirmForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Authorization Check
-        isUserAllowed(request, response, "course_form_manage.jsp");
+        if (isUserAllowed(request, response, "course_form_details.jsp")) {
+            response.sendRedirect("home.jsp");
+            return;
+        }
 
         int formId;
         try {
@@ -351,20 +416,24 @@ public class CourseServlet extends HttpServlet {
         response.sendRedirect("home.jsp"); // Redirect to a success page
     }
 
-    private void isUserAllowed(HttpServletRequest request, HttpServletResponse response, String current_page) throws ServletException, IOException {
+    private boolean isUserAllowed(HttpServletRequest request, HttpServletResponse response, String current_page) throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
 
         if (user == null) {
             response.sendRedirect(login_link);
-            return;
+            return false;
         }
 
-        boolean isAllowed = user.getRole().getId() == 3;
+        boolean isAllowed = user.getRole().getId() != 3;
 
         if (!isAllowed) {
             request.setAttribute(alert_message, "You are not allowed to access this page!");
             request.setAttribute(alert_action, "course");
             request.getRequestDispatcher(current_page).forward(request, response);
+
+            return false;
         }
+
+        return true;
     }
 }

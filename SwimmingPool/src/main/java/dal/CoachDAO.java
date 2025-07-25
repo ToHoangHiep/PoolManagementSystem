@@ -8,16 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CoachDAO {
-    private static Connection conn;
-
-    public CoachDAO(Connection conn) {
-        this.conn = conn;
-    }
-
     public static List<Coach> getAll() throws SQLException {
         List<Coach> list = new ArrayList<>();
         String sql = "SELECT * FROM Coaches";
-        try (PreparedStatement ps = conn.prepareStatement(sql);
+        try (Connection conn = DBConnect.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(mapCoach(rs));
@@ -28,7 +23,8 @@ public class CoachDAO {
 
     public static Coach getById(int id) throws SQLException {
         String sql = "SELECT * FROM Coaches WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -39,9 +35,10 @@ public class CoachDAO {
         return null;
     }
 
-    public void insert(Coach c) throws SQLException {
+    public static void insert(Coach c) throws SQLException {
         String sql = "INSERT INTO Coaches (full_name, email, phone_number, gender, bio, profile_picture, active) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getFullName());
             ps.setString(2, c.getEmail());
             ps.setString(3, c.getPhone());
@@ -53,9 +50,10 @@ public class CoachDAO {
         }
     }
 
-    public void update(Coach c) throws SQLException {
+    public static void update(Coach c) throws SQLException {
         String sql = "UPDATE Coaches SET full_name = ?, email = ?, phone_number = ?, gender = ?, bio = ?, profile_picture = ?, active = ? WHERE id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getFullName());
             ps.setString(2, c.getEmail());
             ps.setString(3, c.getPhone());
@@ -70,7 +68,8 @@ public class CoachDAO {
 
     public boolean isCoachUsed(int coachId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM Classes WHERE coach_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, coachId);
             ResultSet rs = ps.executeQuery();
             return rs.next() && rs.getInt(1) > 0;
