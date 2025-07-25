@@ -13,11 +13,10 @@ import utils.DBConnect;
 public class CourseFormDAO {
     public static List<CourseForm> getAll() {
         List<CourseForm> list = new ArrayList<>();
-        String sql = "SELECT * FROM courseform";
+        String sql = "SELECT * FROM course_form";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
-
 
             while (rs.next()) {
                 CourseForm courseForm = new CourseForm();
@@ -41,7 +40,7 @@ public class CourseFormDAO {
     }
 
     public static CourseForm getById(int id) {
-        String sql = "SELECT * FROM courseform WHERE id = ?";
+        String sql = "SELECT * FROM course_form WHERE id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){
@@ -74,9 +73,9 @@ public class CourseFormDAO {
         String sql = "";
 
         if (courseForm.getUser_id() == -1) {
-            sql = "INSERT INTO courseform ( user_fullName, user_email, user_phone, coach_id, course_id) VALUES (?,?,?,?,?)";
+            sql = "INSERT INTO course_form ( user_fullName, user_email, user_phone, coach_id, course_id) VALUES (?,?,?,?,?)";
         } else {
-            sql = "INSERT INTO courseform (user_id, coach_id, course_id) VALUES (?,?,?)";
+            sql = "INSERT INTO course_form (user_id, coach_id, course_id) VALUES (?,?,?)";
         }
 
         try (Connection conn = DBConnect.getConnection();
@@ -102,7 +101,7 @@ public class CourseFormDAO {
     }
 
     public static boolean setFormStatus(int formId) {
-        String sql = "UPDATE courseform SET has_processed = true WHERE id = ?";
+        String sql = "UPDATE course_form SET has_processed = true WHERE id = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)){

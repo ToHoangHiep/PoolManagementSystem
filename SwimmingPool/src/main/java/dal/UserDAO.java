@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class UserDAO {
 
     // LOGIN
@@ -21,7 +22,7 @@ public class UserDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email);
-            ps.setString(2, password);
+            ps.setString(2, password); // So sánh trực tiếp mật khẩu plain text hoặc đã băm theo cách cũ của bạn
 
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -79,7 +80,7 @@ public class UserDAO {
             ps.setString(1, fullName);
             ps.setString(2, email);
             ps.setString(3, phone);
-            ps.setString(4, password);
+            ps.setString(4, password); // Lưu mật khẩu plain text hoặc theo cách cũ của bạn
             ps.setString(5, address);
             ps.setDate(6, Date.valueOf(dob));
             ps.setString(7, gender);
@@ -94,14 +95,13 @@ public class UserDAO {
     }
 
 
-
     // RESET PASSWORD
     public static boolean updatePassword(String email, String newPassword) {
         String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newPassword);
+            ps.setString(1, newPassword); // Cập nhật mật khẩu plain text hoặc theo cách cũ của bạn
             ps.setString(2, email);
             return ps.executeUpdate() > 0;
 
@@ -113,7 +113,7 @@ public class UserDAO {
 
     // FIND USER BY EMAIL
     public static User findUserFromEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
+        String sql = "SELECT u.*, r.name AS role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.email = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -132,6 +132,7 @@ public class UserDAO {
                 user.setUserStatus(rs.getString("user_status"));
                 user.setCreatedAt(rs.getTimestamp("created_at"));
                 user.setUpdatedAt(rs.getTimestamp("updated_at"));
+                user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name"))); // Lấy Role
                 return user;
             }
 
@@ -201,6 +202,7 @@ public class UserDAO {
         }
     }
 
+    // getAllUsers
     public static List<User> getAllUsers(String name, String status, String roleId) {
         List<User> list = new ArrayList<>();
         String sql = "SELECT u.*, r.name as role_name FROM users u " +
@@ -271,6 +273,8 @@ public class UserDAO {
                 user.setGender(rs.getString("gender"));
                 user.setUserStatus(rs.getString("user_status"));
                 user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
+                user.setCreatedAt(rs.getTimestamp("created_at")); // Lấy created_at
+                user.setUpdatedAt(rs.getTimestamp("updated_at")); // Lấy updated_at
                 return user;
             }
         } catch (Exception e) {
@@ -370,8 +374,69 @@ public class UserDAO {
     }
 
 
+     // Lấy Role theo ID.
 
+    public static Role getRoleById(int roleId) throws SQLException {
+        String sql = "SELECT id, name FROM Roles WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Role(rs.getInt("id"), rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            // In lỗi ra console để debug
+            System.err.println("ERROR (UserDAO.getRoleById): " + e.getMessage());
+            throw e; // Ném lại lỗi để Servlet xử lý
+        }
+        return null;
+    }
 
+    //Thêm User tối thiểu (chỉ email, mật khẩu, role_id, status).
 
+    public static int insertUserMinimal(String email, String password, int roleId, String userStatus) throws SQLException {
+        String sql = "INSERT INTO Users (email, password_hash, role_id, user_status) VALUES (?, ?, ?, ?)";
+        int userId = -1;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, email);
+            ps.setString(2, password); // Lưu mật khẩu plain text
+            ps.setInt(3, roleId);
+            ps.setString(4, userStatus);
 
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        userId = rs.getInt(1); // Lấy ID của user vừa được thêm
+                        System.out.println("DEBUG (UserDAO.insertUserMinimal): User inserted with ID: " + userId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("ERROR (UserDAO.insertUserMinimal): " + e.getMessage());
+            throw e; // Ném lại lỗi để Servlet xử lý
+        }
+        return userId;
+    }
+
+    // Cập nhật thông tin cá nhân của User.
+
+    public static boolean updateUserProfile(User user) throws SQLException {
+        String sql = "UPDATE Users SET full_name=?, phone_number=?, address=?, dob=?, gender=?, updated_at=CURRENT_TIMESTAMP WHERE id=?";
+        try (Connection conn = DBConnect.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getPhoneNumber());
+            ps.setString(3, user.getAddress());
+            ps.setDate(4, new java.sql.Date(user.getDob().getTime())); // Chuyển đổi java.util.Date sang java.sql.Date
+            ps.setString(5, user.getGender());
+            ps.setInt(6, user.getId());
+            int affectedRows = ps.executeUpdate();
+            System.out.println("DEBUG (UserDAO.updateUserProfile): User ID " + user.getId() + " updated. Affected rows: " + affectedRows);
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.err.println("ERROR (UserDAO.updateUserProfile): " + e.getMessage());
+            throw e; // Ném lại lỗi để Servlet xử lý
+        }
+    }
 }

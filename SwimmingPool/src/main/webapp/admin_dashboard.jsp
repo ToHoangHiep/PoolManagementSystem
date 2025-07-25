@@ -129,12 +129,13 @@
         <div style="padding-left: 20px;">
             <div style="font-weight:bold; margin-bottom:8px; color:#0078d7;"><i class="fas fa-swimmer"></i> Quản lý khóa học</div>
             <a href="swimcourse" style="padding-left: 30px;"><i class="fas fa-book"></i> Khóa học</a>
-            <a href="register-course" style="padding-left: 30px;"><i class="fas fa-user-plus"></i> Đăng kí mới</a>
+            <a href="course?action=list_form" style="padding-left: 30px;"><i class="fas fa-user-plus"></i> Đăng kí mới</a>
         </div>
 
         <a href="MaintenanceServlet"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
         <a href="coach-list"><i class="fas fa-user-tie"></i> Quản lý huấn luyện viên</a>
         <a href="pool-area"><i class="fas fa-warehouse"></i> Quản bể bơi</a>
+        <a href="staff-registration"><i class="fas fa-user-plus"></i> Tạo tài khoản cho nhân viên</a>
     </div>
 
     <div class="hero-section"></div>

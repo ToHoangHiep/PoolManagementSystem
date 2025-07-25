@@ -23,20 +23,18 @@ public class CoachServlet extends HttpServlet {
 
         String action = request.getParameter("action");
 
-        try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
-
+        try {
             if ("add".equals(action)) {
                 request.getRequestDispatcher("/coach-form.jsp").forward(request, response);
 
             } else if ("edit".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Coach coach = dao.getById(id);
+                Coach coach = CoachDAO.getById(id);
                 request.setAttribute("coach", coach);
                 request.getRequestDispatcher("/coach-form.jsp").forward(request, response);
 
             } else {
-                List<Coach> list = dao.getAll();
+                List<Coach> list = CoachDAO.getAll();
                 request.setAttribute("coaches", list);
                 request.getRequestDispatcher("/coach-list.jsp").forward(request, response);
             }
@@ -49,8 +47,7 @@ public class CoachServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        try (Connection conn = utils.DBConnect.getConnection()) {
-            CoachDAO dao = new CoachDAO(conn);
+        try{
             request.setCharacterEncoding("UTF-8");
 
             int id = request.getParameter("id") != null && !request.getParameter("id").isEmpty()
@@ -87,12 +84,12 @@ public class CoachServlet extends HttpServlet {
                 if (fileName != null) {
                     coach.setProfilePicture(fileName);
                 } else {
-                    coach.setProfilePicture(dao.getById(id).getProfilePicture());
+                    coach.setProfilePicture(CoachDAO.getById(id).getProfilePicture());
                 }
-                dao.update(coach);
+                CoachDAO.update(coach);
             } else {
                 coach.setProfilePicture(fileName != null ? fileName : "");
-                dao.insert(coach);
+                CoachDAO.insert(coach);
             }
 
             response.sendRedirect("coach-list");
