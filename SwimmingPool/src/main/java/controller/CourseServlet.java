@@ -192,10 +192,6 @@ public class CourseServlet extends HttpServlet {
             courseForms = courseForms.stream()
                     .filter(form -> form.getUser_id() == user.getId())
                     .toList();
-        } else {
-            courseForms = courseForms.stream()
-                    .filter(form -> form.getHas_processed() == 0 || form.getUser_id() == user.getId())
-                    .toList();
         }
 
         request.setAttribute("courseForms", courseForms);
