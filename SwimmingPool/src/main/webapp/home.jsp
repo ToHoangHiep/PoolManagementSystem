@@ -63,7 +63,7 @@
         <h1>Thư Giãn, Vui Chơi & Rèn Luyện Tại Nơi Đây</h1>
         <p>Hãy đến và trải nghiệm những dịch vụ tuyệt vời của chúng tôi, từ bơi lội giải trí đến các khóa học.</p>
         <button class="btn btn-primary">Khám phá</button>
-        <button class="btn btn-outline" onclick="window.location.href='#how-to-register';">Đăng ký học bơi</button>
+        <button class="btn btn-outline" onclick="window.location.href='#how-to-register';">Bài viết</button>
     </div>
 </div>
 

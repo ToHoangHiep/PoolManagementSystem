@@ -25,6 +25,8 @@
         <%= user.getFullName() %> (Email: <%= user.getEmail() %>)
     </div>
 
+
+
     <div class="password-requirements">
         <strong>Password must:</strong>
         <ul>
@@ -37,6 +39,10 @@
     </div>
 
     <form method="post" action="change-password">
+        <div class="success" style="display: <%= request.getAttribute("message") != null ? "block" : "none" %>;">
+            <%= request.getAttribute("message") != null ? request.getAttribute("message") : "" %>
+        </div>
+        
         <div class="form-group">
             <label for="oldPass">Old Password</label>
             <div class="password-container">
@@ -70,7 +76,15 @@
 
         <div class="button-group">
             <button type="submit">Change Password</button>
-            <button type="button" onclick="window.location.href='home.jsp'">Cancel</button>
+            <%
+                String return_link = switch (user.getRole().getId()) {
+                    case 1, 2 -> "admin_dashboard.jsp";
+                    case 4 -> "home.jsp";
+                    case 5 -> "staff_dashboard.jsp";
+                    default -> throw new IllegalStateException("Unexpected value: " + user.getRole().getId());
+                };
+            %>
+            <button type="button" onclick="window.location.href='<%= return_link %>'"> Return</button>
         </div>
     </form>
 </div>

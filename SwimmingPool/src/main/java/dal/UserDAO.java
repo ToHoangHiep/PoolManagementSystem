@@ -272,6 +272,7 @@ public class UserDAO {
                 user.setDob(rs.getDate("dob"));
                 user.setGender(rs.getString("gender"));
                 user.setUserStatus(rs.getString("user_status"));
+                user.setPasswordHash(rs.getString("password_hash"));
                 user.setRole(new Role(rs.getInt("role_id"), rs.getString("role_name")));
                 user.setCreatedAt(rs.getTimestamp("created_at")); // Lấy created_at
                 user.setUpdatedAt(rs.getTimestamp("updated_at")); // Lấy updated_at

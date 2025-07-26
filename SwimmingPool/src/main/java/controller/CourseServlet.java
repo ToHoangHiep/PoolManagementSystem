@@ -130,7 +130,7 @@ public class CourseServlet extends HttpServlet {
             List<Course> courses = CourseDAO.getAllCourses();
             List<Coach> coaches = CoachDAO.getAllCoaches();
             request.setAttribute("courses", courses);
-            request.setAttribute("coaches", coaches.stream().filter(c -> Objects.equals(c.getStatus().toLowerCase(), "active")));
+            request.setAttribute("coaches", coaches.stream().filter(c -> Objects.equals(c.getStatus().toLowerCase(), "active")).toList());
 
             // Forward to the registration form
             request.getRequestDispatcher("course_signup.jsp").forward(request, response);

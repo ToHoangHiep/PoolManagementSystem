@@ -10,15 +10,16 @@ import model.User;
 import utils.Utils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class ChangePasswordServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String currentPassword = request.getParameter("currentPassword");
-        String newPassword = request.getParameter("newPassword");
-        String confirmPassword = request.getParameter("confirmPassword");
+        String currentPassword = request.getParameter("oldPass");
+        String newPassword = request.getParameter("newPass");
+        String confirmPassword = request.getParameter("confirmPass");
 
         // Kiểm tra dữ liệu đầu vào
         if (Utils.CheckIfEmpty(currentPassword) || Utils.CheckIfEmpty(newPassword) || Utils.CheckIfEmpty(confirmPassword)) {
@@ -45,7 +46,11 @@ public class ChangePasswordServlet extends HttpServlet {
         // Giả sử userObj là một đối tượng User với phương thức getPassword() để lấy mật khẩu hiện tại
         // Kiểm tra mật khẩu hiện tại
         User user = (User) userObj;
-        if (!(user.getPasswordHash().equals(currentPassword))) {
+        String userCurrentPassword = UserDAO.getUserById(user.getId()).getPasswordHash();
+        if (!Objects.equals(userCurrentPassword, currentPassword)) {
+            System.out.println("mk hien tai:" + currentPassword);
+            System.out.println("k real: "+ userCurrentPassword);
+
             request.setAttribute("error", "Mật khẩu hiện tại không đúng.");
             request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;
@@ -66,7 +71,7 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         // Kiểm tra xem mật khẩu mới có phải là mật khẩu cũ không
-        if (newPassword.equals(currentPassword)) {
+        if (newPassword.equals(userCurrentPassword)) {
             request.setAttribute("error", "Mật khẩu mới không thể là mật khẩu cũ!");
             request.getRequestDispatcher("change_password.jsp").forward(request, response);
             return;

@@ -181,8 +181,9 @@
             <div class="col">
                 <div class="card directory-card">
                     <div class="card-body d-flex">
-                        <img src="<%= coach.getProfilePicture() != null && !coach.getProfilePicture().isEmpty() ? coach.getProfilePicture() : "images/coach"+coach.getId()+".jpg" %>"
-                             alt="images/default-avatar.jpg" class="rounded-circle coach-avatar me-3"
+                        <% boolean isImageReady = coach.getProfilePicture() != null && !coach.getProfilePicture().isEmpty(); %>
+                        <img src="<%= isImageReady ? "images/"+coach.getProfilePicture() : "images/default-avatar.png" %>"
+                             alt="default-avatar" class="rounded-circle coach-avatar me-3"
                         >
                         <div class="flex-grow-1">
                             <h5 class="card-title card-title-link mb-1">

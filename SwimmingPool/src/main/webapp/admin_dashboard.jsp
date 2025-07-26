@@ -161,6 +161,7 @@
             <div class="greeting">Xin chào, <strong><%= user.getFullName() %></strong></div>
             <a href="userprofile"><i class="fas fa-id-card"></i> Hồ sơ của tôi</a>
             <a href="change-password"><i class="fas fa-key"></i> Đổi mật khẩu</a>
+            <a href="course?action=list_form"><i class="fas fa-book"></i> Lịch sử đăng kí khóa học</a>
             <form action="logout" method="post">
                 <button type="submit"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
             </form>

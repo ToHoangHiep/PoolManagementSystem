@@ -104,7 +104,7 @@ public class BlogServlet extends HttpServlet {
         List<Coach> coaches = CoachDAO.getAllCoaches();
         Map<Integer, Integer> courseCounts = CourseDAO.getProcessedCourseRegistrationCounts();
         request.setAttribute("courses", courses != null ? courses : Collections.emptyList());
-        request.setAttribute("coaches", coaches != null ? coaches.stream().filter(coach -> Objects.equals(coach.getStatus().toLowerCase(), "active")) : Collections.emptyList());
+        request.setAttribute("coaches", coaches != null ? coaches.stream().filter(coach -> Objects.equals(coach.getStatus().toLowerCase(), "active")).toList() : Collections.emptyList());
         request.setAttribute("courseCounts", courseCounts != null ? courseCounts : Collections.emptyMap());
         // Note: The coachCounts attribute is no longer needed and has been removed.
 
