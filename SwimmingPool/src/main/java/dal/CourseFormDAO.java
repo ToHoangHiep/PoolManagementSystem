@@ -10,7 +10,7 @@ import utils.DBConnect;
 public class CourseFormDAO {
     public static List<CourseForm> getAll() {
         List<CourseForm> list = new ArrayList<>();
-        String sql = "SELECT * FROM course_form";
+        String sql = "SELECT * FROM course_form ORDER BY has_processed, request_date DESC";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();

@@ -169,16 +169,14 @@
         <a href="purchase"><i class="fas fa-ticket-alt"></i> Vé bơi</a>
         <a href="MaintenanceServlet"><i class="fas fa-screwdriver-wrench"></i> Bảo trì của tôi</a>
         <div class="dropdown">
-            <button class="dropbtn"><i class="fas fa-box"></i> Danh mục thiết bị</button>
+            <button class="drop-btn"><i class="fas fa-box"></i> Danh mục thiết bị</button>
             <div class="dropdown-content">
                 <a href="inventory?action=lowstock"><i class="fas fa-box-open"></i> Sản phẩm sắp hết</a>
                 <a href="inventory?action=broken"><i class="fas fa-tools"></i> Sản phẩm hỏng</a>
             </div>
         </div>
-
         <a href="feedback?action=create"><i class="fas fa-comment-dots"></i> Gửi phản hồi</a>
-        <a href="feedback?mode=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>
-        <a href="course?action=list_form"><i class="fa-brands fa-discourse"></i> Lịch sử Đăng kí khóa học</a>
+        <a href="feedback?action=list"><i class="fas fa-history"></i> Phản hồi trước đây</a>
     </div>
 
     <!-- Background bên phải -->

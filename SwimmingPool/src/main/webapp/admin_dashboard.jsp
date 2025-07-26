@@ -186,7 +186,6 @@
         <a href="MaintenanceServlet"><i class="fas fa-tools"></i> Quản lý bảo trì</a>
         <a href="coach-list"><i class="fas fa-user-tie"></i> Quản lý huấn luyện viên</a>
         <a href="pool-area"><i class="fas fa-warehouse"></i> Quản bể bơi</a>
-        <a href="course?action=list_form"><i class="fa-brands fa-discourse"></i> Lịch sử Đăng kí khóa học</a>
     </div>
 
     <div class="hero-section"></div>

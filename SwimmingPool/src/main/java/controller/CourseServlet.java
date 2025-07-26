@@ -18,6 +18,7 @@ import utils.EmailUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 public class CourseServlet extends HttpServlet {
     private static final String alert_message = "alert_message";
@@ -129,7 +130,7 @@ public class CourseServlet extends HttpServlet {
             List<Course> courses = CourseDAO.getAllCourses();
             List<Coach> coaches = CoachDAO.getAllCoaches();
             request.setAttribute("courses", courses);
-            request.setAttribute("coaches", coaches);
+            request.setAttribute("coaches", coaches.stream().filter(c -> Objects.equals(c.getStatus().toLowerCase(), "active")));
 
             // Forward to the registration form
             request.getRequestDispatcher("course_signup.jsp").forward(request, response);

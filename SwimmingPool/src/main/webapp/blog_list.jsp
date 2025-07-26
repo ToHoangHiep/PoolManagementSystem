@@ -109,6 +109,9 @@
         <a href="home.jsp" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Quay về Trang chủ
         </a>
+        <a href="course?action=create_form" class="btn btn-outline-success">
+            <i class="fas fa-plus me-1"></i> Đăng ký khóa học
+        </a>
     </div>
 
     <div class="mb-5">
@@ -178,8 +181,9 @@
             <div class="col">
                 <div class="card directory-card">
                     <div class="card-body d-flex">
-                        <img src="<%= coach.getProfilePicture() != null && !coach.getProfilePicture().isEmpty() ? coach.getProfilePicture() : "https://via.placeholder.com/150" %>"
-                             alt="Coach <%= coach.getFullName() %>" class="rounded-circle coach-avatar me-3">
+                        <img src="<%= coach.getProfilePicture() != null && !coach.getProfilePicture().isEmpty() ? coach.getProfilePicture() : "images/coach"+coach.getId()+".jpg" %>"
+                             alt="images/default-avatar.jpg" class="rounded-circle coach-avatar me-3"
+                        >
                         <div class="flex-grow-1">
                             <h5 class="card-title card-title-link mb-1">
                                 <a href="blogs?action=view_coach&coachId=<%= coach.getId() %>"><%= coach.getFullName() %></a>
